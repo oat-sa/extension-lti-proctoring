@@ -20,17 +20,38 @@
  */
 namespace oat\ltiProctoring\controller;
 
-use oat\taoProctoring\controller\Monitor as BaseMonitor;
+use oat\generis\model\OntologyAwareTrait;
+
 /**
  * LTI monitoring controller
  * 
  * @author joel bout
  */
-class Monitor extends BaseMonitor
+class Monitor  extends \tao_actions_CommonModule
 {
+    use OntologyAwareTrait;
+    
     protected function getCurrentDelivery()
     {
         $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
         return $this->getResource($launchData->getCustomParameter('delivery'));
+    }
+
+    /**
+     * Monitoring view of a selected delivery
+     */
+    public function index()
+    {
+        $delivery = $this->getCurrentDelivery();
+        $data = array(
+            'delivery' => $delivery->getUri(),
+            'action' => 'index',
+            'controller' => 'Monitor',
+            'extension' => 'taoProctoring',
+        );
+
+        $this->defaultData();
+        $this->setData('data', $data);
+        $this->setView('layout.tpl', \Context::getInstance()->getExtensionName());
     }
 }
