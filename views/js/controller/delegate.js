@@ -40,9 +40,10 @@ define([
             var action = $container.data('action');
             var controller = $container.data('controller');
             var extension = $container.data('extension');
-            var page = urlUtil.route(action, controller, extension, {delivery: delivery});
+            var page = urlUtil.route(action, controller, extension);
+            var params = {delivery: delivery};
 
-            $container.load(page, function() {
+            $container.load(page, params, function() {
                 loadingBar.stop();
             });
         }
