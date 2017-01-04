@@ -24,6 +24,7 @@ use oat\oatbox\service\ConfigurableService;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionCreated;
 use \taoLti_models_classes_LtiLaunchData as LtiLaunchData;
+use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 
 /**
  * Sample Delivery Service for proctoring
@@ -38,10 +39,20 @@ class LtiListenerService extends ConfigurableService
     {
         $session = \common_session_SessionManager::getSession();
         if ($session instanceof \taoLti_models_classes_TaoLtiSession) {
+            $contextId = $session->getLaunchData()->getVariable(LtiLaunchData::CONTEXT_ID);
+            $resourceLink = $session->getLaunchData()->getResourceLinkID();
+
+            $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID)->log(
+                $event->getDeliveryExecution()->getIdentifier(), 'LTI_DELIVERY_EXECUTION_CREATED', [
+                    LtiLaunchData::CONTEXT_ID => $contextId,
+                    LtiLaunchData::CONTEXT_LABEL => $session->getLaunchData()->getVariable(LtiLaunchData::CONTEXT_LABEL),
+                    LtiLaunchData::RESOURCE_LINK_ID => $resourceLink,
+                ]
+            );
             $monitoringService = $this->getServiceManager()->get(DeliveryMonitoringService::SERVICE_ID);
             $data = $monitoringService->getData($event->getDeliveryExecution());
-            $data->update(LtiLaunchData::CONTEXT_ID, $session->getLaunchData()->getVariable(LtiLaunchData::CONTEXT_ID));
-            $data->update(LtiLaunchData::RESOURCE_LINK_ID, $session->getLaunchData()->getResourceLinkID());
+            $data->update(LtiLaunchData::CONTEXT_ID, $contextId);
+            $data->update(LtiLaunchData::RESOURCE_LINK_ID, $resourceLink);
             $success = $monitoringService->save($data);
             if (!$success) {
                 \common_Logger::w('monitor cache for delivery ' . $event->getDeliveryExecution()->getIdentifier() . ' could not be created');

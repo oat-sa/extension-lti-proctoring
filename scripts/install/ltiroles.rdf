@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<rdf:RDF 
+  xml:base="http://www.imsglobal.org/imspurl/lis/v1/vocab/membership#"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:generis="http://www.tao.lu/Ontologies/generis.rdf#"
+>
+  
+  <!-- Context roles -->
+  <rdf:Description rdf:about="http://www.imsglobal.org/imspurl/lis/v1/vocab/membership#TeachingAssistant">
+    <generis:includesRole rdf:resource="http://www.tao.lu/Ontologies/TAOProctor.rdf#ProctorRole"/>
+  </rdf:Description>
+</rdf:RDF>
