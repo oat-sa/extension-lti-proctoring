@@ -22,6 +22,7 @@ use oat\ltiProctoring\controller\ProctoringTool;
 use oat\ltiProctoring\controller\Monitor;
 use oat\taoLti\models\classes\LtiRoles;
 use oat\tao\model\user\TaoRoles;
+use oat\ltiProctoring\scripts\install\SetupProctoringEventListeners;
 
 /**
  * Generated using taoDevTools 2.17.0
@@ -44,6 +45,9 @@ return array(
         array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Monitor::class),
     ),
     'install' => array(
+        'php' => [
+            SetupProctoringEventListeners::class
+        ]
     ),
     'uninstall' => array(
     ),
