@@ -32,7 +32,7 @@ return array(
     'label' => 'LTI Proctoring',
     'description' => 'Grants access to the proctoring functionalities using LTI',
     'license' => 'GPL-2.0',
-    'version' => '0.1.0',
+    'version' => '0.2.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'taoProctoring' => '>=4.0.0',
@@ -46,7 +46,8 @@ return array(
     ),
     'install' => array(
         'php' => [
-            SetupProctoringEventListeners::class
+            SetupProctoringEventListeners::class,
+            \oat\taoAct\scripts\install\RegisterAuthProvider::class,
         ],
         'rdf' => array(
             __DIR__.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'install'.DIRECTORY_SEPARATOR.'ltiroles.rdf'
@@ -54,6 +55,7 @@ return array(
     ),
     'uninstall' => array(
     ),
+    'update' => 'oat\\ltiProctoring\\scripts\\update\\Updater',
     'routes' => array(
         '/ltiProctoring' => 'oat\\ltiProctoring\\controller'
     ),    
