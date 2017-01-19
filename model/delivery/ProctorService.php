@@ -48,13 +48,15 @@ class ProctorService extends DefaultProctorService
         $currentSession = \common_session_SessionManager::getSession();
         if ($currentSession instanceof \taoLti_models_classes_TaoLtiSession) {
             /** @var \taoLti_models_classes_LtiLaunchData $launchData */
-            $launchData = \common_session_SessionManager::getSession()->getLaunchData();
-            $contextId = $launchData->getVariable(LtiLaunchData::CONTEXT_ID);
-            $criteria = [
-                [DeliveryMonitoringService::DELIVERY_ID => $delivery->getUri()],
-                'AND',
-                [LtiLaunchData::CONTEXT_ID => $contextId],
-            ];
+            $launchData = $currentSession->getLaunchData();
+            if ($launchData->hasVariable(LtiLaunchData::CONTEXT_ID)) {
+                $contextId = $launchData->getVariable(LtiLaunchData::CONTEXT_ID);
+                $criteria = [
+                    [DeliveryMonitoringService::DELIVERY_ID => $delivery->getUri()],
+                    'AND',
+                    [LtiLaunchData::CONTEXT_ID => $contextId],
+                ];
+            }
         }
         $options = ['asArray' => true];
         return $monitoringService->find($criteria, $options, true);
