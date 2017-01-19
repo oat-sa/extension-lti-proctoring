@@ -23,8 +23,9 @@ use oat\ltiProctoring\controller\Monitor;
 use oat\taoLti\models\classes\LtiRoles;
 use oat\tao\model\user\TaoRoles;
 use oat\ltiProctoring\scripts\install\SetupProctoringEventListeners;
+use oat\ltiProctoring\scripts\install\RegisterAuthProvider;
 
-/**
+    /**
  * Generated using taoDevTools 2.17.0
  */
 return array(
@@ -47,7 +48,7 @@ return array(
     'install' => array(
         'php' => [
             SetupProctoringEventListeners::class,
-            \oat\taoAct\scripts\install\RegisterAuthProvider::class,
+            RegisterAuthProvider::class,
         ],
         'rdf' => array(
             __DIR__.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'install'.DIRECTORY_SEPARATOR.'ltiroles.rdf'
