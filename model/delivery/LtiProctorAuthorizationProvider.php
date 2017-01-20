@@ -60,7 +60,7 @@ class LtiProctorAuthorizationProvider extends ProctorAuthorizationProvider
             if ($launchData->hasVariable(self::CUSTOM_LTI_PROCTORED)) {
                 $var = mb_strtolower($launchData->getVariable(self::CUSTOM_LTI_PROCTORED));
                 if ($var !== 'true' && $var !== 'false') {
-                    throw new \taoLti_models_classes_LtiException(__('Wrong value of `'.self::CUSTOM_LTI_PROCTORED.'` variable.'));
+                    throw new \taoLti_models_classes_LtiException('Wrong value of `'.self::CUSTOM_LTI_PROCTORED.'` variable.');
                 }
                 $proctored = filter_var($var, FILTER_VALIDATE_BOOLEAN);
             }
