@@ -1,0 +1,31 @@
+<?php
+
+namespace oat\ltiProctoring\scripts\update;
+
+use oat\ltiProctoring\model\delivery\LtiProctorAuthorizationProvider;
+use oat\taoDelivery\model\authorization\strategy\AuthorizationAggregator;
+use oat\taoProctoring\model\authorization\ProctorAuthorizationProvider;
+use oat\taoDelivery\model\authorization\AuthorizationService as DeliveryAuthorizationService;
+
+class Updater extends \common_ext_ExtensionUpdater
+{
+
+    /**
+     * @param $initialVersion
+     * @return string $versionUpdatedTo
+     */
+    public function update($initialVersion)
+    {
+        if ($this->isVersion('0.1.0')) {
+            /** @var AuthorizationAggregator $service */
+            $service = $this->getServiceManager()->get(DeliveryAuthorizationService::SERVICE_ID);
+            if ($service instanceof AuthorizationAggregator) {
+                $service->unregister(ProctorAuthorizationProvider::class);
+                $service->addProvider(new LtiProctorAuthorizationProvider());
+                $this->getServiceManager()->register(AuthorizationAggregator::SERVICE_ID, $service);
+            }
+
+            $this->setVersion('0.2.0');
+        }
+    }
+}
