@@ -36,31 +36,24 @@ class ProctorService extends DefaultProctorService
      * @param User $proctor
      * @param \core_kernel_classes_Resource $delivery
      * @param null $context
+     * @param array $options
      * @return array
      */
-    public function getProctorableDeliveryExecutions(User $proctor, $delivery = null, $context = null)
+    public function getProctorableDeliveryExecutions(User $proctor, $delivery = null, $context = null, $options = [])
     {
         $monitoringService = $this->getServiceManager()->get(DeliveryMonitoringService::SERVICE_ID);
 
-        $criteria = [
-            [DeliveryMonitoringService::DELIVERY_ID => $delivery->getUri()]
-        ];
+        $criteria = $this->getCriteria($delivery, $context, $options);
         $currentSession = \common_session_SessionManager::getSession();
         if ($currentSession instanceof \taoLti_models_classes_TaoLtiSession) {
             /** @var \taoLti_models_classes_LtiLaunchData $launchData */
             $launchData = $currentSession->getLaunchData();
             if ($launchData->hasVariable(LtiLaunchData::CONTEXT_ID)) {
                 $contextId = $launchData->getVariable(LtiLaunchData::CONTEXT_ID);
-                $criteria = [
-                    [DeliveryMonitoringService::DELIVERY_ID => $delivery->getUri()],
-                    'AND',
-                    [LtiLaunchData::CONTEXT_ID => $contextId],
-                ];
+                $criteria[] = [LtiLaunchData::CONTEXT_ID => $contextId];
             }
         }
-        $options = ['asArray' => true];
+        $options['asArray'] = true;
         return $monitoringService->find($criteria, $options, true);
     }
-    
-
 }
