@@ -24,6 +24,7 @@ use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
 use oat\oatbox\user\User;
+use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
 
 /**
  * Manage the Delivery authorization.
@@ -60,7 +61,10 @@ class LtiProctorAuthorizationProvider extends ProctorAuthorizationProvider
             if ($launchData->hasVariable(self::CUSTOM_LTI_PROCTORED)) {
                 $var = mb_strtolower($launchData->getVariable(self::CUSTOM_LTI_PROCTORED));
                 if ($var !== 'true' && $var !== 'false') {
-                    throw new \taoLti_models_classes_LtiException('Wrong value of `'.self::CUSTOM_LTI_PROCTORED.'` variable.');
+                    throw new \taoLti_models_classes_LtiException(
+                        'Wrong value of `'.self::CUSTOM_LTI_PROCTORED.'` variable.',
+                        LtiErrorMessage::ERROR_WRONG_PARAMETER_VALUE
+                    );
                 }
                 $proctored = filter_var($var, FILTER_VALIDATE_BOOLEAN);
             }
