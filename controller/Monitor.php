@@ -37,6 +37,12 @@ class Monitor  extends \tao_actions_CommonModule
         return $this->getResource($launchData->getCustomParameter('delivery'));
     }
 
+    protected function getDefaultTag()
+    {
+        $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
+        return $this->getResource($launchData->getVariable(\taoLti_models_classes_LtiLaunchData::CUSTOM_TAG));
+    }
+
     /**
      * Monitoring view of a selected delivery
      */
@@ -45,6 +51,7 @@ class Monitor  extends \tao_actions_CommonModule
         $delivery = $this->getCurrentDelivery();
         $data = array(
             'delivery' => $delivery->getUri(),
+            'defaultTag' => (string)$this->getDefaultTag(),
             'action' => 'index',
             'controller' => 'Monitor',
             'extension' => 'taoProctoring',

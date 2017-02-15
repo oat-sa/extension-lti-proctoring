@@ -37,13 +37,17 @@ define([
         start: function start() {
             var $container = $('.delegated-view');
             var delivery = $container.data('delivery');
+            var defaultTag = $container.data('defaultTag');
             var action = $container.data('action');
             var controller = $container.data('controller');
             var extension = $container.data('extension');
             var page = urlUtil.route(action, controller, extension);
-            var params = {delivery: delivery};
+            var params = {
+                delivery: delivery,
+                defaultTag: defaultTag,
+            };
 
-            $container.load(page, params, function() {
+            $container.load(page, params, function () {
                 loadingBar.stop();
             });
         }
