@@ -29,5 +29,13 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('0.2.0', '0.2.1');
+
+        if ($this->isVersion('0.2.1')) {
+            $service = new LtiDeliveryExecutionService([]);
+            $this->getServiceManager()->register(LtiDeliveryExecutionService::SERVICE_ID, $service);
+            $this->setVersion('0.3.0');
+        }
+
+        $this->skip('0.3.0', '0.3.1');
     }
 }
