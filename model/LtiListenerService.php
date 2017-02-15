@@ -40,7 +40,7 @@ class LtiListenerService extends ConfigurableService
         $session = \common_session_SessionManager::getSession();
         if ($session instanceof \taoLti_models_classes_TaoLtiSession) {
             $contextId = $session->getLaunchData()->getVariable(LtiLaunchData::CONTEXT_ID);
-            $tags = (array)$session->getLaunchData()->getCustomParameter(LtiLaunchData::CUSTOM_TAG);
+            $tags = (array)$session->getLaunchData()->getVariable(LtiLaunchData::CUSTOM_TAG);
             $resourceLink = $session->getLaunchData()->getResourceLinkID();
 
             $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID)->log(
