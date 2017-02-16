@@ -40,22 +40,27 @@ class LtiListenerService extends ConfigurableService
         $session = \common_session_SessionManager::getSession();
         if ($session instanceof \taoLti_models_classes_TaoLtiSession) {
             $contextId = $session->getLaunchData()->getVariable(LtiLaunchData::CONTEXT_ID);
-            $tags = (array)$session->getLaunchData()->getVariable(LtiLaunchData::CUSTOM_TAG);
+            $tags = [];
+            if ($session->getLaunchData()->hasVariable(LtiLaunchData::CUSTOM_TAG)) {
+                $tags = (array)$session->getLaunchData()->getVariable(LtiLaunchData::CUSTOM_TAG);
+            }
             $resourceLink = $session->getLaunchData()->getResourceLinkID();
 
+            $tagsString = implode(',', $tags);
+            $tagsString = str_pad($tagsString, strlen($tagsString) + 2, ',', STR_PAD_BOTH);
             $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID)->log(
                 $event->getDeliveryExecution()->getIdentifier(), 'LTI_DELIVERY_EXECUTION_CREATED', [
                     LtiLaunchData::CONTEXT_ID => $contextId,
                     LtiLaunchData::CONTEXT_LABEL => $session->getLaunchData()->getVariable(LtiLaunchData::CONTEXT_LABEL),
                     LtiLaunchData::RESOURCE_LINK_ID => $resourceLink,
-                    LtiLaunchData::CUSTOM_TAG => implode(';', $tags)
+                    LtiLaunchData::CUSTOM_TAG => $tagsString,
                 ]
             );
             $monitoringService = $this->getServiceManager()->get(DeliveryMonitoringService::SERVICE_ID);
             $data = $monitoringService->getData($event->getDeliveryExecution());
             $data->update(LtiLaunchData::CONTEXT_ID, $contextId);
             $data->update(LtiLaunchData::RESOURCE_LINK_ID, $resourceLink);
-            $data->update(LtiLaunchData::CUSTOM_TAG, implode(';', $tags));
+            $data->update(LtiLaunchData::CUSTOM_TAG, $tagsString);
             $success = $monitoringService->save($data);
             if (!$success) {
                 \common_Logger::w('monitor cache for delivery ' . $event->getDeliveryExecution()->getIdentifier() . ' could not be created');
