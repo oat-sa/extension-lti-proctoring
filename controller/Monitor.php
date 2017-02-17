@@ -34,7 +34,8 @@ class Monitor  extends \tao_actions_CommonModule
     protected function getCurrentDelivery()
     {
         $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
-        return $this->getResource($launchData->getCustomParameter('delivery'));
+        $delieryId = $launchData->getCustomParameter('delivery');
+        return is_null($delieryId) ? null : $this->getResource($delieryId);
     }
 
     /**
@@ -44,11 +45,13 @@ class Monitor  extends \tao_actions_CommonModule
     {
         $delivery = $this->getCurrentDelivery();
         $data = array(
-            'delivery' => $delivery->getUri(),
             'action' => 'index',
             'controller' => 'Monitor',
             'extension' => 'taoProctoring',
         );
+        if (!is_null($delivery)) {
+            $data['delivery'] = $delivery->getUri();
+        }
 
         $this->defaultData();
         $this->setData('data', $data);

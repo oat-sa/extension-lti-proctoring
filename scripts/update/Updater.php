@@ -6,6 +6,7 @@ use oat\ltiProctoring\model\delivery\LtiProctorAuthorizationProvider;
 use oat\taoDelivery\model\authorization\strategy\AuthorizationAggregator;
 use oat\taoProctoring\model\authorization\ProctorAuthorizationProvider;
 use oat\taoDelivery\model\authorization\AuthorizationService as DeliveryAuthorizationService;
+use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 
 class Updater extends \common_ext_ExtensionUpdater
 {
@@ -36,6 +37,6 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('0.3.0');
         }
 
-        $this->skip('0.3.0', '0.3.1');
+        $this->skip('0.3.0', '0.3.2');
     }
 }
