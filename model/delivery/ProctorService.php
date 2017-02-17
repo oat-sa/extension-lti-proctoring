@@ -32,6 +32,9 @@ use \taoLti_models_classes_LtiLaunchData as LtiLaunchData;
  */
 class ProctorService extends DefaultProctorService
 {
+
+    const CUSTOM_TAG = 'custom_tag';
+
     /**
      * @param User $proctor
      * @param \core_kernel_classes_Resource $delivery
@@ -65,10 +68,10 @@ class ProctorService extends DefaultProctorService
                 $contextId = $launchData->getVariable(LtiLaunchData::CONTEXT_ID);
                 $criteria[] = [LtiLaunchData::CONTEXT_ID => $contextId];
             }
-            if ($launchData->hasVariable(LtiLaunchData::CUSTOM_TAG)) {
+            if ($launchData->hasVariable(self::CUSTOM_TAG)) {
                 if ($useTagsCriteria) {
-                    $tag = $launchData->getVariable(LtiLaunchData::CUSTOM_TAG);
-                    $criteria[] = [LtiLaunchData::CUSTOM_TAG => 'LIKE%,' . $tag . ',%'];
+                    $tag = $launchData->getVariable(self::CUSTOM_TAG);
+                    $criteria[] = [self::CUSTOM_TAG => 'LIKE%,' . $tag . ',%'];
                 }
             }
         }

@@ -21,6 +21,7 @@
 namespace oat\ltiProctoring\controller;
 
 use oat\generis\model\OntologyAwareTrait;
+use oat\ltiProctoring\model\delivery\ProctorService;
 
 /**
  * LTI monitoring controller
@@ -41,7 +42,7 @@ class Monitor  extends \tao_actions_CommonModule
     protected function getDefaultTag()
     {
         $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
-        return $launchData->hasVariable(\taoLti_models_classes_LtiLaunchData::CUSTOM_TAG)?$launchData->getVariable(\taoLti_models_classes_LtiLaunchData::CUSTOM_TAG):'';
+        return $launchData->hasVariable(ProctorService::CUSTOM_TAG) ? $launchData->getVariable(ProctorService::CUSTOM_TAG) : '';
     }
 
     /**
