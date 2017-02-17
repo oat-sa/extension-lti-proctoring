@@ -20,6 +20,7 @@
  */
 namespace oat\ltiProctoring\model;
 
+use oat\ltiProctoring\model\delivery\ProctorService;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionCreated;
@@ -34,25 +35,33 @@ use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 class LtiListenerService extends ConfigurableService
 {
     const SERVICE_ID = 'ltiProctoring/LtiListener';
-    
+
     public function executionCreated(DeliveryExecutionCreated $event)
     {
         $session = \common_session_SessionManager::getSession();
         if ($session instanceof \taoLti_models_classes_TaoLtiSession) {
             $contextId = $session->getLaunchData()->getVariable(LtiLaunchData::CONTEXT_ID);
-            $resourceLink = $session->getLaunchData()->getResourceLinkID();
 
+            $tagsString = '';
+            if ($session->getLaunchData()->hasVariable(ProctorService::CUSTOM_TAG)) {
+                $tags = (array)$session->getLaunchData()->getVariable(ProctorService::CUSTOM_TAG);
+                $tagsString = implode(',', $tags);
+                $tagsString = str_pad($tagsString, strlen($tagsString) + 2, ',', STR_PAD_BOTH);
+            }
+            $resourceLink = $session->getLaunchData()->getResourceLinkID();
             $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID)->log(
                 $event->getDeliveryExecution()->getIdentifier(), 'LTI_DELIVERY_EXECUTION_CREATED', [
                     LtiLaunchData::CONTEXT_ID => $contextId,
                     LtiLaunchData::CONTEXT_LABEL => $session->getLaunchData()->getVariable(LtiLaunchData::CONTEXT_LABEL),
                     LtiLaunchData::RESOURCE_LINK_ID => $resourceLink,
+                    ProctorService::CUSTOM_TAG => $tagsString,
                 ]
             );
             $monitoringService = $this->getServiceManager()->get(DeliveryMonitoringService::SERVICE_ID);
             $data = $monitoringService->getData($event->getDeliveryExecution());
             $data->update(LtiLaunchData::CONTEXT_ID, $contextId);
             $data->update(LtiLaunchData::RESOURCE_LINK_ID, $resourceLink);
+            $data->update(ProctorService::CUSTOM_TAG, $tagsString);
             $success = $monitoringService->save($data);
             if (!$success) {
                 \common_Logger::w('monitor cache for delivery ' . $event->getDeliveryExecution()->getIdentifier() . ' could not be created');

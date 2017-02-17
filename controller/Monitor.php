@@ -21,6 +21,7 @@
 namespace oat\ltiProctoring\controller;
 
 use oat\generis\model\OntologyAwareTrait;
+use oat\ltiProctoring\model\delivery\ProctorService;
 
 /**
  * LTI monitoring controller
@@ -34,7 +35,14 @@ class Monitor  extends \tao_actions_CommonModule
     protected function getCurrentDelivery()
     {
         $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
-        return $this->getResource($launchData->getCustomParameter('delivery'));
+        $delieryId = $launchData->getCustomParameter('delivery');
+        return is_null($delieryId) ? null : $this->getResource($delieryId);
+    }
+
+    protected function getDefaultTag()
+    {
+        $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
+        return $launchData->hasVariable(ProctorService::CUSTOM_TAG) ? $launchData->getVariable(ProctorService::CUSTOM_TAG) : '';
     }
 
     /**
@@ -44,11 +52,15 @@ class Monitor  extends \tao_actions_CommonModule
     {
         $delivery = $this->getCurrentDelivery();
         $data = array(
-            'delivery' => $delivery->getUri(),
+            'defaultTag' => (string)$this->getDefaultTag(),
             'action' => 'index',
             'controller' => 'Monitor',
             'extension' => 'taoProctoring',
         );
+
+        if (!is_null($delivery)) {
+            $data['delivery'] = $delivery->getUri();
+        }
 
         $this->defaultData();
         $this->setData('data', $data);
