@@ -68,11 +68,15 @@ class ProctorService extends DefaultProctorService
                 $contextId = $launchData->getVariable(LtiLaunchData::CONTEXT_ID);
                 $criteria[] = [LtiLaunchData::CONTEXT_ID => $contextId];
             }
-            if ($launchData->hasVariable(self::CUSTOM_TAG)) {
-                if ($useTagsCriteria) {
-                    $tag = $launchData->getVariable(self::CUSTOM_TAG);
-                    $criteria[] = [self::CUSTOM_TAG => 'LIKE%,' . $tag . ',%'];
+            if ($launchData->hasVariable(self::CUSTOM_TAG) && $useTagsCriteria) {
+                $tags = $launchData->getVariable(self::CUSTOM_TAG);
+                $tagsCriteria = [];
+                foreach (explode(',', $tags) as $tag) {
+                    $tagsCriteria[] = [self::CUSTOM_TAG => 'LIKE%,' . $tag . ',%'];
+                    $tagsCriteria[] = 'OR';
                 }
+                array_pop($tagsCriteria);
+                $criteria[] = $tagsCriteria;
             }
         }
         $options['asArray'] = true;
