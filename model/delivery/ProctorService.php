@@ -32,6 +32,9 @@ use \taoLti_models_classes_LtiLaunchData as LtiLaunchData;
  */
 class ProctorService extends DefaultProctorService
 {
+
+    const CUSTOM_TAG = 'custom_tag';
+
     /**
      * @param User $proctor
      * @param \core_kernel_classes_Resource $delivery
@@ -43,6 +46,19 @@ class ProctorService extends DefaultProctorService
     {
         $monitoringService = $this->getServiceManager()->get(DeliveryMonitoringService::SERVICE_ID);
 
+        $useTagsCriteria = false;
+
+        if (array_key_exists('filters', $options)) {
+
+            $useTagsCriteria = in_array(true, array_map(function ($e) {
+                return filter_var($e, FILTER_VALIDATE_BOOLEAN);
+            }, array_column($options['filters'], 'tag')), true);
+
+            $options['filters'] = array_filter((array)$options['filters'], function ($filter) {
+                return !array_key_exists('tag', $filter);
+            });
+        }
+
         $criteria = $this->getCriteria($delivery, $context, $options);
         $currentSession = \common_session_SessionManager::getSession();
         if ($currentSession instanceof \taoLti_models_classes_TaoLtiSession) {
@@ -51,6 +67,16 @@ class ProctorService extends DefaultProctorService
             if ($launchData->hasVariable(LtiLaunchData::CONTEXT_ID)) {
                 $contextId = $launchData->getVariable(LtiLaunchData::CONTEXT_ID);
                 $criteria[] = [LtiLaunchData::CONTEXT_ID => $contextId];
+            }
+            if ($launchData->hasVariable(self::CUSTOM_TAG) && $useTagsCriteria) {
+                $tags = $launchData->getVariable(self::CUSTOM_TAG);
+                $tagsCriteria = [];
+                foreach (explode(',', $tags) as $tag) {
+                    $tagsCriteria[] = [self::CUSTOM_TAG => 'LIKE%,' . $tag . ',%'];
+                    $tagsCriteria[] = 'OR';
+                }
+                array_pop($tagsCriteria);
+                $criteria[] = $tagsCriteria;
             }
         }
         $options['asArray'] = true;

@@ -35,6 +35,8 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->getServiceManager()->register(LtiDeliveryExecutionService::SERVICE_ID, $service);
             $this->setVersion('0.3.0');
         }
-        $this->skip('0.3.0', '0.3.2');
+
+        $this->skip('0.3.0', '0.4.0');
+
     }
 }
