@@ -71,6 +71,6 @@ class Monitor  extends \tao_actions_SinglePageModule
             $data['delivery'] = $delivery->getUri();
         }
 
-        $this->composeView('delegated-view', $data);
+        $this->composeView('delegated-view', $data, 'pages/index.tpl', 'tao');
     }
 }
