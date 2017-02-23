@@ -21,10 +21,9 @@ use oat\tao\model\theme\Theme;
 <?php Template::inc('blocks/requirement-check.tpl', 'tao'); ?>
 <div class="content-wrap">
     <div id="feedback-box"></div>
-    <div class="delegated-view"
-        <?php foreach (get_data('data') as $name => $value): ?>
-            data-<?= $name; ?>="<?= _dh($value); ?>"
-        <?php endforeach; ?>></div>
+    <?php /* actual content */
+    $contentTemplate = Layout::getContentTemplate();
+    Template::inc($contentTemplate['path'], $contentTemplate['ext']); ?>
 </div>
 <div class="loading-bar"></div>
 </body>

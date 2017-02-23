@@ -20,10 +20,18 @@
  */
 define([
     'jquery',
+    'core/app',
     'util/url',
+    'ui/container',
     'layout/loading-bar'
-], function ($, urlUtil, loadingBar) {
+], function ($, appController, urlUtil, containerFactory, loadingBar) {
     'use strict';
+
+    /**
+     * The CSS scope
+     * @type {String}
+     */
+    var cssScope = '.delegated-view';
 
     /**
      * Delegate the UI to another controller through an AJAX request
@@ -35,21 +43,27 @@ define([
          * Entry point of the page
          */
         start: function start() {
-            var $container = $('.delegated-view');
-            var delivery = $container.data('delivery');
-            var defaulttag = $container.data('defaulttag');
-            var action = $container.data('action');
-            var controller = $container.data('controller');
-            var extension = $container.data('extension');
-            var page = urlUtil.route(action, controller, extension);
-            var params = {
-                delivery: delivery,
-                defaulttag: defaulttag
-            };
+            var container, action, controller, extension, params;
 
-            $container.load(page, params, function () {
-                loadingBar.stop();
-            });
+            // Take care of the application controller. If the current controller is the entry point, we first
+            // need to wait for the history to dispatch the action, otherwise the controller will be called twice.
+            if (!appController.getState('dispatching')) {
+                return appController.start();
+            }
+
+            container = containerFactory('.container').changeScope(cssScope);
+            action = container.getValue('action');
+            controller = container.getValue('controller');
+            extension = container.getValue('extension');
+            params = {
+                defaulttag: container.getValue('defaulttag')
+            };
+            if (container.hasValue('delivery')) {
+                params.delivery = container.getValue('delivery');
+            }
+            container.destroy();
+
+            appController.forward(urlUtil.route(action, controller, extension, params));
         }
     };
 

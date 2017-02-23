@@ -28,7 +28,7 @@ use oat\ltiProctoring\model\delivery\ProctorService;
  * 
  * @author joel bout
  */
-class Monitor  extends \tao_actions_CommonModule
+class Monitor  extends \tao_actions_SinglePageModule
 {
     use OntologyAwareTrait;
     
@@ -43,6 +43,15 @@ class Monitor  extends \tao_actions_CommonModule
     {
         $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
         return $launchData->hasVariable(ProctorService::CUSTOM_TAG) ? $launchData->getVariable(ProctorService::CUSTOM_TAG) : '';
+    }
+
+    /**
+     * Gets the path to the layout
+     * @return array
+     */
+    protected function getLayout()
+    {
+        return ['layout.tpl', 'ltiProctoring'];
     }
 
     /**
@@ -62,8 +71,6 @@ class Monitor  extends \tao_actions_CommonModule
             $data['delivery'] = $delivery->getUri();
         }
 
-        $this->defaultData();
-        $this->setData('data', $data);
-        $this->setView('layout.tpl', \Context::getInstance()->getExtensionName());
+        $this->composeView('delegated-view', $data);
     }
 }
