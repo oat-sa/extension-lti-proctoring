@@ -51,6 +51,8 @@ class LtiProctorAuthorizationProvider extends ProctorAuthorizationProvider
             );
         }
 
+        $this->authorizeGuest($deliveryExecution, $user);
+
         $currentSession = \common_session_SessionManager::getSession();
 
         $proctored = true;
