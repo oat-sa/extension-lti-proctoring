@@ -45,12 +45,6 @@ define([
         start: function start() {
             var container, action, controller, extension, params;
 
-            // Take care of the application controller. If the current controller is the entry point, we first
-            // need to wait for the history to dispatch the action, otherwise the controller will be called twice.
-            if (!appController.getState('dispatching')) {
-                return appController.start();
-            }
-
             container = containerFactory('.container').changeScope(cssScope);
             action = container.getValue('action');
             controller = container.getValue('controller');
@@ -63,7 +57,7 @@ define([
             }
             container.destroy();
 
-            appController.forward(urlUtil.route(action, controller, extension, params));
+            appController.getRouter().forward(urlUtil.route(action, controller, extension, params));
         }
     };
 
