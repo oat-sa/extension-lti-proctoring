@@ -21,7 +21,7 @@ use oat\tao\model\theme\Theme;
 <?php Template::inc('blocks/requirement-check.tpl', 'tao'); ?>
 <div class="content-wrap<?php if (!get_data('showControls')) :?> no-controls<?php endif; ?>">
     <?php if (get_data('showControls')){
-        Template::inc('blocks/header.tpl', 'tao');
+        Template::inc('blocks/header.tpl', 'ltiProctoring');
     }?>
     <?php /* alpha|beta|sandbox message */
     if($hasVersionWarning) {
