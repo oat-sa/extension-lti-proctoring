@@ -20,7 +20,7 @@
  */
 define([
     'jquery',
-    'core/app',
+    'core/appController',
     'util/url',
     'ui/container',
     'layout/loading-bar'
@@ -55,6 +55,7 @@ define([
             if (container.hasValue('delivery')) {
                 params.delivery = container.getValue('delivery');
             }
+            container.removeData();
             container.destroy();
 
             appController.getRouter().forward(urlUtil.route(action, controller, extension, params));
