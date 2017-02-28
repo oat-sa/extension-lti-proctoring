@@ -26,6 +26,10 @@ module.exports = function(grunt) {
                 'ltiProctoring' : root + '/ltiProctoring/views/js'
             },
             modules : [{
+                name: 'controller/app',
+                include: ['lib/require', 'loader/bootstrap'],
+                exclude : ['json!i18ntr/messages.json']
+            }, {
                 name: 'ltiProctoring/controller/routes',
                 include : ext.getExtensionsControllers(['ltiProctoring'])
             }]
@@ -37,6 +41,8 @@ module.exports = function(grunt) {
      */
     copy.ltiproctoringbundle = {
         files: [
+            { src: [out + '/controller/app.js'],       dest: root + '/ltiProctoring/views/js/loader/app.min.js' },
+            { src: [out + '/controller/app.js.map'],   dest: root + '/ltiProctoring/views/js/loader/app.min.js.map' },
             { src: [out + '/ltiProctoring/controller/routes.js'],  dest: root + '/ltiProctoring/views/js/controllers.min.js' },
             { src: [out + '/ltiProctoring/controller/routes.js.map'],  dest: root + '/ltiProctoring/views/js/controllers.min.js.map' }
         ]
