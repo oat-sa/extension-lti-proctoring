@@ -71,7 +71,11 @@ class LtiProctorAuthorizationProvider extends ProctorAuthorizationProvider
         }
 
         if ($proctored && $state !== ProctoredDeliveryExecution::STATE_AUTHORIZED) {
-            $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'ltiProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
+            if ($currentSession instanceof \taoLti_models_classes_TaoLtiSession) {
+                $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'ltiProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
+            } else {
+                $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'taoProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
+            }
             throw new UnAuthorizedException($errorPage, 'Proctor authorization missing');
         }
     }
