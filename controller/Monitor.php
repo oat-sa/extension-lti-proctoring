@@ -55,6 +55,21 @@ class Monitor  extends \tao_actions_SinglePageModule
     }
 
     /**
+     * Defines if the top and bottom action menu should be displayed or not
+     *
+     * @return boolean
+     */
+    protected function showControls() {
+        if ($this->getServiceManager()->has('ltiProctoring/proctoring')) {
+            $config = $this->getServiceManager()->get('ltiProctoring/proctoring');
+            if ($config && array_key_exists('showControls', $config)) {
+                return $config['showControls'];
+            }
+        }
+        return false;
+    }
+
+    /**
      * Monitoring view of a selected delivery
      */
     public function index()
@@ -66,6 +81,8 @@ class Monitor  extends \tao_actions_SinglePageModule
             'controller' => 'Monitor',
             'extension' => 'taoProctoring',
         );
+
+        $this->setData('showControls', $this->showControls());
 
         if (!is_null($delivery)) {
             $data['delivery'] = $delivery->getUri();

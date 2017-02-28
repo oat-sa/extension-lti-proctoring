@@ -36,6 +36,18 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('0.3.0');
         }
 
-        $this->skip('0.3.0', '0.5.0');
+        $this->skip('0.3.0', '0.4.1');
+
+        if ($this->isVersion('0.4.1')) {
+            $extension = \common_ext_ExtensionsManager::singleton()->getExtensionById('ltiProctoring');
+
+            $config = $extension->getConfig('proctoring');
+
+            $config['showControls'] = false;
+
+            $extension->setConfig('proctoring', $config);
+
+            $this->setVersion('0.5.0');
+        }
     }
 }

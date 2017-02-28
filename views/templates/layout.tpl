@@ -19,12 +19,24 @@ use oat\tao\model\theme\Theme;
 </head>
 <body class="proctoring-scope">
 <?php Template::inc('blocks/requirement-check.tpl', 'tao'); ?>
-<div class="content-wrap">
+<div class="content-wrap<?php if (!get_data('showControls')) :?> no-controls<?php endif; ?>">
+    <?php if (get_data('showControls')){
+        Template::inc('blocks/header.tpl', 'tao');
+    }?>
+    <?php /* alpha|beta|sandbox message */
+    if($hasVersionWarning) {
+        Template::inc('blocks/version-warning.tpl', 'tao');
+    }?>
+
+
     <div id="feedback-box"></div>
     <?php /* actual content */
     $contentTemplate = Layout::getContentTemplate();
     Template::inc($contentTemplate['path'], $contentTemplate['ext']); ?>
 </div>
+<?php if (get_data('showControls')){
+    echo Layout::renderThemeTemplate(Theme::CONTEXT_FRONTOFFICE, 'footer');
+}?>
 <div class="loading-bar"></div>
 </body>
 </html>
