@@ -71,7 +71,7 @@ class LtiProctorAuthorizationProvider extends ProctorAuthorizationProvider
         }
 
         if ($proctored && $state !== ProctoredDeliveryExecution::STATE_AUTHORIZED) {
-            $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'taoProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
+            $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'ltiProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
             throw new UnAuthorizedException($errorPage, 'Proctor authorization missing');
         }
     }
