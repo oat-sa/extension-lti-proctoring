@@ -22,6 +22,8 @@ namespace oat\ltiProctoring\controller;
 
 use oat\generis\model\OntologyAwareTrait;
 use oat\ltiProctoring\model\delivery\ProctorService;
+use oat\tao\model\theme\ThemeService;
+use oat\taoLti\models\classes\theme\LtiHeadless;
 
 /**
  * LTI monitoring controller
@@ -60,11 +62,9 @@ class Monitor  extends \tao_actions_SinglePageModule
      * @return boolean
      */
     protected function showControls() {
-        if ($this->getServiceManager()->has('ltiProctoring/proctoring')) {
-            $config = $this->getServiceManager()->get('ltiProctoring/proctoring');
-            if ($config && array_key_exists('showControls', $config)) {
-                return $config['showControls'];
-            }
+        $themeService = $this->getServiceManager()->get(ThemeService::SERVICE_ID);
+        if ($themeService instanceof LtiHeadless) {
+            return !$themeService->isHeadless();
         }
         return false;
     }

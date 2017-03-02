@@ -37,7 +37,7 @@ return array(
     'version' => '0.5.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
-        'taoLti' => '>=1.8.0',
+        'taoLti' => '>=1.9.0',
         'taoProctoring' => '>=4.5.0',
         'ltiDeliveryProvider' => '>=2.2.0',
     ),
