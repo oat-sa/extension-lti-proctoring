@@ -38,7 +38,7 @@ class DeliveryServer extends ProctoringDeliveryServer
     {
         parent::awaitingAuthorization();
         $deliveryExecution = $this->getCurrentDeliveryExecution();
-        $this->setData('cancelUrl', _url('cancelAuthorization', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getIdentifier()]));
+        $this->setData('cancelUrl', _url('cancelExecution', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getIdentifier()]));
     }
 
     /**
