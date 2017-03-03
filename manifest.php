@@ -25,8 +25,9 @@ use oat\tao\model\user\TaoRoles;
 use oat\ltiProctoring\scripts\install\SetupProctoringEventListeners;
 use oat\ltiProctoring\scripts\install\RegisterAuthProvider;
 use oat\ltiProctoring\scripts\install\RegisterServices;
+use oat\ltiProctoring\controller\DeliveryServer;
 
-    /**
+/**
  * Generated using taoDevTools 2.17.0
  */
 return array(
@@ -34,17 +35,19 @@ return array(
     'label' => 'LTI Proctoring',
     'description' => 'Grants access to the proctoring functionalities using LTI',
     'license' => 'GPL-2.0',
-    'version' => '0.4.0',
+    'version' => '0.5.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
+        'taoLti' => '>=1.8.0',
         'taoProctoring' => '>=4.5.0',
-        'ltiDeliveryProvider' => '>=2.2.0'
+        'ltiDeliveryProvider' => '>=2.2.0',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#ltiProctoringManager',
     'acl' => array(
         array('grant', 'http://www.tao.lu/Ontologies/generis.rdf#ltiProctoringManager', array('ext'=>'ltiProctoring')),
         array('grant', TaoRoles::ANONYMOUS, ProctoringTool::class),
         array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Monitor::class),
+        array('grant', LtiRoles::CONTEXT_LEARNER, DeliveryServer::class),
     ),
     'install' => array(
         'php' => [
