@@ -2,6 +2,16 @@
 use oat\tao\helpers\Template;
 use oat\tao\helpers\Layout;
 use oat\tao\model\theme\Theme;
+
+$releaseMsgData = Layout::getReleaseMsgData();
+
+// yellow bar if
+// never removed by user
+// and version considered unstable resp. sandbox
+$hasVersionWarning = empty($_COOKIE['versionWarning'])
+    && !!$releaseMsgData['msg']
+    && ($releaseMsgData['is-unstable']
+    || $releaseMsgData['is-sandbox']);
 ?><!doctype html>
 <html class="no-js no-version-warning" lang="<?= tao_helpers_I18n::getLangCode() ?>">
 <head>
