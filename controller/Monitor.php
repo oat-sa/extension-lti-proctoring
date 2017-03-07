@@ -75,19 +75,18 @@ class Monitor  extends \tao_actions_SinglePageModule
     public function index()
     {
         $delivery = $this->getCurrentDelivery();
-        $data = array(
-            'defaultTag' => (string)$this->getDefaultTag(),
-            'action' => 'index',
-            'controller' => 'Monitor',
-            'extension' => 'taoProctoring',
-        );
 
         $this->setData('showControls', $this->showControls());
 
+        $params = [
+            'defaultTag' => (string)$this->getDefaultTag(),
+        ];
+
         if (!is_null($delivery)) {
-            $data['delivery'] = $delivery->getUri();
+            $params['delivery'] = $delivery->getUri();
         }
 
-        $this->composeView('delegated-view', $data, 'pages/index.tpl', 'tao');
+        $this->setClientRoute(_url('index', 'Monitor', 'taoProctoring', $params));
+        $this->composeView('delegated-view', null, 'pages/index.tpl', 'tao');
     }
 }
