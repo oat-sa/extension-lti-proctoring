@@ -39,7 +39,7 @@ return array(
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'taoLti' => '>=1.9.0',
-        'taoProctoring' => '>=4.5.0',
+        'taoProctoring' => '>=4.7.0',
         'ltiDeliveryProvider' => '>=2.2.0',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#ltiProctoringManager',
