@@ -49,7 +49,8 @@ class LtiListenerService extends ConfigurableService
                 $tagsString = str_pad($tagsString, strlen($tagsString) + 2, ',', STR_PAD_BOTH);
             }
             $resourceLink = $session->getLaunchData()->getResourceLinkID();
-            $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID)->log(
+            $deliveryLog = $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID);
+            $deliveryLog->log(
                 $event->getDeliveryExecution()->getIdentifier(), 'LTI_DELIVERY_EXECUTION_CREATED', [
                     LtiLaunchData::CONTEXT_ID => $contextId,
                     LtiLaunchData::CONTEXT_LABEL => $session->getLaunchData()->getVariable(LtiLaunchData::CONTEXT_LABEL),
@@ -57,6 +58,10 @@ class LtiListenerService extends ConfigurableService
                     ProctorService::CUSTOM_TAG => $tagsString,
                 ]
             );
+
+            $ltiParameters = $this->getLtiCustomParams($session);
+            $deliveryLog->log($event->getDeliveryExecution()->getIdentifier(), 'LTI_PARAMETERS', $ltiParameters);
+
             $monitoringService = $this->getServiceManager()->get(DeliveryMonitoringService::SERVICE_ID);
             $data = $monitoringService->getData($event->getDeliveryExecution());
             $data->update(LtiLaunchData::CONTEXT_ID, $contextId);
@@ -67,5 +72,22 @@ class LtiListenerService extends ConfigurableService
                 \common_Logger::w('monitor cache for delivery ' . $event->getDeliveryExecution()->getIdentifier() . ' could not be created');
             }
         }
+    }
+
+    /**
+     * Get LTI launch parameters which name starts from 'custom_'
+     * @param \taoLti_models_classes_TaoLtiSession $session
+     * @return array
+     */
+    protected function getLtiCustomParams(\taoLti_models_classes_TaoLtiSession $session)
+    {
+        $ltiParameters = array_filter(
+            $session->getLaunchData()->getVariables(),
+            function ($key) {
+                return strpos($key, 'custom_') === 0;
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+        return $ltiParameters;
     }
 }
