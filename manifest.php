@@ -20,6 +20,7 @@
  */
 use oat\ltiProctoring\controller\ProctoringTool;
 use oat\ltiProctoring\controller\Monitor;
+use oat\ltiProctoring\controller\Reporting;
 use oat\taoLti\models\classes\LtiRoles;
 use oat\tao\model\user\TaoRoles;
 use oat\ltiProctoring\scripts\install\SetupProctoringEventListeners;
@@ -35,11 +36,11 @@ return array(
     'label' => 'LTI Proctoring',
     'description' => 'Grants access to the proctoring functionalities using LTI',
     'license' => 'GPL-2.0',
-    'version' => '0.6.0',
+    'version' => '0.6.1',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'taoLti' => '>=1.9.0',
-        'taoProctoring' => '>=4.9.0',
+        'taoProctoring' => '>=4.9.1',
         'ltiDeliveryProvider' => '>=2.2.0',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#ltiProctoringManager',
@@ -47,6 +48,7 @@ return array(
         array('grant', 'http://www.tao.lu/Ontologies/generis.rdf#ltiProctoringManager', array('ext'=>'ltiProctoring')),
         array('grant', TaoRoles::ANONYMOUS, ProctoringTool::class),
         array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Monitor::class),
+        array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Reporting::class),
         array('grant', LtiRoles::CONTEXT_LEARNER, DeliveryServer::class),
     ),
     'install' => array(

@@ -2,7 +2,9 @@
 
 namespace oat\ltiProctoring\scripts\update;
 
+use oat\ltiProctoring\controller\Reporting;
 use oat\ltiProctoring\model\delivery\LtiProctorAuthorizationProvider;
+use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
 use oat\taoDelivery\model\authorization\strategy\AuthorizationAggregator;
 use oat\taoProctoring\model\authorization\ProctorAuthorizationProvider;
 use oat\taoDelivery\model\authorization\AuthorizationService as DeliveryAuthorizationService;
@@ -47,5 +49,14 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('0.5.0');
         }
         $this->skip('0.5.0', '0.6.0');
+        
+        if ($this->isVersion('0.6.0')) {
+            $service = new TestSessionHistoryService();
+            $this->getServiceManager()->register(TestSessionHistoryService::SERVICE_ID, $service);
+
+            AclProxy::applyRule(new AccessRule('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Reporting::class));
+            
+            $this->setVersion('0.6.1');
+        }
     }
 }
