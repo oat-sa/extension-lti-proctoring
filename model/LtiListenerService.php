@@ -91,7 +91,6 @@ class LtiListenerService extends ConfigurableService
         if ($session instanceof \taoLti_models_classes_TaoLtiSession) {
             $launchData = $session->getLaunchData();
             if ($event->getState() == DeliveryExecution::STATE_ACTIVE &&
-                $event->getPreviousState() == DeliveryExecution::STATE_AUTHORIZED &&
                 $launchData->hasVariable(LtiDeliveryExecutionService::LTI_USER_NAME)
             ) {
                 $ltiUserName = $launchData->getVariable(LtiDeliveryExecutionService::LTI_USER_NAME);
