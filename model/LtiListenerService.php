@@ -21,11 +21,14 @@
 namespace oat\ltiProctoring\model;
 
 use oat\ltiProctoring\model\delivery\ProctorService;
+use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\oatbox\service\ConfigurableService;
-use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionCreated;
-use \taoLti_models_classes_LtiLaunchData as LtiLaunchData;
+use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionState;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
+use oat\taoProctoring\model\execution\DeliveryExecution;
+use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
+use taoLti_models_classes_LtiLaunchData as LtiLaunchData;
 
 /**
  * Sample Delivery Service for proctoring
@@ -40,31 +43,71 @@ class LtiListenerService extends ConfigurableService
     {
         $session = \common_session_SessionManager::getSession();
         if ($session instanceof \taoLti_models_classes_TaoLtiSession) {
-            $contextId = $session->getLaunchData()->getVariable(LtiLaunchData::CONTEXT_ID);
+            $deliveryExecution = $event->getDeliveryExecution();
+            $executionId = $deliveryExecution->getIdentifier();
+            $deliveryLog = $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID);
+
+            $launchData = $session->getLaunchData();
+            $contextId = $launchData->getVariable(LtiLaunchData::CONTEXT_ID);
 
             $tagsString = '';
-            if ($session->getLaunchData()->hasVariable(ProctorService::CUSTOM_TAG)) {
-                $tags = (array)$session->getLaunchData()->getVariable(ProctorService::CUSTOM_TAG);
+            if ($launchData->hasVariable(ProctorService::CUSTOM_TAG)) {
+                $tags = (array)$launchData->getVariable(ProctorService::CUSTOM_TAG);
                 $tagsString = implode(',', $tags);
                 $tagsString = str_pad($tagsString, strlen($tagsString) + 2, ',', STR_PAD_BOTH);
             }
-            $resourceLink = $session->getLaunchData()->getResourceLinkID();
-            $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID)->log(
-                $event->getDeliveryExecution()->getIdentifier(), 'LTI_DELIVERY_EXECUTION_CREATED', [
-                    LtiLaunchData::CONTEXT_ID => $contextId,
-                    LtiLaunchData::CONTEXT_LABEL => $session->getLaunchData()->getVariable(LtiLaunchData::CONTEXT_LABEL),
-                    LtiLaunchData::RESOURCE_LINK_ID => $resourceLink,
-                    ProctorService::CUSTOM_TAG => $tagsString,
-                ]
-            );
+            $resourceLink = $launchData->getResourceLinkID();
+            $deliveryLog->log($executionId, 'LTI_DELIVERY_EXECUTION_CREATED', [
+                LtiLaunchData::CONTEXT_ID => $contextId,
+                LtiLaunchData::CONTEXT_LABEL => $launchData->getVariable(LtiLaunchData::CONTEXT_LABEL),
+                LtiLaunchData::RESOURCE_LINK_ID => $resourceLink,
+                ProctorService::CUSTOM_TAG => $tagsString,
+            ]);
+
             $monitoringService = $this->getServiceManager()->get(DeliveryMonitoringService::SERVICE_ID);
             $data = $monitoringService->getData($event->getDeliveryExecution());
             $data->update(LtiLaunchData::CONTEXT_ID, $contextId);
             $data->update(LtiLaunchData::RESOURCE_LINK_ID, $resourceLink);
             $data->update(ProctorService::CUSTOM_TAG, $tagsString);
+
+            if ($launchData->hasVariable(LtiDeliveryExecutionService::LTI_USER_NAME)) {
+                $ltiUserName = $launchData->getVariable(LtiDeliveryExecutionService::LTI_USER_NAME);
+                $deliveryLog->log($executionId, 'LTI_USER_NAME', $ltiUserName);
+
+                $data->update(LtiDeliveryExecutionService::LTI_USER_NAME, $ltiUserName);
+            }
+
             $success = $monitoringService->save($data);
             if (!$success) {
-                \common_Logger::w('monitor cache for delivery ' . $event->getDeliveryExecution()->getIdentifier() . ' could not be created');
+                \common_Logger::w('monitor cache for delivery ' . $deliveryExecution->getIdentifier() . ' could not be created');
+            }
+        }
+    }
+
+    public function executionStateChanged(DeliveryExecutionState $event)
+    {
+        $session = \common_session_SessionManager::getSession();
+        if ($session instanceof \taoLti_models_classes_TaoLtiSession) {
+            $launchData = $session->getLaunchData();
+            if ($event->getState() == DeliveryExecution::STATE_ACTIVE &&
+                $event->getPreviousState() == DeliveryExecution::STATE_AUTHORIZED &&
+                $launchData->hasVariable(LtiDeliveryExecutionService::LTI_USER_NAME)
+            ) {
+                $ltiUserName = $launchData->getVariable(LtiDeliveryExecutionService::LTI_USER_NAME);
+                $deliveryExecution = $event->getDeliveryExecution();
+                $executionId = $deliveryExecution->getIdentifier();
+
+                $deliveryLog = $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID);
+                $deliveryLog->log($executionId, 'LTI_USER_NAME', $ltiUserName);
+
+                $monitoringService = $this->getServiceManager()->get(DeliveryMonitoringService::SERVICE_ID);
+                $data = $monitoringService->getData($deliveryExecution);
+                $data->update(LtiDeliveryExecutionService::LTI_USER_NAME, $ltiUserName);
+
+                $success = $monitoringService->save($data);
+                if (!$success) {
+                    \common_Logger::w('monitor cache for delivery ' . $executionId . ' could not be updated');
+                }
             }
         }
     }
