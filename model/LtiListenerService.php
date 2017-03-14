@@ -45,7 +45,8 @@ class LtiListenerService extends ConfigurableService
         if ($session instanceof \taoLti_models_classes_TaoLtiSession) {
             $deliveryExecution = $event->getDeliveryExecution();
             $executionId = $deliveryExecution->getIdentifier();
-            $deliveryLog = $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID);
+            $serviceManager = $this->getServiceManager();
+            $deliveryLog = $serviceManager->get(DeliveryLog::SERVICE_ID);
 
             $launchData = $session->getLaunchData();
             $contextId = $launchData->getVariable(LtiLaunchData::CONTEXT_ID);
@@ -64,8 +65,8 @@ class LtiListenerService extends ConfigurableService
                 ProctorService::CUSTOM_TAG => $tagsString,
             ]);
 
-            $monitoringService = $this->getServiceManager()->get(DeliveryMonitoringService::SERVICE_ID);
-            $data = $monitoringService->getData($event->getDeliveryExecution());
+            $monitoringService = $serviceManager->get(DeliveryMonitoringService::SERVICE_ID);
+            $data = $monitoringService->getData($deliveryExecution);
             $data->update(LtiLaunchData::CONTEXT_ID, $contextId);
             $data->update(LtiLaunchData::RESOURCE_LINK_ID, $resourceLink);
             $data->update(ProctorService::CUSTOM_TAG, $tagsString);
@@ -79,7 +80,7 @@ class LtiListenerService extends ConfigurableService
 
             $success = $monitoringService->save($data);
             if (!$success) {
-                \common_Logger::w('monitor cache for delivery ' . $deliveryExecution->getIdentifier() . ' could not be created');
+                \common_Logger::w('monitor cache for delivery ' . $executionId . ' could not be created');
             }
         }
     }
@@ -96,11 +97,12 @@ class LtiListenerService extends ConfigurableService
                 $ltiUserName = $launchData->getVariable(LtiDeliveryExecutionService::LTI_USER_NAME);
                 $deliveryExecution = $event->getDeliveryExecution();
                 $executionId = $deliveryExecution->getIdentifier();
+                $serviceManager = $this->getServiceManager();
 
-                $deliveryLog = $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID);
+                $deliveryLog = $serviceManager->get(DeliveryLog::SERVICE_ID);
                 $deliveryLog->log($executionId, 'LTI_USER_NAME', $ltiUserName);
 
-                $monitoringService = $this->getServiceManager()->get(DeliveryMonitoringService::SERVICE_ID);
+                $monitoringService = $serviceManager->get(DeliveryMonitoringService::SERVICE_ID);
                 $data = $monitoringService->getData($deliveryExecution);
                 $data->update(LtiDeliveryExecutionService::LTI_USER_NAME, $ltiUserName);
 
