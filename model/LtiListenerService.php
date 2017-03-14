@@ -73,7 +73,6 @@ class LtiListenerService extends ConfigurableService
 
             if ($launchData->hasVariable(LtiDeliveryExecutionService::LTI_USER_NAME)) {
                 $ltiUserName = $launchData->getVariable(LtiDeliveryExecutionService::LTI_USER_NAME);
-                $deliveryLog->log($executionId, 'LTI_USER_NAME', $ltiUserName);
 
                 $data->update(LtiDeliveryExecutionService::LTI_USER_NAME, $ltiUserName);
             }
@@ -97,9 +96,6 @@ class LtiListenerService extends ConfigurableService
                 $deliveryExecution = $event->getDeliveryExecution();
                 $executionId = $deliveryExecution->getIdentifier();
                 $serviceManager = $this->getServiceManager();
-
-                $deliveryLog = $serviceManager->get(DeliveryLog::SERVICE_ID);
-                $deliveryLog->log($executionId, 'LTI_USER_NAME', $ltiUserName);
 
                 $monitoringService = $serviceManager->get(DeliveryMonitoringService::SERVICE_ID);
                 $data = $monitoringService->getData($deliveryExecution);
