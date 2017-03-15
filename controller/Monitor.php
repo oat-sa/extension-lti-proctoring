@@ -22,13 +22,15 @@ namespace oat\ltiProctoring\controller;
 
 use oat\generis\model\OntologyAwareTrait;
 use oat\ltiProctoring\model\delivery\ProctorService;
+use oat\tao\model\theme\ThemeService;
+use oat\taoLti\models\classes\theme\LtiHeadless;
 
 /**
  * LTI monitoring controller
  * 
  * @author joel bout
  */
-class Monitor  extends \tao_actions_CommonModule
+class Monitor  extends \tao_actions_SinglePageModule
 {
     use OntologyAwareTrait;
     
@@ -46,24 +48,45 @@ class Monitor  extends \tao_actions_CommonModule
     }
 
     /**
+     * Gets the path to the layout
+     * @return array
+     */
+    protected function getLayout()
+    {
+        return ['layout.tpl', 'ltiProctoring'];
+    }
+
+    /**
+     * Defines if the top and bottom action menu should be displayed or not
+     *
+     * @return boolean
+     */
+    protected function showControls() {
+        $themeService = $this->getServiceManager()->get(ThemeService::SERVICE_ID);
+        if ($themeService instanceof LtiHeadless) {
+            return !$themeService->isHeadless();
+        }
+        return false;
+    }
+
+    /**
      * Monitoring view of a selected delivery
      */
     public function index()
     {
         $delivery = $this->getCurrentDelivery();
-        $data = array(
+
+        $this->setData('showControls', $this->showControls());
+
+        $params = [
             'defaultTag' => (string)$this->getDefaultTag(),
-            'action' => 'index',
-            'controller' => 'Monitor',
-            'extension' => 'taoProctoring',
-        );
+        ];
 
         if (!is_null($delivery)) {
-            $data['delivery'] = $delivery->getUri();
+            $params['delivery'] = $delivery->getUri();
         }
 
-        $this->defaultData();
-        $this->setData('data', $data);
-        $this->setView('layout.tpl', \Context::getInstance()->getExtensionName());
+        $this->setClientRoute(_url('index', 'Monitor', 'taoProctoring', $params));
+        $this->composeView('delegated-view', null, 'pages/index.tpl', 'tao');
     }
 }
