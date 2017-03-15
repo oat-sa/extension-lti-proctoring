@@ -32,6 +32,8 @@ use oat\oatbox\service\ConfigurableService;
  */
 class LtiDeliveryExecutionService extends ConfigurableService implements LtiDeliveryExecutionServiceInterface
 {
+    const LTI_USER_NAME = 'custom_username';
+    
     /**
      * @inheritdoc
      */
