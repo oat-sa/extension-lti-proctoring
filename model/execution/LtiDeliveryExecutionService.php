@@ -44,6 +44,7 @@ class LtiDeliveryExecutionService extends ConfigurableService implements LtiDeli
             [
                 ProctoredDeliveryExecution::STATE_FINISHIED,
                 ProctoredDeliveryExecution::STATE_TERMINATED,
+                ProctoredDeliveryExecution::STATE_CANCELED,
             ]
         );
     }

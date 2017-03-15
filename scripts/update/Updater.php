@@ -49,14 +49,14 @@ class Updater extends \common_ext_ExtensionUpdater
             AclProxy::applyRule(new AccessRule('grant', LtiRoles::CONTEXT_LEARNER, DeliveryServer::class));
             $this->setVersion('0.5.0');
         }
-        $this->skip('0.5.0', '0.6.0');
+        $this->skip('0.5.0', '0.7.1');
         
-        if ($this->isVersion('0.6.0')) {
+        if ($this->isVersion('0.7.1')) {
             $eventManager = $this->getServiceManager()->get(EventManager::SERVICE_ID);
             $eventManager->attach(DeliveryExecutionState::class, [LtiListenerService::SERVICE_ID, 'executionStateChanged']);
             $this->getServiceManager()->register(EventManager::SERVICE_ID, $eventManager);
 
-            $this->setVersion('0.7.0');
+            $this->setVersion('0.8.0');
         }
     }
 }

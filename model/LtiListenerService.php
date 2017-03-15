@@ -65,6 +65,9 @@ class LtiListenerService extends ConfigurableService
                 ProctorService::CUSTOM_TAG => $tagsString,
             ]);
 
+            $ltiParameters = $this->getLtiCustomParams($session);
+            $deliveryLog->log($event->getDeliveryExecution()->getIdentifier(), 'LTI_PARAMETERS', $ltiParameters);
+
             $monitoringService = $serviceManager->get(DeliveryMonitoringService::SERVICE_ID);
             $data = $monitoringService->getData($deliveryExecution);
             $data->update(LtiLaunchData::CONTEXT_ID, $contextId);
@@ -107,5 +110,22 @@ class LtiListenerService extends ConfigurableService
                 }
             }
         }
+    }
+
+    /**
+     * Get LTI launch parameters which name starts from 'custom_'
+     * @param \taoLti_models_classes_TaoLtiSession $session
+     * @return array
+     */
+    protected function getLtiCustomParams(\taoLti_models_classes_TaoLtiSession $session)
+    {
+        $ltiParameters = array_filter(
+            $session->getLaunchData()->getVariables(),
+            function ($key) {
+                return strpos($key, 'custom_') === 0;
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+        return $ltiParameters;
     }
 }
