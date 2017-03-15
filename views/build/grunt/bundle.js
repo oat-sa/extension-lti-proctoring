@@ -23,8 +23,7 @@ module.exports = function(grunt) {
             dir : out,
             mainConfigFile : './config/requirejs.build.js',
             paths : {
-                'ltiProctoring' : root + '/ltiProctoring/views/js',
-                'taoProctoring' : root + '/taoProctoring/views/js'
+                'ltiProctoring' : root + '/ltiProctoring/views/js'
             },
             modules : [{
                 name: 'ltiProctoring/controller/routes',
