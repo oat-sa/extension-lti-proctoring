@@ -20,6 +20,7 @@
 
 namespace oat\ltiProctoring\scripts\install;
 
+use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
 use oat\oatbox\extension\InstallAction;
 use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 
@@ -38,5 +39,8 @@ class RegisterServices extends InstallAction
     {
         $service = new LtiDeliveryExecutionService([]);
         $this->registerService(LtiDeliveryExecutionService::SERVICE_ID, $service);
+        
+        $service = new TestSessionHistoryService();
+        $this->registerService(TestSessionHistoryService::SERVICE_ID, $service);
     }
 }

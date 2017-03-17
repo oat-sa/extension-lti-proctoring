@@ -32,6 +32,8 @@ use oat\oatbox\service\ConfigurableService;
  */
 class LtiDeliveryExecutionService extends ConfigurableService implements LtiDeliveryExecutionServiceInterface
 {
+    const LTI_USER_NAME = 'custom_username';
+    
     /**
      * @inheritdoc
      */
@@ -42,6 +44,7 @@ class LtiDeliveryExecutionService extends ConfigurableService implements LtiDeli
             [
                 ProctoredDeliveryExecution::STATE_FINISHIED,
                 ProctoredDeliveryExecution::STATE_TERMINATED,
+                ProctoredDeliveryExecution::STATE_CANCELED,
             ]
         );
     }
