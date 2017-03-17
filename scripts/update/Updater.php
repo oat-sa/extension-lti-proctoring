@@ -2,18 +2,21 @@
 
 namespace oat\ltiProctoring\scripts\update;
 
-use oat\ltiProctoring\model\delivery\LtiProctorAuthorizationProvider;
+use oat\ltiProctoring\controller\DeliveryServer;
+use oat\ltiProctoring\controller\Reporting;
 use oat\ltiProctoring\model\LtiListenerService;
+use oat\ltiProctoring\model\delivery\LtiProctorAuthorizationProvider;
+use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
+use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
 use oat\oatbox\event\EventManager;
+use oat\taoDelivery\model\authorization\AuthorizationService as DeliveryAuthorizationService;
 use oat\taoDelivery\model\authorization\strategy\AuthorizationAggregator;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionState;
+use oat\taoLti\models\classes\LtiRoles;
 use oat\taoProctoring\model\authorization\ProctorAuthorizationProvider;
-use oat\taoDelivery\model\authorization\AuthorizationService as DeliveryAuthorizationService;
-use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\tao\model\accessControl\func\AccessRule;
 use oat\tao\model\accessControl\func\AclProxy;
-use oat\taoLti\models\classes\LtiRoles;
-use oat\ltiProctoring\controller\DeliveryServer;
+
 
 class Updater extends \common_ext_ExtensionUpdater
 {
@@ -57,6 +60,15 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->getServiceManager()->register(EventManager::SERVICE_ID, $eventManager);
 
             $this->setVersion('0.8.0');
+        }
+
+        if ($this->isVersion('0.8.0')) {
+            $service = new TestSessionHistoryService();
+            $this->getServiceManager()->register(TestSessionHistoryService::SERVICE_ID, $service);
+
+            AclProxy::applyRule(new AccessRule('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Reporting::class));
+            
+            $this->setVersion('0.8.1');
         }
     }
 }

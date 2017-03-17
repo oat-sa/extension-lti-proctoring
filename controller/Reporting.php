@@ -14,35 +14,32 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2016 (original work) Open Assessment Technologies SA;
- *
+ * Copyright (c) 2017 (original work) Open Assessment Technologies SA ;
  *
  */
+
 namespace oat\ltiProctoring\controller;
 
 /**
- * LTI monitoring controller
- * 
- * @author joel bout
+ * LTI reporting controller
+ *
+ * @author Jean-Sébastien Conan <jean-sebastien@taotesting.com>
  */
-class Monitor extends SimplePageModule
+class Reporting  extends SimplePageModule
 {
     /**
      * Monitoring view of a selected delivery
      */
     public function index()
     {
+        $params = [];
+
         $delivery = $this->getCurrentDelivery();
-
-        $params = [
-            'defaultTag' => (string)$this->getDefaultTag(),
-        ];
-
         if (!is_null($delivery)) {
             $params['delivery'] = $delivery->getUri();
         }
 
-        $this->setClientRoute(_url('index', 'Monitor', 'taoProctoring', $params));
+        $this->setClientRoute(_url('index', 'Reporting', 'taoProctoring', $params));
         $this->composeView('delegated-view', null, 'pages/index.tpl', 'tao');
     }
 }
