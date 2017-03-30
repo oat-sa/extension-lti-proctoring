@@ -47,6 +47,8 @@ return array(
     'acl' => array(
         array('grant', 'http://www.tao.lu/Ontologies/generis.rdf#ltiProctoringManager', array('ext'=>'ltiProctoring')),
         array('grant', TaoRoles::ANONYMOUS, ProctoringTool::class),
+        array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, \oat\taoProctoring\controller\Monitor::class),
+        array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, \oat\taoProctoring\controller\Reporting::class),
         array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Monitor::class),
         array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Reporting::class),
         array('grant', LtiRoles::CONTEXT_LEARNER, DeliveryServer::class),
@@ -56,10 +58,7 @@ return array(
             SetupProctoringEventListeners::class,
             RegisterAuthProvider::class,
             RegisterServices::class,
-        ],
-        'rdf' => array(
-            __DIR__.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'install'.DIRECTORY_SEPARATOR.'ltiroles.rdf'
-        )
+        ]
     ),
     'uninstall' => array(
     ),
