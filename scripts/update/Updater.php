@@ -16,6 +16,7 @@ use oat\taoLti\models\classes\LtiRoles;
 use oat\taoProctoring\model\authorization\ProctorAuthorizationProvider;
 use oat\tao\model\accessControl\func\AccessRule;
 use oat\tao\model\accessControl\func\AclProxy;
+use oat\taoProctoring\model\ProctorService;
 
 
 class Updater extends \common_ext_ExtensionUpdater
@@ -70,7 +71,11 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $this->setVersion('0.8.1');
         }
+
+        if ($this->isVersion('0.8.1')) {
+                \tao_models_classes_RoleService::singleton()->unincludeRole(new \core_kernel_classes_Resource(LtiRoles::CONTEXT_TEACHING_ASSISTANT), new \core_kernel_classes_Resource(ProctorService::ROLE_PROCTOR));
+            $this->setVersion('0.8.2');
+        }
         
-        $this->skip('0.8.1', '0.8.2');
     }
 }
