@@ -1,7 +1,12 @@
 define({
     'Monitor' : {
         'actions' : {
-            'index' : 'controller/delegate'
+            'index' : 'taoProctoring/controller/Delivery/monitoring'
+        }
+    },
+    'Reporting' : {
+        'actions' : {
+            'index' : 'taoProctoring/controller/Reporting/history'
         }
     }
 });

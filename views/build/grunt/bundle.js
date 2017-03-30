@@ -27,7 +27,8 @@ module.exports = function(grunt) {
             },
             modules : [{
                 name: 'ltiProctoring/controller/routes',
-                include : ext.getExtensionsControllers(['ltiProctoring'])
+                include : ext.getExtensionsControllers(['ltiProctoring']),
+                exclude: ['mathJax'].concat(libs)
             }]
         }
     };
