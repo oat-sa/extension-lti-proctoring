@@ -53,7 +53,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('0.5.0');
         }
         $this->skip('0.5.0', '0.7.1');
-        
+
         if ($this->isVersion('0.7.1')) {
             $eventManager = $this->getServiceManager()->get(EventManager::SERVICE_ID);
             $eventManager->attach(DeliveryExecutionState::class, [LtiListenerService::SERVICE_ID, 'executionStateChanged']);
@@ -67,8 +67,10 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->getServiceManager()->register(TestSessionHistoryService::SERVICE_ID, $service);
 
             AclProxy::applyRule(new AccessRule('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Reporting::class));
-            
+
             $this->setVersion('0.8.1');
         }
+        
+        $this->skip('0.8.1', '0.8.2');
     }
 }
