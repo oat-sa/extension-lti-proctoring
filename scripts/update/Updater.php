@@ -13,6 +13,7 @@ use oat\taoDelivery\model\authorization\AuthorizationService as DeliveryAuthoriz
 use oat\taoDelivery\model\authorization\strategy\AuthorizationAggregator;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionState;
 use oat\taoLti\models\classes\LtiRoles;
+use oat\taoProctoring\controller\Monitor;
 use oat\taoProctoring\model\authorization\ProctorAuthorizationProvider;
 use oat\tao\model\accessControl\func\AccessRule;
 use oat\tao\model\accessControl\func\AclProxy;
@@ -73,7 +74,9 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         if ($this->isVersion('0.8.1')) {
-                \tao_models_classes_RoleService::singleton()->unincludeRole(new \core_kernel_classes_Resource(LtiRoles::CONTEXT_TEACHING_ASSISTANT), new \core_kernel_classes_Resource(ProctorService::ROLE_PROCTOR));
+            \tao_models_classes_RoleService::singleton()->unincludeRole(new \core_kernel_classes_Resource(LtiRoles::CONTEXT_TEACHING_ASSISTANT), new \core_kernel_classes_Resource(ProctorService::ROLE_PROCTOR));
+            AclProxy::applyRule(new AccessRule('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Monitor::class));
+            AclProxy::applyRule(new AccessRule('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, \oat\taoProctoring\controller\Reporting::class));
             $this->setVersion('0.8.2');
         }
         
