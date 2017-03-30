@@ -36,7 +36,7 @@ return array(
     'label' => 'LTI Proctoring',
     'description' => 'Grants access to the proctoring functionalities using LTI',
     'license' => 'GPL-2.0',
-    'version' => '0.8.1',
+    'version' => '0.8.2',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'taoLti' => '>=1.11.0',
@@ -47,6 +47,8 @@ return array(
     'acl' => array(
         array('grant', 'http://www.tao.lu/Ontologies/generis.rdf#ltiProctoringManager', array('ext'=>'ltiProctoring')),
         array('grant', TaoRoles::ANONYMOUS, ProctoringTool::class),
+        array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, \oat\taoProctoring\controller\Monitor::class),
+        array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, \oat\taoProctoring\controller\Reporting::class),
         array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Monitor::class),
         array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Reporting::class),
         array('grant', LtiRoles::CONTEXT_LEARNER, DeliveryServer::class),
@@ -58,7 +60,7 @@ return array(
             RegisterServices::class,
         ],
         'rdf' => array(
-            __DIR__.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'install'.DIRECTORY_SEPARATOR.'ltiroles.rdf'
+             __DIR__.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'install'.DIRECTORY_SEPARATOR.'ltiroles.rdf'
         )
     ),
     'uninstall' => array(
