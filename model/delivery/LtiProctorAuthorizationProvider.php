@@ -71,6 +71,7 @@ class LtiProctorAuthorizationProvider extends ProctorAuthorizationProvider
      */
     protected function throwUnAuthorizedException(DeliveryExecution $deliveryExecution)
     {
+        $currentSession = \common_session_SessionManager::getSession();
         if ($currentSession instanceof \taoLti_models_classes_TaoLtiSession) {
             $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'ltiProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
         } else {
