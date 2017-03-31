@@ -36,25 +36,13 @@ class LtiProctorAuthorizationProvider extends ProctorAuthorizationProvider
     const CUSTOM_LTI_PROCTORED = 'custom_proctored';
 
     /**
-     * @param DeliveryExecution $deliveryExecution
-     * @param User $user
-     * @throws UnAuthorizedException
-     * @throws \taoLti_models_classes_LtiException
+     * (non-PHPdoc)
+     * @see \oat\taoProctoring\model\authorization\ProctorAuthorizationProvider::isProctored()
      */
-    public function verifyResumeAuthorization(DeliveryExecution $deliveryExecution, User $user)
+    protected function isProctored(DeliveryExecution $deliveryExecution)
     {
-        $state = $deliveryExecution->getState()->getUri();
-        if (in_array($state, [ProctoredDeliveryExecution::STATE_FINISHED, ProctoredDeliveryExecution::STATE_TERMINATED])) {
-            throw new UnAuthorizedException(
-                _url('index', 'DeliveryServer', 'taoProctoring'),
-                'Terminated/Finished delivery cannot be resumed'
-            );
-        }
-
-        $currentSession = \common_session_SessionManager::getSession();
-
         $proctored = true;
-
+        $currentSession = \common_session_SessionManager::getSession();
         if ($currentSession instanceof \taoLti_models_classes_TaoLtiSession) {
             /** @var \taoLti_models_classes_LtiLaunchData $launchData */
             $launchData = \common_session_SessionManager::getSession()->getLaunchData();
@@ -69,14 +57,26 @@ class LtiProctorAuthorizationProvider extends ProctorAuthorizationProvider
                 $proctored = filter_var($var, FILTER_VALIDATE_BOOLEAN);
             }
         }
-
-        if ($proctored && $state !== ProctoredDeliveryExecution::STATE_AUTHORIZED) {
-            if ($currentSession instanceof \taoLti_models_classes_TaoLtiSession) {
-                $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'ltiProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
-            } else {
-                $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'taoProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
+        if (!$proctored) {
+            if ($deliveryExecution->getState()->getUri() == ProctoredDeliveryExecution::STATE_PAUSED) {
+                $deliveryExecution->setState(ProctoredDeliveryExecution::STATE_ACTIVE);
             }
-            throw new UnAuthorizedException($errorPage, 'Proctor authorization missing');
         }
+        return $proctored;
+    }
+
+    /**
+     * (non-PHPdoc)
+     * @see \oat\taoProctoring\model\authorization\ProctorAuthorizationProvider::throwUnAuthorizedException()
+     */
+    protected function throwUnAuthorizedException(DeliveryExecution $deliveryExecution)
+    {
+        $currentSession = \common_session_SessionManager::getSession();
+        if ($currentSession instanceof \taoLti_models_classes_TaoLtiSession) {
+            $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'ltiProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
+        } else {
+            $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'taoProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
+        }
+        throw new UnAuthorizedException($errorPage, 'Proctor authorization missing');
     }
 }
