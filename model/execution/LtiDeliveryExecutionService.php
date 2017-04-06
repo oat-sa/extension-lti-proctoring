@@ -23,14 +23,14 @@ namespace oat\ltiProctoring\model\execution;
 use oat\ltiDeliveryProvider\model\execution\LtiDeliveryExecutionService as LtiDeliveryExecutionServiceInterface;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
-use oat\oatbox\service\ConfigurableService;
+use oat\ltiDeliveryProvider\model\execution\implementation\LtiDeliveryExecutionService as BaseImplementation;
 
 /**
  * Class LtiDeliveryExecutionService
  * @package oat\ltiDeliveryProvider\model\execution
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class LtiDeliveryExecutionService extends ConfigurableService implements LtiDeliveryExecutionServiceInterface
+class LtiDeliveryExecutionService extends BaseImplementation implements LtiDeliveryExecutionServiceInterface
 {
     const LTI_USER_NAME = 'custom_username';
     
@@ -47,5 +47,21 @@ class LtiDeliveryExecutionService extends ConfigurableService implements LtiDeli
                 ProctoredDeliveryExecution::STATE_CANCELED,
             ]
         );
+    }
+
+    /**
+     * Returns an array of DeliveryExecution
+     *
+     * @param \core_kernel_classes_Resource $delivery
+     * @param \core_kernel_classes_Resource $link
+     * @param string $userId
+     * @return DeliveryExecution[]
+     */
+    public function getLinkedDeliveryExecutions(\core_kernel_classes_Resource $delivery, \core_kernel_classes_Resource $link, $userId)
+    {
+        $result = parent::getLinkedDeliveryExecutions($delivery, $link, $userId);
+        return array_filter($result, function($execution) {
+            return $execution->getState()->getUri() !== ProctoredDeliveryExecution::STATE_CANCELED;
+        });
     }
 }
