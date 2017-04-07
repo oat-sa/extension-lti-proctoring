@@ -80,6 +80,7 @@ class Updater extends \common_ext_ExtensionUpdater
             AclProxy::applyRule(new AccessRule('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, \oat\taoProctoring\controller\Reporting::class));
             $this->setVersion('0.8.2');
         }
+
         $this->skip('0.8.2', '0.9.0');
     }
 }

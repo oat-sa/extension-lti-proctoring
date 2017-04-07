@@ -21,12 +21,13 @@
 
 namespace oat\ltiProctoring\controller;
 
+use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
+
 /**
  * 
  * @author CRP Henri Tudor - TAO Team - {@link http://www.tao.lu}
  * @license GPLv2  http://www.opensource.org/licenses/gpl-2.0.php
  * @package ltiDeliveryProvider
- 
  */
 class ProctoringTool extends \taoLti_actions_ToolModule
 {
@@ -39,7 +40,10 @@ class ProctoringTool extends \taoLti_actions_ToolModule
         if ($this->hasAccess(Monitor::class, 'index')) {
             $this->redirect(_url('index', 'Monitor'));
         } else {
-            $this->returnError('You are not authoirzed to access this resource');
+            throw new \taoLti_models_classes_LtiException(
+                'You are not authoirzed to access this resource',
+                LtiErrorMessage::ERROR_UNAUTHORIZED
+            );
         }
     }
 }
