@@ -20,7 +20,6 @@
 
 namespace oat\ltiProctoring\model\execution;
 
-use oat\ltiDeliveryProvider\model\execution\LtiDeliveryExecutionService as LtiDeliveryExecutionServiceInterface;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
 use oat\ltiDeliveryProvider\model\execution\implementation\LtiDeliveryExecutionService as BaseImplementation;
@@ -30,7 +29,7 @@ use oat\ltiDeliveryProvider\model\execution\implementation\LtiDeliveryExecutionS
  * @package oat\ltiDeliveryProvider\model\execution
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class LtiDeliveryExecutionService extends BaseImplementation implements LtiDeliveryExecutionServiceInterface
+class LtiDeliveryExecutionService extends BaseImplementation
 {
     const LTI_USER_NAME = 'custom_username';
     
