@@ -21,6 +21,9 @@
 
 namespace oat\ltiProctoring\controller;
 
+use oat\ltiProctoring\model\ImpersonatingService;
+use oat\oatbox\service\ServiceNotFoundException;
+use oat\tao\model\SessionSubstitutionService;
 use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
 
 /**
@@ -47,9 +50,24 @@ class DeliveryServer extends ProctoringDeliveryServer
      */
     protected function getReturnUrl()
     {
+        if($this->getServiceManager()->has(ImpersonatingService::SERVICE_ID)){
+            /** @var ImpersonatingService $service */
+            $service = $this->getServiceManager()->get(ImpersonatingService::SERVICE_ID);
+            if($returnUrl = $service->getReturnUrl() !== ''){
+                return $returnUrl;
+            }
+        }
+
         $deliveryExecution = $this->getCurrentDeliveryExecution();
         return _url('finishDeliveryExecution', 'DeliveryRunner', 'ltiDeliveryProvider',
             ['deliveryExecution' => $deliveryExecution->getIdentifier()]
         );
     }
+
+    public function runDeliveryExecution()
+    {
+        parent::runDeliveryExecution();
+    }
+
+
 }
