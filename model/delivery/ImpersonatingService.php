@@ -21,7 +21,6 @@ namespace oat\ltiProctoring\model;
 
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\SessionSubstitutionService;
-use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 
 class ImpersonatingService extends ConfigurableService
 {
