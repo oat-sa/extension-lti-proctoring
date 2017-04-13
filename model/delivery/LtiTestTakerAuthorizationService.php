@@ -40,7 +40,7 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService
      */
     public function isProctored($deliveryId, User $user)
     {
-        $proctored = true;
+        $proctored = parent::isProctored($deliveryId, $user);
         $currentSession = \common_session_SessionManager::getSession();
         if ($currentSession instanceof \taoLti_models_classes_TaoLtiSession) {
             /** @var \taoLti_models_classes_LtiLaunchData $launchData */
@@ -56,13 +56,6 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService
                 $proctored = filter_var($var, FILTER_VALIDATE_BOOLEAN);
             }
         }
-        /*
-        if (!$proctored) {
-            if ($deliveryExecution->getState()->getUri() == DeliveryExecution::STATE_PAUSED) {
-                $deliveryExecution->setState(DeliveryExecution::STATE_ACTIVE);
-            }
-        }
-        */
         return $proctored;
     }
 
