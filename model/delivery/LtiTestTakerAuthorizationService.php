@@ -19,29 +19,28 @@
  */
 namespace oat\ltiProctoring\model\delivery;
 
-use oat\taoProctoring\model\authorization\ProctorAuthorizationProvider;
+use oat\taoProctoring\model\authorization\TestTakerAuthorizationService;
 use oat\taoDelivery\model\execution\DeliveryExecution;
-use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
-use oat\oatbox\user\User;
 use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
+use oat\oatbox\user\User;
 
 /**
  * Manage the Delivery authorization.
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class LtiProctorAuthorizationProvider extends ProctorAuthorizationProvider
+class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService
 {
 
     const CUSTOM_LTI_PROCTORED = 'custom_proctored';
 
     /**
      * (non-PHPdoc)
-     * @see \oat\taoProctoring\model\authorization\ProctorAuthorizationProvider::isProctored()
+     * @see \oat\taoProctoring\model\authorization\TestTakerAuthorizationService::isProctored()
      */
-    protected function isProctored(DeliveryExecution $deliveryExecution)
+    public function isProctored($deliveryId, User $user)
     {
-        $proctored = true;
+        $proctored = parent::isProctored($deliveryId, $user);
         $currentSession = \common_session_SessionManager::getSession();
         if ($currentSession instanceof \taoLti_models_classes_TaoLtiSession) {
             /** @var \taoLti_models_classes_LtiLaunchData $launchData */
@@ -57,17 +56,12 @@ class LtiProctorAuthorizationProvider extends ProctorAuthorizationProvider
                 $proctored = filter_var($var, FILTER_VALIDATE_BOOLEAN);
             }
         }
-        if (!$proctored) {
-            if ($deliveryExecution->getState()->getUri() == ProctoredDeliveryExecution::STATE_PAUSED) {
-                $deliveryExecution->setState(ProctoredDeliveryExecution::STATE_ACTIVE);
-            }
-        }
         return $proctored;
     }
 
     /**
      * (non-PHPdoc)
-     * @see \oat\taoProctoring\model\authorization\ProctorAuthorizationProvider::throwUnAuthorizedException()
+     * @see \oat\taoProctoring\model\authorization\TestTakerAuthorizationService::throwUnAuthorizedException()
      */
     protected function throwUnAuthorizedException(DeliveryExecution $deliveryExecution)
     {
