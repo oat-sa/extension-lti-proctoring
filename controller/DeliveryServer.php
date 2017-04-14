@@ -47,8 +47,9 @@ class DeliveryServer extends ProctoringDeliveryServer
      */
     protected function getReturnUrl()
     {
-        $session = \common_session_SessionManager::getSession();
-        $launchData = $session->getLaunchData();
-        return $launchData->getReturnUrl();
+        $deliveryExecution = $this->getCurrentDeliveryExecution();
+        return _url('finishDeliveryExecution', 'DeliveryRunner', 'ltiDeliveryProvider',
+            ['deliveryExecution' => $deliveryExecution->getIdentifier()]
+        );
     }
 }
