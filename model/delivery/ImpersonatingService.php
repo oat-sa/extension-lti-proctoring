@@ -17,14 +17,14 @@
  * Copyright (c) 2017 (original work) Open Assessment Technologies SA;
  */
 
-namespace oat\ltiProctoring\model;
+namespace oat\ltiProctoring\model\delivery;
 
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\SessionSubstitutionService;
 
 class ImpersonatingService extends ConfigurableService
 {
-    const SERVICE_ID = 'ltiProctoring/ImpersonatingService';
+    const SERVICE_ID = 'ltiProctoring/ALLL';
 
     const RETURN_URL = 'return_url';
 

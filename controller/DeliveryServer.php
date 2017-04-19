@@ -21,9 +21,7 @@
 
 namespace oat\ltiProctoring\controller;
 
-use oat\ltiProctoring\model\ImpersonatingService;
-use oat\oatbox\service\ServiceNotFoundException;
-use oat\tao\model\SessionSubstitutionService;
+use oat\ltiProctoring\model\delivery\ImpersonatingService;
 use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
 
 /**
@@ -68,6 +66,5 @@ class DeliveryServer extends ProctoringDeliveryServer
     {
         parent::runDeliveryExecution();
     }
-
 
 }

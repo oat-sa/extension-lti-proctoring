@@ -36,7 +36,7 @@ return array(
     'label' => 'LTI Proctoring',
     'description' => 'Grants access to the proctoring functionalities using LTI',
     'license' => 'GPL-2.0',
-    'version' => '0.10.0',
+    'version' => '0.11.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'taoLti' => '>=1.11.0',
@@ -52,6 +52,7 @@ return array(
         array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Monitor::class),
         array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Reporting::class),
         array('grant', LtiRoles::CONTEXT_LEARNER, DeliveryServer::class),
+        array('grant', INSTANCE_ROLE_DELIVERY, DeliveryServer::class),
     ),
     'install' => array(
         'php' => [

@@ -82,5 +82,11 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('0.8.2', '0.10.0');
+
+        if ($this->isVersion('0.10.0')) {
+            OntologyUpdater::syncModels();
+            AclProxy::applyRule(new AccessRule('grant', INSTANCE_ROLE_DELIVERY, DeliveryServer::class));
+            $this->setVersion('0.11.0');
+        }
     }
 }
