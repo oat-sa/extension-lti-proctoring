@@ -22,7 +22,8 @@ use oat\taoDelivery\model\authorization\AuthorizationService;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationService;
 use oat\ltiProctoring\model\delivery\LtiProctorAuthorizationProvider;
 use oat\ltiProctoring\model\delivery\LtiTestTakerAuthorizationService;
-
+use oat\ltiProctoring\model\ActivityMonitoringService;
+use oat\oatbox\service\ServiceNotFoundException;
 
 class Updater extends \common_ext_ExtensionUpdater
 {
@@ -97,6 +98,21 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $this->getServiceManager()->register(TestTakerAuthorizationService::SERVICE_ID, new LtiTestTakerAuthorizationService());
             $this->setVersion('1.0.0');
+        }
+
+        if ($this->isVersion('1.0.0')) {
+            /** @var ActivityMonitoringService $oldService */
+            try {
+                $oldService = $this->safeLoadService(ActivityMonitoringService::SERVICE_ID);
+                $options = $oldService->getOptions();
+            } catch (ServiceNotFoundException $error) {
+                $options = [
+                    ActivityMonitoringService::OPTION_ACTIVE_USER_THRESHOLD => 300
+                ];
+            }
+            $newService = new ActivityMonitoringService($options);
+            $this->getServiceManager()->register(ActivityMonitoringService::SERVICE_ID, $newService);
+            $this->setVersion('1.1.0');
         }
     }
 }

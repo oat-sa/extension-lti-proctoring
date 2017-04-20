@@ -25,6 +25,8 @@ use oat\oatbox\extension\InstallAction;
 use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationService;
 use oat\ltiProctoring\model\delivery\LtiTestTakerAuthorizationService;
+use oat\oatbox\service\ServiceNotFoundException;
+use oat\ltiProctoring\model\ActivityMonitoringService;
 
 /**
  * Action to register necessary extension services
@@ -46,5 +48,16 @@ class RegisterServices extends InstallAction
         $this->registerService(TestSessionHistoryService::SERVICE_ID, $service);
 
         $this->registerService(TestTakerAuthorizationService::SERVICE_ID, new LtiTestTakerAuthorizationService());
+
+        try {
+            $oldActivityMonitoringService = $this->safeLoadService(ActivityMonitoringService::SERVICE_ID);
+            $options = $oldActivityMonitoringService->getOptions();
+        } catch (ServiceNotFoundException $error) {
+            $options = [
+                ActivityMonitoringService::OPTION_ACTIVE_USER_THRESHOLD => 300
+            ];
+        }
+        $newActivityMonitoringService = new ActivityMonitoringService($options);
+        $this->getServiceManager()->register(ActivityMonitoringService::SERVICE_ID, $newActivityMonitoringService);
     }
 }
