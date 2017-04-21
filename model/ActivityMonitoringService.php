@@ -24,7 +24,6 @@ namespace oat\ltiProctoring\model;
 use oat\taoProctoring\model\ActivityMonitoringService as BaseActivityMonitoringService;
 use oat\taoLti\models\classes\LtiRoles;
 use oat\taoProctoring\model\ProctorService;
-use oat\taoProctoring\model\execution\DeliveryExecution;
 
 /**
  * Service to manage and monitor assessment activity
@@ -40,23 +39,11 @@ class ActivityMonitoringService extends BaseActivityMonitoringService
      */
     public function getData()
     {
+        $data = parent::getData();
         $proctors = $this->getNumberOfActiveUsers(ProctorService::ROLE_PROCTOR) +
             $this->getNumberOfActiveUsers(LtiRoles::CONTEXT_TEACHING_ASSISTANT);
-
-        return [
-            'active_users' => $this->getNumberOfActiveUsers(),
-            'active_proctors' => $proctors,
-            'active_test_takers' => $this->getNumberOfActiveUsers(INSTANCE_ROLE_DELIVERY),
-            'total_assessments' => $this->getNumberOfAssessments(),
-            'awaiting_assessments' => $this->getNumberOfAssessments(DeliveryExecution::STATE_AWAITING),
-            'authorized_but_not_started_assessments' => $this->getNumberOfAssessments(DeliveryExecution::STATE_AUTHORIZED),
-            'paused_assessments' => $this->getNumberOfAssessments(DeliveryExecution::STATE_PAUSED),
-            'in_progress_assessments' => $this->getNumberOfAssessments(DeliveryExecution::STATE_ACTIVE),
-            'terminated_assessment' => $this->getNumberOfAssessments(DeliveryExecution::STATE_TERMINATED),
-            'cancelled_assessments' => $this->getNumberOfAssessments(DeliveryExecution::STATE_CANCELED),
-            'finished_assessments' => $this->getNumberOfAssessments(DeliveryExecution::STATE_FINISHIED),
-            'deliveries_statistics' => $this->getStatesByDelivery(),
-        ];
+        $data['active_proctors'] = $proctors;
+        return $data;
     }
 
 }
