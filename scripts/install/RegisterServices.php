@@ -50,7 +50,7 @@ class RegisterServices extends InstallAction
         $this->registerService(TestTakerAuthorizationService::SERVICE_ID, new LtiTestTakerAuthorizationService());
 
         try {
-            $oldActivityMonitoringService = $this->safeLoadService(ActivityMonitoringService::SERVICE_ID);
+            $oldActivityMonitoringService = $this->getServiceManager()->get(ActivityMonitoringService::SERVICE_ID);
             $options = $oldActivityMonitoringService->getOptions();
         } catch (ServiceNotFoundException $error) {
             $options = [
