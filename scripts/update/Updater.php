@@ -112,7 +112,7 @@ class Updater extends \common_ext_ExtensionUpdater
             }
             $newService = new ActivityMonitoringService($options);
             $this->getServiceManager()->register(ActivityMonitoringService::SERVICE_ID, $newService);
-            $this->setVersion('1.1.0');
+            $this->setVersion('1.1.1');
         }
     }
 }
