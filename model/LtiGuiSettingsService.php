@@ -14,35 +14,35 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2016 (original work) Open Assessment Technologies SA;
- *
+ * Copyright (c) 2017 (original work) Open Assessment Technologies SA ;
  *
  */
-namespace oat\ltiProctoring\controller;
+/**
+ * @author Jean-Sébastien Conan <jean-sebastien@taotesting.com>
+ */
+
+namespace oat\ltiProctoring\model;
+
+use oat\taoProctoring\model\GuiSettingsService;
 
 /**
- * LTI monitoring controller
- * 
- * @author joel bout
+ * Class LtiGuiSettingsService
+ * @package oat\ltiProctoring\model
  */
-class Monitor extends SimplePageModule
+class LtiGuiSettingsService extends GuiSettingsService
 {
     /**
-     * Monitoring view of a selected delivery
+     * Gets the URL that exits the proctor pages
+     * @return string|null
      */
-    public function index()
+    public function getExitUrl()
     {
-        $delivery = $this->getCurrentDelivery();
-
-        $params = [
-            'defaultTag' => (string)$this->getDefaultTag(),
-        ];
-
-        if (!is_null($delivery)) {
-            $params['delivery'] = $delivery->getUri();
+        $session = \common_session_SessionManager::getSession();
+        if ($session instanceof \taoLti_models_classes_TaoLtiSession) {
+            $launchData = $session->getLaunchData();
+            return $launchData->getReturnUrl();
         }
-
-        $this->setClientRoute(_url('index', 'Monitor', 'taoProctoring', $params));
-        $this->composeView('delegated-view', null, 'pages/index.tpl', 'tao');
+        
+        return parent::getExitUrl();
     }
 }

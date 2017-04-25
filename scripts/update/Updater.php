@@ -7,6 +7,7 @@ use oat\ltiProctoring\controller\Reporting;
 use oat\ltiProctoring\model\LtiListenerService;
 use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
+use oat\ltiProctoring\scripts\install\RegisterLtiGuiSettingsService;
 use oat\oatbox\event\EventManager;
 use oat\tao\scripts\update\OntologyUpdater;
 use oat\taoDelivery\model\authorization\AuthorizationService as DeliveryAuthorizationService;
@@ -115,6 +116,11 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('1.1.1');
         }
         
-        $this->skip('1.1.1', '1.2.0');
+        $this->skip('1.1.1', '1.1.2');
+
+        if ($this->isVersion('1.1.2')) {
+            $this->runExtensionScript(RegisterLtiGuiSettingsService::class);
+            $this->setVersion('1.2.0');
+        }
     }
 }
