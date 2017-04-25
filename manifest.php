@@ -36,11 +36,11 @@ return array(
     'label' => 'LTI Proctoring',
     'description' => 'Grants access to the proctoring functionalities using LTI',
     'license' => 'GPL-2.0',
-    'version' => '1.1.2',
+    'version' => '1.2.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'taoLti' => '>=1.11.0',
-        'taoProctoring' => '>=4.17.0',
+        'taoProctoring' => '>=4.21.0',
         'ltiDeliveryProvider' => '>=2.7.0',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#ltiProctoringManager',
