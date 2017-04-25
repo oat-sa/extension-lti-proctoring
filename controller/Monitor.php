@@ -38,6 +38,12 @@ class Monitor extends SimplePageModule
             'defaultTag' => (string)$this->getDefaultTag(),
         ];
 
+        $session = \common_session_SessionManager::getSession();
+        if ($session instanceof \taoLti_models_classes_TaoLtiSession) {
+            $launchData = $session->getLaunchData();
+            $params['exitUrl'] = $launchData->getReturnUrl();
+        }
+
         if (!is_null($delivery)) {
             $params['delivery'] = $delivery->getUri();
         }
