@@ -36,7 +36,7 @@ return array(
     'label' => 'LTI Proctoring',
     'description' => 'Grants access to the proctoring functionalities using LTI',
     'license' => 'GPL-2.0',
-    'version' => '1.3.0',
+    'version' => '2.0.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'taoLti' => '>=1.11.0',
@@ -74,8 +74,5 @@ return array(
         
         #BASE URL (usually the domain root)
         'BASE_URL' => ROOT_URL.'ltiProctoring/',
-        
-        #BASE WWW required by JS
-        'BASE_WWW' => ROOT_URL.'ltiProctoring/views/'
     )
 );
