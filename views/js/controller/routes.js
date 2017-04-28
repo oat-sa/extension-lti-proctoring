@@ -1,7 +1,7 @@
 define({
     'Monitor' : {
         'actions' : {
-            'index' : 'taoProctoring/controller/Delivery/monitoring'
+            'index' : 'ltiProctoring/controller/Delivery/monitoring'
         }
     },
     'Reporting' : {
