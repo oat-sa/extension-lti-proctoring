@@ -29,6 +29,7 @@ use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use oat\taoProctoring\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
 use taoLti_models_classes_LtiLaunchData as LtiLaunchData;
+use oat\taoLti\models\classes\LtiVariableMissingException;
 
 /**
  * Sample Delivery Service for proctoring
@@ -49,34 +50,45 @@ class LtiListenerService extends ConfigurableService
             $deliveryLog = $serviceManager->get(DeliveryLog::SERVICE_ID);
 
             $launchData = $session->getLaunchData();
-            $contextId = $launchData->getVariable(LtiLaunchData::CONTEXT_ID);
-
             $tagsString = '';
             if ($launchData->hasVariable(ProctorService::CUSTOM_TAG)) {
                 $tags = (array)$launchData->getVariable(ProctorService::CUSTOM_TAG);
                 $tagsString = implode(',', $tags);
                 $tagsString = str_pad($tagsString, strlen($tagsString) + 2, ',', STR_PAD_BOTH);
             }
-            $resourceLink = $launchData->getResourceLinkID();
-            $deliveryLog->log($executionId, 'LTI_DELIVERY_EXECUTION_CREATED', [
-                LtiLaunchData::CONTEXT_ID => $contextId,
-                LtiLaunchData::CONTEXT_LABEL => $launchData->getVariable(LtiLaunchData::CONTEXT_LABEL),
-                LtiLaunchData::RESOURCE_LINK_ID => $resourceLink,
+
+            $monitoringService = $serviceManager->get(DeliveryMonitoringService::SERVICE_ID);
+            $data = $monitoringService->getData($deliveryExecution);
+
+            // tag data
+            $logData = [
                 ProctorService::CUSTOM_TAG => $tagsString,
-            ]);
+            ];
+            $data->update(ProctorService::CUSTOM_TAG, $tagsString);
+
+            // context
+            try {
+                $contextId = $launchData->getVariable(LtiLaunchData::CONTEXT_ID);
+                $data->update(LtiLaunchData::CONTEXT_ID, $contextId);
+                $logData[LtiLaunchData::CONTEXT_ID] = $contextId;
+                $logData[LtiLaunchData::CONTEXT_LABEL] = $launchData->getVariable(LtiLaunchData::CONTEXT_LABEL);
+            } catch (LtiVariableMissingException $e) {
+            }
+
+            // resource
+            try {
+                $resourceLink = $launchData->getResourceLinkID();
+                $logData[LtiLaunchData::RESOURCE_LINK_ID] = $resourceLink;
+                $data->update(LtiLaunchData::RESOURCE_LINK_ID, $resourceLink);
+            } catch (LtiVariableMissingException $e) {
+            }
+            $deliveryLog->log($executionId, 'LTI_DELIVERY_EXECUTION_CREATED', $logData);
 
             $ltiParameters = $this->getLtiCustomParams($session);
             $deliveryLog->log($event->getDeliveryExecution()->getIdentifier(), 'LTI_PARAMETERS', $ltiParameters);
 
-            $monitoringService = $serviceManager->get(DeliveryMonitoringService::SERVICE_ID);
-            $data = $monitoringService->getData($deliveryExecution);
-            $data->update(LtiLaunchData::CONTEXT_ID, $contextId);
-            $data->update(LtiLaunchData::RESOURCE_LINK_ID, $resourceLink);
-            $data->update(ProctorService::CUSTOM_TAG, $tagsString);
-
             if ($launchData->hasVariable(LtiDeliveryExecutionService::LTI_USER_NAME)) {
                 $ltiUserName = $launchData->getVariable(LtiDeliveryExecutionService::LTI_USER_NAME);
-
                 $data->update(LtiDeliveryExecutionService::LTI_USER_NAME, $ltiUserName);
             }
 
