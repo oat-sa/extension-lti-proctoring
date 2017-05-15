@@ -84,4 +84,21 @@ abstract class SimplePageModule extends \tao_actions_SinglePageModule
         }
         return false;
     }
+
+    protected function composeView($scope = '', $data = array(), $template = '', $extension = '')
+    {
+        $this->setExitUrl();
+
+        parent::composeView($scope, $data, $template, $extension);
+    }
+
+    private function setExitUrl()
+    {
+        $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
+
+        $exitUrl = $launchData->getReturnUrl();
+        $url = explode('?', $exitUrl);
+
+        $this->setClientParam('redirectUrl', ['redirectUrl'=>$url[0]]);
+    }
 }
