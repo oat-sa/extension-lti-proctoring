@@ -21,6 +21,7 @@
 
 namespace oat\ltiProctoring\scripts\install;
 
+use oat\ltiDeliveryProvider\model\event\DeliveryRunEvent;
 use oat\ltiProctoring\model\LtiListenerService;
 use oat\oatbox\extension\InstallAction;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionCreated;
@@ -39,5 +40,6 @@ class SetupProctoringEventListeners extends InstallAction
         // monitoring cache
         $this->registerEvent(DeliveryExecutionCreated::class, [LtiListenerService::SERVICE_ID, 'executionCreated']);
         $this->registerEvent(DeliveryExecutionState::class, [LtiListenerService::SERVICE_ID, 'executionStateChanged']);
+        $this->registerEvent(DeliveryRunEvent::class, [LtiListenerService::SERVICE_ID, 'deliveryRun']);
     }
 }
