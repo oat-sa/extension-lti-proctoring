@@ -15,18 +15,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * 
  * Copyright (c) 2016 (original work) Open Assessment Technologies SA;
- *               
- * 
  */
-use oat\ltiProctoring\controller\ProctoringTool;
-use oat\ltiProctoring\controller\Monitor;
-use oat\ltiProctoring\controller\Reporting;
-use oat\taoLti\models\classes\LtiRoles;
-use oat\tao\model\user\TaoRoles;
-use oat\ltiProctoring\scripts\install\SetupProctoringEventListeners;
-use oat\ltiProctoring\scripts\install\RegisterAuthProvider;
-use oat\ltiProctoring\scripts\install\RegisterServices;
 use oat\ltiProctoring\controller\DeliveryServer;
+use oat\ltiProctoring\controller\Monitor;
+use oat\ltiProctoring\controller\ProctoringTool;
+use oat\ltiProctoring\controller\Reporting;
+use oat\ltiProctoring\scripts\install\RegisterServices;
+use oat\ltiProctoring\scripts\install\SetupProctoringEventListeners;
+use oat\tao\model\user\TaoRoles;
+use oat\taoLti\models\classes\LtiRoles;
 
 /**
  * Generated using taoDevTools 2.17.0
@@ -36,12 +33,12 @@ return array(
     'label' => 'LTI Proctoring',
     'description' => 'Grants access to the proctoring functionalities using LTI',
     'license' => 'GPL-2.0',
-    'version' => '2.3.0',
+    'version' => '2.3.1',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'taoLti' => '>=3.1.0',
         'taoProctoring' => '>=5.7.0',
-        'ltiDeliveryProvider' => '>=2.9.0',
+        'ltiDeliveryProvider' => '>=3.0.1',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#ltiProctoringManager',
     'acl' => array(

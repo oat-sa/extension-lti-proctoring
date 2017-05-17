@@ -2,28 +2,28 @@
 
 namespace oat\ltiProctoring\scripts\update;
 
+use oat\ltiDeliveryProvider\model\event\DeliveryRunEvent;
 use oat\ltiProctoring\controller\DeliveryServer;
 use oat\ltiProctoring\controller\Reporting;
-use oat\ltiProctoring\model\LtiListenerService;
+use oat\ltiProctoring\model\ActivityMonitoringService;
+use oat\ltiProctoring\model\delivery\LtiProctorAuthorizationProvider;
+use oat\ltiProctoring\model\delivery\LtiTestTakerAuthorizationService;
 use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
+use oat\ltiProctoring\model\LtiListenerService;
 use oat\oatbox\event\EventManager;
+use oat\oatbox\service\ServiceNotFoundException;
+use oat\tao\model\accessControl\func\AccessRule;
+use oat\tao\model\accessControl\func\AclProxy;
 use oat\tao\scripts\update\OntologyUpdater;
+use oat\taoDelivery\model\authorization\AuthorizationService;
 use oat\taoDelivery\model\authorization\AuthorizationService as DeliveryAuthorizationService;
 use oat\taoDelivery\model\authorization\strategy\AuthorizationAggregator;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionState;
 use oat\taoLti\models\classes\LtiRoles;
 use oat\taoProctoring\controller\Monitor;
 use oat\taoProctoring\model\authorization\ProctorAuthorizationProvider;
-use oat\tao\model\accessControl\func\AccessRule;
-use oat\tao\model\accessControl\func\AclProxy;
-use oat\taoProctoring\model\ProctorService;
-use oat\taoDelivery\model\authorization\AuthorizationService;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationService;
-use oat\ltiProctoring\model\delivery\LtiProctorAuthorizationProvider;
-use oat\ltiProctoring\model\delivery\LtiTestTakerAuthorizationService;
-use oat\ltiProctoring\model\ActivityMonitoringService;
-use oat\oatbox\service\ServiceNotFoundException;
 
 class Updater extends \common_ext_ExtensionUpdater
 {
@@ -116,5 +116,14 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('1.1.1', '2.3.0');
+
+        if ($this->isVersion('2.3.0')) {
+
+            $eventManager = $this->getServiceManager()->get(EventManager::SERVICE_ID);
+            $eventManager->attach(DeliveryRunEvent::class, [LtiListenerService::SERVICE_ID, 'deliveryRun']);
+            $this->getServiceManager()->register(EventManager::SERVICE_ID, $eventManager);
+            
+            $this->setVersion('2.3.1');
+        }
     }
 }
