@@ -15,16 +15,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  * Copyright (c) 2015 (original work) Open Assessment Technologies SA;
- *
- *
  */
 namespace oat\ltiProctoring\model;
 
+use oat\ltiDeliveryProvider\model\event\DeliveryRunEvent;
+use oat\ltiDeliveryProvider\model\LTIDeliveryTool;
 use oat\ltiProctoring\model\delivery\ProctorService;
 use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionCreated;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionState;
+use oat\taoProctoring\model\DeliveryExecutionStateService;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use oat\taoProctoring\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
@@ -119,6 +120,27 @@ class LtiListenerService extends ConfigurableService
                 $success = $monitoringService->save($data);
                 if (!$success) {
                     \common_Logger::w('monitor cache for delivery ' . $executionId . ' could not be updated');
+                }
+            }
+        }
+    }
+
+    /**
+     * @param DeliveryRunEvent $event
+     */
+    public function deliveryRun(DeliveryRunEvent $event)
+    {
+        $delivery = $event->getDelivery();
+        $user = $event->getUser();
+        $remoteLink = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLtiLinkResource();
+        $executions = LTIDeliveryTool::singleton()->getLinkedDeliveryExecutions($delivery, $remoteLink, $user->getIdentifier());
+        if (!empty($executions)) {
+            $deliveryExecutionService = $this->getServiceManager()->get(LtiDeliveryExecutionService::SERVICE_ID);
+            foreach ($executions as $deliveryExecution) {
+                if (!$deliveryExecutionService->isFinished($deliveryExecution) && $deliveryExecution->getState()->getUri() != DeliveryExecution::STATE_PAUSED) {
+                    /** @var DeliveryExecutionStateService $deliveryExecutionStateService */
+                    $deliveryExecutionStateService = $this->getServiceManager()->get(DeliveryExecutionStateService::SERVICE_ID);
+                    $deliveryExecutionStateService->pauseExecution($deliveryExecution);
                 }
             }
         }
