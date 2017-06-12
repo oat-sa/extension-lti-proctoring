@@ -7,6 +7,7 @@ use oat\ltiProctoring\controller\Reporting;
 use oat\ltiProctoring\model\LtiListenerService;
 use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
+use oat\ltiProctoring\scripts\install\SetupTestSessionHistory;
 use oat\oatbox\event\EventManager;
 use oat\tao\scripts\update\OntologyUpdater;
 use oat\taoDelivery\model\authorization\AuthorizationService as DeliveryAuthorizationService;
@@ -116,5 +117,10 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('1.1.1', '2.3.1');
+
+        if ($this->isVersion('2.3.1')) {
+            $this->runExtensionScript(SetupTestSessionHistory::class);
+            $this->setVersion('2.3.2');
+        }
     }
 }
