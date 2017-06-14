@@ -47,7 +47,10 @@ abstract class SimplePageModule extends \tao_actions_SinglePageModule
         $this->setData('showControls', $this->showControls());
         
         $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
-        $this->setData('exit', $launchData->getReturnUrl());
+        if($launchData->hasReturnUrl()){
+            $this->setData('exit', $launchData->getReturnUrl());
+        }
+
     }
 
     protected function getCurrentDelivery()
