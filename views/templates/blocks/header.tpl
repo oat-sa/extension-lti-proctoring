@@ -8,7 +8,7 @@ use oat\tao\model\theme\Theme;
     <?=Layout::renderThemeTemplate(Theme::CONTEXT_BACKOFFICE, 'header-logo')?>
 
     <?php /* main navigation bar */
-    !common_session_SessionManager::isAnonymous()
+    !common_session_SessionManager::isAnonymous() && has_data('exit')
         ? Template::inc('blocks/header-main-navi.tpl', 'ltiProctoring')
         : '';
     ?>
