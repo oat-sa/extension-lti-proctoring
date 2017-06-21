@@ -113,15 +113,15 @@ class Updater extends \common_ext_ExtensionUpdater
             }
             $newService = new ActivityMonitoringService($options);
             $this->getServiceManager()->register(ActivityMonitoringService::SERVICE_ID, $newService);
-            $this->setVersion('1.1.1');
+            $this->setVersion('1.1.0');
         }
 
-        $this->skip('1.1.1', '2.3.1');
+        $this->skip('1.1.0', '2.3.1');
 
         if ($this->isVersion('2.3.1')) {
             $this->runExtensionScript(SetupTestSessionHistory::class);
             $this->setVersion('2.3.2');
         }
-        $this->skip('2.3.2', '2.3.3');
+        $this->skip('2.3.2', '2.3.4');
     }
 }
