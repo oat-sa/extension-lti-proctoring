@@ -122,6 +122,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->runExtensionScript(SetupTestSessionHistory::class);
             $this->setVersion('2.3.2');
         }
-        $this->skip('2.3.2', '2.3.4');
+
+        $this->skip('2.3.2', '2.4.0');
     }
 }
