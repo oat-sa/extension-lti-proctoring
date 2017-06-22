@@ -99,9 +99,11 @@ abstract class SimplePageModule extends \tao_actions_SinglePageModule
     {
         $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
 
-        $exitUrl = $launchData->getReturnUrl();
-        $url = explode('?', $exitUrl);
+        if($launchData->hasReturnUrl()){
+            $exitUrl = $launchData->getReturnUrl();
+            $url = explode('?', $exitUrl);
 
-        $this->setClientParam('redirectUrl', ['redirectUrl'=>$url[0]]);
+            $this->setClientParam('redirectUrl', ['redirectUrl'=>$url[0]]);
+        }
     }
 }
