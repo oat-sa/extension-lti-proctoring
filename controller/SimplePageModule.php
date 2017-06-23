@@ -47,7 +47,10 @@ abstract class SimplePageModule extends \tao_actions_SinglePageModule
         $this->setData('showControls', $this->showControls());
         
         $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
-        $this->setData('exit', $launchData->getReturnUrl());
+        if($launchData->hasReturnUrl()){
+            $this->setData('exit', $launchData->getReturnUrl());
+        }
+
     }
 
     protected function getCurrentDelivery()
@@ -96,9 +99,11 @@ abstract class SimplePageModule extends \tao_actions_SinglePageModule
     {
         $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
 
-        $exitUrl = $launchData->getReturnUrl();
-        $url = explode('?', $exitUrl);
+        if($launchData->hasReturnUrl()){
+            $exitUrl = $launchData->getReturnUrl();
+            $url = explode('?', $exitUrl);
 
-        $this->setClientParam('redirectUrl', ['redirectUrl'=>$url[0]]);
+            $this->setClientParam('redirectUrl', ['redirectUrl'=>$url[0]]);
+        }
     }
 }
