@@ -57,7 +57,11 @@ class DeliveryServer extends ProctoringDeliveryServer
                 $this->getRequestParameter('deliveryExecution')
             );
         }
-        $redirectUrl = LTIDeliveryTool::singleton()->getFinishUrl($this->getLtiMessage($deliveryExecution), $deliveryExecution);
+        if ($deliveryExecution->getState()->getUri() == ProctoredDeliveryExecution::STATE_PAUSED ) {
+            $redirectUrl = _url('awaitingAuthorization', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getUri()]);
+        } else {
+            $redirectUrl = LTIDeliveryTool::singleton()->getFinishUrl($this->getLtiMessage($deliveryExecution), $deliveryExecution);
+        }
         $this->redirect($redirectUrl);
     }
 
@@ -90,6 +94,7 @@ class DeliveryServer extends ProctoringDeliveryServer
                 if ($log) {
                     $reasons = $log[count($log) - 1]['data'];
                 }
+                break;
             case ProctoredDeliveryExecution::STATE_CANCELED:
                 $log = $deliveryLog->get($deliveryExecution->getIdentifier(), 'TEST_CANCEL');
                 if ($log) {
