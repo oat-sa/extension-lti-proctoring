@@ -94,6 +94,7 @@ class DeliveryServer extends ProctoringDeliveryServer
                 if ($log) {
                     $reasons = $log[count($log) - 1]['data'];
                 }
+                break;
             case ProctoredDeliveryExecution::STATE_CANCELED:
                 $log = $deliveryLog->get($deliveryExecution->getIdentifier(), 'TEST_CANCEL');
                 if ($log) {
