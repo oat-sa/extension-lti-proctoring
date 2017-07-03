@@ -4,6 +4,7 @@ namespace oat\ltiProctoring\scripts\update;
 
 use oat\ltiProctoring\controller\DeliveryServer;
 use oat\ltiProctoring\controller\Reporting;
+use oat\ltiProctoring\model\delivery\ProctorService as ltiProctorService;
 use oat\ltiProctoring\model\LtiListenerService;
 use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
@@ -25,6 +26,7 @@ use oat\ltiProctoring\model\delivery\LtiProctorAuthorizationProvider;
 use oat\ltiProctoring\model\delivery\LtiTestTakerAuthorizationService;
 use oat\ltiProctoring\model\ActivityMonitoringService;
 use oat\oatbox\service\ServiceNotFoundException;
+use oat\taoProctoring\model\ProctorServiceRoute;
 
 class Updater extends \common_ext_ExtensionUpdater
 {
@@ -124,5 +126,25 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('2.3.2', '2.4.0');
+
+        if ($this->isVersion('2.4.0')) {
+            // to avoid configuration overwrite
+            if (!$this->getServiceManager()->has(ltiProctorService::SERVICE_ID)
+                || !is_a($this->getServiceManager()->get(ltiProctorService::SERVICE_ID), ProctorServiceRoute::class)
+            ) {
+
+                $this->getServiceManager()->register(ltiProctorService::SERVICE_ID, new ProctorServiceRoute());
+            }
+
+            $proctorService = $this->getServiceManager()->get(ltiProctorService::SERVICE_ID);
+            $config = $proctorService->getOptions();
+            if (!isset($config[ProctorServiceRoute::PROCTOR_SERVICE_ROUTES])) {
+                $config[ProctorServiceRoute::PROCTOR_SERVICE_ROUTES] = [];
+            }
+            $config[ProctorServiceRoute::PROCTOR_SERVICE_ROUTES][] = ltiProctorService::class;
+            $config[ProctorServiceRoute::PROCTOR_SERVICE_ROUTES] = array_unique($config[ProctorServiceRoute::PROCTOR_SERVICE_ROUTES]);
+            $this->getServiceManager()->register(ltiProctorService::SERVICE_ID, new ProctorServiceRoute($config));
+            $this->setVersion('2.5.0');
+        }
     }
 }
