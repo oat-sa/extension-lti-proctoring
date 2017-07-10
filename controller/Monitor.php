@@ -41,7 +41,7 @@ class Monitor extends SimplePageModule
         if (!is_null($delivery)) {
             $params['delivery'] = $delivery->getUri();
         }
-
+        $this->setClientRoute(_url('index', 'Monitor', 'taoProctoring', $params));
         $this->composeView('delegated-view', null, 'pages/index.tpl', 'tao');
     }
 }
