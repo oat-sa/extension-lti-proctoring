@@ -128,21 +128,17 @@ class Updater extends \common_ext_ExtensionUpdater
         $this->skip('2.3.2', '2.4.1');
 
         if ($this->isVersion('2.4.1')) {
-            // to avoid configuration overwrite
-            if (!$this->getServiceManager()->has(ltiProctorService::SERVICE_ID)
-                || !is_a($this->getServiceManager()->get(ltiProctorService::SERVICE_ID), ProctorServiceDelegator::class)
-            ) {
-
-                $this->getServiceManager()->register(ltiProctorService::SERVICE_ID, new ProctorServiceRoute());
-            }
-
             $proctorService = $this->getServiceManager()->get(ltiProctorService::SERVICE_ID);
             $config = $proctorService->getOptions();
             if (!isset($config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS])) {
                 $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS] = [];
             }
-            $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS][] = ltiProctorService::class;
-            $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS] = array_unique($config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS]);
+
+            if (!in_array(ltiProctorService::class, $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS])) {
+                $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS] = array_merge([ltiProctorService::class],
+                    $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS]);
+            }
+
             $this->getServiceManager()->register(ltiProctorService::SERVICE_ID, new ProctorServiceDelegator($config));
             $this->setVersion('2.5.0');
         }

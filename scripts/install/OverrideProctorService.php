@@ -24,26 +24,23 @@ namespace oat\ltiProctoring\scripts\install;
 
 use oat\ltiProctoring\model\delivery\ProctorService;
 use oat\oatbox\extension\InstallAction;
-use oat\taoProctoring\model\ProctorServiceRoute;
+use oat\taoProctoring\model\ProctorServiceDelegator;
 
 class OverrideProctorService extends InstallAction
 {
     public function __invoke($params)
     {
-        // to avoid configuration overwrite
-        if (!$this->getServiceManager()->has(ProctorService::SERVICE_ID)
-            || !is_a($this->getServiceManager()->get(ProctorService::SERVICE_ID), ProctorServiceRoute::class)
-        ) {
-
-            $this->getServiceManager()->register(ProctorService::SERVICE_ID, new ProctorServiceRoute());
-        }
         $proctorService = $this->getServiceManager()->get(ProctorService::SERVICE_ID);
         $config = $proctorService->getOptions();
-        if (!isset($config[ProctorServiceRoute::PROCTOR_SERVICE_ROUTES])) {
-            $config[ProctorServiceRoute::PROCTOR_SERVICE_ROUTES] = [];
+        if (!isset($config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS])) {
+            $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS] = [];
         }
-        $config[ProctorServiceRoute::PROCTOR_SERVICE_ROUTES][] = ProctorService::class;
-        $config[ProctorServiceRoute::PROCTOR_SERVICE_ROUTES] = array_unique($config[ProctorServiceRoute::PROCTOR_SERVICE_ROUTES]);
-        $this->getServiceManager()->register(ProctorService::SERVICE_ID, new ProctorServiceRoute($config));
+
+        if (!in_array(ProctorService::class, $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS])) {
+            $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS] = array_merge([ProctorService::class],
+                $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS]);
+        }
+
+        $this->getServiceManager()->register(ProctorService::SERVICE_ID, new ProctorServiceDelegator($config));
     }
 }
