@@ -26,7 +26,7 @@ use oat\ltiProctoring\model\delivery\LtiProctorAuthorizationProvider;
 use oat\ltiProctoring\model\delivery\LtiTestTakerAuthorizationService;
 use oat\ltiProctoring\model\ActivityMonitoringService;
 use oat\oatbox\service\ServiceNotFoundException;
-use oat\taoProctoring\model\ProctorServiceRoute;
+use oat\taoProctoring\model\ProctorServiceDelegator;
 
 class Updater extends \common_ext_ExtensionUpdater
 {
@@ -125,12 +125,12 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('2.3.2');
         }
 
-        $this->skip('2.3.2', '2.4.0');
+        $this->skip('2.3.2', '2.4.1');
 
-        if ($this->isVersion('2.4.0')) {
+        if ($this->isVersion('2.4.1')) {
             // to avoid configuration overwrite
             if (!$this->getServiceManager()->has(ltiProctorService::SERVICE_ID)
-                || !is_a($this->getServiceManager()->get(ltiProctorService::SERVICE_ID), ProctorServiceRoute::class)
+                || !is_a($this->getServiceManager()->get(ltiProctorService::SERVICE_ID), ProctorServiceDelegator::class)
             ) {
 
                 $this->getServiceManager()->register(ltiProctorService::SERVICE_ID, new ProctorServiceRoute());
@@ -138,12 +138,12 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $proctorService = $this->getServiceManager()->get(ltiProctorService::SERVICE_ID);
             $config = $proctorService->getOptions();
-            if (!isset($config[ProctorServiceRoute::PROCTOR_SERVICE_ROUTES])) {
-                $config[ProctorServiceRoute::PROCTOR_SERVICE_ROUTES] = [];
+            if (!isset($config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS])) {
+                $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS] = [];
             }
-            $config[ProctorServiceRoute::PROCTOR_SERVICE_ROUTES][] = ltiProctorService::class;
-            $config[ProctorServiceRoute::PROCTOR_SERVICE_ROUTES] = array_unique($config[ProctorServiceRoute::PROCTOR_SERVICE_ROUTES]);
-            $this->getServiceManager()->register(ltiProctorService::SERVICE_ID, new ProctorServiceRoute($config));
+            $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS][] = ltiProctorService::class;
+            $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS] = array_unique($config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS]);
+            $this->getServiceManager()->register(ltiProctorService::SERVICE_ID, new ProctorServiceDelegator($config));
             $this->setVersion('2.5.0');
         }
     }
