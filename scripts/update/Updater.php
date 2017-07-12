@@ -25,6 +25,7 @@ use oat\ltiProctoring\model\delivery\LtiProctorAuthorizationProvider;
 use oat\ltiProctoring\model\delivery\LtiTestTakerAuthorizationService;
 use oat\ltiProctoring\model\ActivityMonitoringService;
 use oat\oatbox\service\ServiceNotFoundException;
+use oat\taoProctoring\model\ProctorService;
 use oat\taoProctoring\model\ProctorServiceDelegator;
 use oat\taoProctoring\model\ProctorServiceInterface;
 
@@ -130,7 +131,7 @@ class Updater extends \common_ext_ExtensionUpdater
         if ($this->isVersion('2.4.1')) {
             /** @var ProctorServiceDelegator $delegator */
             $delegator = $this->getServiceManager()->get(ProctorServiceInterface::SERVICE_ID);
-            $delegator->registerHandler(new ltiProctorService([ProctorServiceInterface::PROCTORED_BY_DEFAULT => false]));
+            $delegator->registerHandler(new ltiProctorService([ProctorService::PROCTORED_BY_DEFAULT => false]));
             $this->getServiceManager()->register(ltiProctorService::SERVICE_ID, $delegator);
             $this->setVersion('2.5.0');
         }

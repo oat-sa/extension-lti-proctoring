@@ -32,7 +32,7 @@ class OverrideProctorService extends InstallAction
     {
         $delegator = $this->getServiceManager()->get(ProctorServiceInterface::SERVICE_ID);
         $delegator->registerHandler(new ProctorService([
-            ProctorServiceInterface::PROCTORED_BY_DEFAULT => false
+            ProctorService::PROCTORED_BY_DEFAULT => false
         ]));
         $this->getServiceManager()->register(ProctorServiceInterface::SERVICE_ID, $delegator);
     }
