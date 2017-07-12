@@ -24,23 +24,16 @@ namespace oat\ltiProctoring\scripts\install;
 
 use oat\ltiProctoring\model\delivery\ProctorService;
 use oat\oatbox\extension\InstallAction;
-use oat\taoProctoring\model\ProctorServiceDelegator;
+use oat\taoProctoring\model\ProctorServiceInterface;
 
 class OverrideProctorService extends InstallAction
 {
     public function __invoke($params)
     {
-        $proctorService = $this->getServiceManager()->get(ProctorService::SERVICE_ID);
-        $config = $proctorService->getOptions();
-        if (!isset($config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS])) {
-            $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS] = [];
-        }
-
-        if (!in_array(ProctorService::class, $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS])) {
-            $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS] = array_merge([ProctorService::class],
-                $config[ProctorServiceDelegator::PROCTOR_SERVICE_HANDLERS]);
-        }
-
-        $this->getServiceManager()->register(ProctorService::SERVICE_ID, new ProctorServiceDelegator($config));
+        $delegator = $this->getServiceManager()->get(ProctorServiceInterface::SERVICE_ID);
+        $delegator->registerHandler(new ProctorService([
+            ProctorServiceInterface::PROCTORED_BY_DEFAULT => false
+        ]));
+        $this->getServiceManager()->register(ProctorServiceInterface::SERVICE_ID, $delegator);
     }
 }
