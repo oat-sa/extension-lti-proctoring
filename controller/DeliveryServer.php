@@ -21,6 +21,7 @@
 
 namespace oat\ltiProctoring\controller;
 
+use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoLti\models\classes\LtiMessages\LtiMessage;
@@ -53,7 +54,7 @@ class DeliveryServer extends ProctoringDeliveryServer
     {
         $deliveryExecution = null;
         if ($this->hasRequestParameter('deliveryExecution')) {
-            $deliveryExecution = \taoDelivery_models_classes_execution_ServiceProxy::singleton()->getDeliveryExecution(
+            $deliveryExecution = ServiceProxy::singleton()->getDeliveryExecution(
                 $this->getRequestParameter('deliveryExecution')
             );
         }
