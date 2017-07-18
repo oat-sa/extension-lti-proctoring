@@ -39,6 +39,7 @@ class Reporting  extends SimplePageModule
             $params['delivery'] = $delivery->getUri();
         }
 
+        $this->setClientRoute(_url('index', 'Reporting', 'taoProctoring', $params));
         $this->composeView('delegated-view', null, 'pages/index.tpl', 'tao');
     }
 }
