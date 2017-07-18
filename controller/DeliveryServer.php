@@ -21,6 +21,7 @@
 
 namespace oat\ltiProctoring\controller;
 
+use oat\ltiProctoring\model\delivery\ProctorService;
 use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoLti\models\classes\LtiMessages\LtiMessage;
@@ -42,7 +43,18 @@ class DeliveryServer extends ProctoringDeliveryServer
     public function awaitingAuthorization()
     {
         parent::awaitingAuthorization();
+        
         $deliveryExecution = $this->getCurrentDeliveryExecution();
+
+        $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
+        $extendedTime = 0;
+        if ($launchData->hasVariable(ProctorService::CUSTOM_LTI_EXTENDED_TIME)) {
+            $extendedTime = floatval($launchData->getVariable(ProctorService::CUSTOM_LTI_EXTENDED_TIME));
+        }
+        /** @var ProctorService $proctorService */
+        $proctorService = $this->getServiceManager()->get(ProctorService::SERVICE_ID);
+        $proctorService->updateDeliveryExtendedTime($deliveryExecution, $extendedTime);
+
         $this->setData('cancelUrl', _url('cancelExecution', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getIdentifier()]));
     }
 
