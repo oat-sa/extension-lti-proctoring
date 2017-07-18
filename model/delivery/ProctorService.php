@@ -137,11 +137,17 @@ class ProctorService extends DefaultProctorService
         $deliveryExecutionManagerService = $this->getServiceManager()->get(DeliveryExecutionManagerService::SERVICE_ID);
         /** @var QtiTimer $timer */
         $timer = $deliveryExecutionManagerService->getDeliveryTimer($deliveryExecution);
-        if ($timer->getExtraTime() && !$extendedTime) {
-            $extendedTime = null;
-            $deliveryExecutionManagerService->setExtraTime([$deliveryExecution], $timer->getExtraTime(), $extendedTime);
-        } elseif (($timer->getExtraTime() && $extendedTime) || (!$timer->getExtraTime() && $extendedTime)) {
-            $deliveryExecutionManagerService->setExtraTime([$deliveryExecution], $timer->getExtraTime(), $extendedTime);
+        $deliveryExecutionArray = [
+            $deliveryExecution
+        ];
+
+        $extendedTime = ($timer->getExtraTime() && !$extendedTime) ? 1 : $extendedTime;
+        if ($extendedTime) {
+            $deliveryExecutionManagerService->setExtraTime(
+                $deliveryExecutionArray,
+                $timer->getExtraTime(),
+                $extendedTime
+            );
         }
     }
 }
