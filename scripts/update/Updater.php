@@ -131,7 +131,7 @@ class Updater extends \common_ext_ExtensionUpdater
         if ($this->isVersion('2.4.1')) {
             /** @var ProctorServiceDelegator $delegator */
             $delegator = $this->getServiceManager()->get(ProctorServiceInterface::SERVICE_ID);
-            $delegator->registerHandler(new ltiProctorService([ProctorService::PROCTORED_BY_DEFAULT => false]));
+            $delegator->registerHandler(new ltiProctorService());
             $this->getServiceManager()->register(ltiProctorService::SERVICE_ID, $delegator);
             $this->setVersion('2.5.0');
         }

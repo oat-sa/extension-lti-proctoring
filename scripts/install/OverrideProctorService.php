@@ -31,9 +31,7 @@ class OverrideProctorService extends InstallAction
     public function __invoke($params)
     {
         $delegator = $this->getServiceManager()->get(ProctorServiceInterface::SERVICE_ID);
-        $delegator->registerHandler(new ProctorService([
-            ProctorService::PROCTORED_BY_DEFAULT => false
-        ]));
+        $delegator->registerHandler(new ProctorService());
         $this->getServiceManager()->register(ProctorServiceInterface::SERVICE_ID, $delegator);
     }
 }
