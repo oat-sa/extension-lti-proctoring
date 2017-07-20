@@ -120,4 +120,10 @@ class ProctorService extends DefaultProctorService
         }
         return $monitoringService->count($criteria);
     }
+
+    public function isSuitable()
+    {
+        $proctor = \common_session_SessionManager::getSession()->getUser();
+        return is_a($proctor, \taoLti_models_classes_LtiUser::class);
+    }
 }

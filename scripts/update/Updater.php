@@ -4,6 +4,7 @@ namespace oat\ltiProctoring\scripts\update;
 
 use oat\ltiProctoring\controller\DeliveryServer;
 use oat\ltiProctoring\controller\Reporting;
+use oat\ltiProctoring\model\delivery\ProctorService as ltiProctorService;
 use oat\ltiProctoring\model\LtiListenerService;
 use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
@@ -18,13 +19,15 @@ use oat\taoProctoring\controller\Monitor;
 use oat\taoProctoring\model\authorization\ProctorAuthorizationProvider;
 use oat\tao\model\accessControl\func\AccessRule;
 use oat\tao\model\accessControl\func\AclProxy;
-use oat\taoProctoring\model\ProctorService;
 use oat\taoDelivery\model\authorization\AuthorizationService;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationService;
 use oat\ltiProctoring\model\delivery\LtiProctorAuthorizationProvider;
 use oat\ltiProctoring\model\delivery\LtiTestTakerAuthorizationService;
 use oat\ltiProctoring\model\ActivityMonitoringService;
 use oat\oatbox\service\ServiceNotFoundException;
+use oat\taoProctoring\model\ProctorService;
+use oat\taoProctoring\model\ProctorServiceDelegator;
+use oat\taoProctoring\model\ProctorServiceInterface;
 
 class Updater extends \common_ext_ExtensionUpdater
 {
@@ -125,5 +128,13 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('2.3.2', '2.4.2');
+
+        if ($this->isVersion('2.4.2')) {
+            /** @var ProctorServiceDelegator $delegator */
+            $delegator = $this->getServiceManager()->get(ProctorServiceInterface::SERVICE_ID);
+            $delegator->registerHandler(new ltiProctorService());
+            $this->getServiceManager()->register(ltiProctorService::SERVICE_ID, $delegator);
+            $this->setVersion('2.5.0');
+        }
     }
 }
