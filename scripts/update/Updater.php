@@ -136,5 +136,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->getServiceManager()->register(ltiProctorService::SERVICE_ID, $delegator);
             $this->setVersion('2.5.0');
         }
+
+        $this->skip('2.5.0', '2.5.1');
     }
 }
