@@ -58,7 +58,7 @@ return array(
             SetupProctoringEventListeners::class,
             RegisterServices::class,
             SetupTestSessionHistory::class,
-            \oat\ltiProctoring\scripts\install\OverrideProctorService::class
+            \oat\ltiProctoring\scripts\install\OverrideProctorService::class,
         ],
         'rdf' => array(
             __DIR__.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'install'.DIRECTORY_SEPARATOR.'ltiroles.rdf'
