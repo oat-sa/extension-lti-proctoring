@@ -21,12 +21,16 @@
 
 namespace oat\ltiProctoring\controller;
 
+use oat\ltiProctoring\model\delivery\ProctorService;
+use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoLti\models\classes\LtiMessages\LtiMessage;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
 use oat\ltiDeliveryProvider\model\LTIDeliveryTool;
+use oat\taoProctoring\model\ProctorServiceDelegator;
+use oat\taoProctoring\model\ProctorServiceInterface;
 
 /**
  * Override the default DeliveryServer Controller
@@ -42,7 +46,22 @@ class DeliveryServer extends ProctoringDeliveryServer
     public function awaitingAuthorization()
     {
         parent::awaitingAuthorization();
+        
         $deliveryExecution = $this->getCurrentDeliveryExecution();
+
+        $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
+        $extendedTime = 0;
+        if ($launchData->hasVariable(ProctorService::CUSTOM_LTI_EXTENDED_TIME)) {
+            $extendedTime = floatval($launchData->getVariable(ProctorService::CUSTOM_LTI_EXTENDED_TIME));
+        }
+
+        /** @var ProctorServiceDelegator $delegator */
+        $delegator = $this->getServiceManager()->get(ProctorServiceInterface::SERVICE_ID);
+
+        /** @var ProctorService $proctorService */
+        $proctorService = $delegator->getResponsibleService();
+        $proctorService->updateDeliveryExtendedTime($deliveryExecution, $extendedTime);
+
         $this->setData('cancelUrl', _url('cancelExecution', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getIdentifier()]));
     }
 
@@ -53,12 +72,12 @@ class DeliveryServer extends ProctoringDeliveryServer
     {
         $deliveryExecution = null;
         if ($this->hasRequestParameter('deliveryExecution')) {
-            $deliveryExecution = \taoDelivery_models_classes_execution_ServiceProxy::singleton()->getDeliveryExecution(
+            $deliveryExecution = ServiceProxy::singleton()->getDeliveryExecution(
                 $this->getRequestParameter('deliveryExecution')
             );
         }
-        if ($deliveryExecution->getState()->getUri() == ProctoredDeliveryExecution::STATE_PAUSED ) {
-            $redirectUrl = _url('awaitingAuthorization', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getUri()]);
+        if ($deliveryExecution->getState()->getUri() == ProctoredDeliveryExecution::STATE_PAUSED) {
+            $redirectUrl = _url('awaitingAuthorization', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getIdentifier()]);
         } else {
             $redirectUrl = LTIDeliveryTool::singleton()->getFinishUrl($this->getLtiMessage($deliveryExecution), $deliveryExecution);
         }
