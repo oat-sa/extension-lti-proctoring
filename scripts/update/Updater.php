@@ -35,7 +35,6 @@ class Updater extends \common_ext_ExtensionUpdater
     /**
      * @param $initialVersion
      * @return string $versionUpdatedTo
-     * @throws \common_exception_Error
      */
     public function update($initialVersion)
     {
@@ -137,6 +136,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('2.5.0');
         }
 
-        $this->skip('2.5.0', '2.5.1');
+        $this->skip('2.5.0', '2.6.0');
+
     }
 }
