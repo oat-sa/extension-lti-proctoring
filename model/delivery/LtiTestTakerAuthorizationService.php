@@ -24,13 +24,13 @@ use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
 use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
 use oat\oatbox\user\User;
-use oat\taoProctoring\model\DelegatorServiceHandler;
+use oat\taoProctoring\model\DelegatedServiceHandler;
 
 /**
  * Manage the Delivery authorization.
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService implements DelegatorServiceHandler
+class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService implements DelegatedServiceHandler
 {
 
     const CUSTOM_LTI_PROCTORED = 'custom_proctored';
