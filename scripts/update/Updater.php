@@ -20,6 +20,7 @@ use oat\taoProctoring\model\authorization\ProctorAuthorizationProvider;
 use oat\tao\model\accessControl\func\AccessRule;
 use oat\tao\model\accessControl\func\AclProxy;
 use oat\taoDelivery\model\authorization\AuthorizationService;
+use oat\taoProctoring\model\authorization\TestTakerAuthorizationInterface;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationService;
 use oat\ltiProctoring\model\delivery\LtiProctorAuthorizationProvider;
 use oat\ltiProctoring\model\delivery\LtiTestTakerAuthorizationService;
@@ -137,6 +138,13 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('2.5.0', '2.6.0');
+
+        if ($this->isVersion('2.6.0')) {
+            $delegator = $this->getServiceManager()->get(TestTakerAuthorizationInterface::SERVICE_ID);
+            $delegator->registerHandler(new LtiTestTakerAuthorizationService());
+            $this->getServiceManager()->register(TestTakerAuthorizationInterface::SERVICE_ID, $delegator);
+            $this->setVersion('2.7.0');
+        }
 
     }
 }

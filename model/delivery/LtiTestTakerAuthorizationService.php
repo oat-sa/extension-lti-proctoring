@@ -24,12 +24,13 @@ use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
 use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
 use oat\oatbox\user\User;
+use oat\taoProctoring\model\DelegatorServiceHandler;
 
 /**
  * Manage the Delivery authorization.
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService
+class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService implements DelegatorServiceHandler
 {
 
     const CUSTOM_LTI_PROCTORED = 'custom_proctored';
@@ -72,5 +73,11 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService
             $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'taoProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
         }
         throw new UnAuthorizedException($errorPage, 'Proctor authorization missing');
+    }
+
+    public function isSuitable()
+    {
+        $proctor = \common_session_SessionManager::getSession()->getUser();
+        return is_a($proctor, \taoLti_models_classes_LtiUser::class);
     }
 }
