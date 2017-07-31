@@ -143,7 +143,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $delegator = $this->getServiceManager()->get(TestTakerAuthorizationInterface::SERVICE_ID);
             $delegator->registerHandler(new LtiTestTakerAuthorizationService());
             $this->getServiceManager()->register(TestTakerAuthorizationInterface::SERVICE_ID, $delegator);
-            $this->setVersion('2.7.0');
+            $this->setVersion('3.0.0');
         }
 
     }
