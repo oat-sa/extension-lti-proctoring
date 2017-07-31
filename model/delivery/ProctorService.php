@@ -150,9 +150,8 @@ class ProctorService extends DefaultProctorService
         }
     }
 
-    public function isSuitable()
+    public function isSuitable(User $user, $deliveryId = null)
     {
-        $proctor = \common_session_SessionManager::getSession()->getUser();
-        return is_a($proctor, \taoLti_models_classes_LtiUser::class);
+        return is_a($user, \taoLti_models_classes_LtiUser::class);
     }
 }
