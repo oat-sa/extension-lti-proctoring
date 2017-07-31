@@ -61,7 +61,7 @@ class DeliveryServer extends ProctoringDeliveryServer
         $delegator = $this->getServiceManager()->get(ProctorServiceInterface::SERVICE_ID);
 
         /** @var ProctorService $proctorService */
-        $proctorService = $delegator->getResponsibleService($delivery->getUri(), $user);
+        $proctorService = $delegator->getResponsibleService($user, $delivery->getUri());
         $proctorService->updateDeliveryExtendedTime($deliveryExecution, $extendedTime);
 
         $this->setData('cancelUrl', _url('cancelExecution', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getIdentifier()]));
