@@ -75,9 +75,8 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
         throw new UnAuthorizedException($errorPage, 'Proctor authorization missing');
     }
 
-    public function isSuitable()
+    public function isSuitable($deliveryId = null, User $user)
     {
-        $proctor = \common_session_SessionManager::getSession()->getUser();
-        return is_a($proctor, \taoLti_models_classes_LtiUser::class);
+        return is_a($user, \taoLti_models_classes_LtiUser::class);
     }
 }
