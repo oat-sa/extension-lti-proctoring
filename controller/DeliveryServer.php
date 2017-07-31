@@ -48,6 +48,8 @@ class DeliveryServer extends ProctoringDeliveryServer
         parent::awaitingAuthorization();
         
         $deliveryExecution = $this->getCurrentDeliveryExecution();
+        $user = \common_session_SessionManager::getSession()->getUser();
+        $delivery = $deliveryExecution->getDelivery();
 
         $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
         $extendedTime = 0;
@@ -59,7 +61,7 @@ class DeliveryServer extends ProctoringDeliveryServer
         $delegator = $this->getServiceManager()->get(ProctorServiceInterface::SERVICE_ID);
 
         /** @var ProctorService $proctorService */
-        $proctorService = $delegator->getResponsibleService();
+        $proctorService = $delegator->getResponsibleService($user, $delivery->getUri());
         $proctorService->updateDeliveryExtendedTime($deliveryExecution, $extendedTime);
 
         $this->setData('cancelUrl', _url('cancelExecution', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getIdentifier()]));

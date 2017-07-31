@@ -23,6 +23,7 @@ namespace oat\ltiProctoring\scripts\install;
 use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
 use oat\oatbox\extension\InstallAction;
 use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
+use oat\taoProctoring\model\authorization\TestTakerAuthorizationInterface;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationService;
 use oat\ltiProctoring\model\delivery\LtiTestTakerAuthorizationService;
 use oat\oatbox\service\ServiceNotFoundException;
@@ -47,7 +48,9 @@ class RegisterServices extends InstallAction
         $service = new TestSessionHistoryService();
         $this->registerService(TestSessionHistoryService::SERVICE_ID, $service);
 
-        $this->registerService(TestTakerAuthorizationService::SERVICE_ID, new LtiTestTakerAuthorizationService());
+        $delegator = $this->getServiceManager()->get(TestTakerAuthorizationInterface::SERVICE_ID);
+        $delegator->registerHandler(new LtiTestTakerAuthorizationService());
+        $this->getServiceManager()->register(TestTakerAuthorizationInterface::SERVICE_ID, $delegator);
 
         try {
             $oldActivityMonitoringService = $this->getServiceManager()->get(ActivityMonitoringService::SERVICE_ID);
