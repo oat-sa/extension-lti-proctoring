@@ -20,12 +20,9 @@
 
 namespace oat\ltiProctoring\model\delivery;
 
-use oat\taoDelivery\model\execution\DeliveryExecution;
-use oat\taoProctoring\model\execution\DeliveryExecutionManagerService;
 use oat\taoProctoring\model\ProctorService as DefaultProctorService;
 use oat\oatbox\user\User;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
-use oat\taoQtiTest\models\runner\time\QtiTimer;
 use \taoLti_models_classes_LtiLaunchData as LtiLaunchData;
 
 /**
@@ -37,8 +34,6 @@ class ProctorService extends DefaultProctorService
 {
 
     const CUSTOM_TAG = 'custom_tag';
-
-    const CUSTOM_LTI_EXTENDED_TIME = 'custom_extended_time';
 
     /**
      * @param User $proctor
@@ -124,30 +119,6 @@ class ProctorService extends DefaultProctorService
             }
         }
         return $monitoringService->count($criteria);
-    }
-
-    /**
-     * @param DeliveryExecution $deliveryExecution
-     * @param $extendedTime
-     */
-    public function updateDeliveryExtendedTime(DeliveryExecution $deliveryExecution, $extendedTime)
-    {
-        /** @var DeliveryExecutionManagerService  $deliveryExecutionManagerService */
-        $deliveryExecutionManagerService = $this->getServiceManager()->get(DeliveryExecutionManagerService::SERVICE_ID);
-        /** @var QtiTimer $timer */
-        $timer = $deliveryExecutionManagerService->getDeliveryTimer($deliveryExecution);
-        $deliveryExecutionArray = [
-            $deliveryExecution
-        ];
-
-        $extendedTime = ($timer->getExtraTime() && !$extendedTime) ? 1 : $extendedTime;
-        if ($extendedTime) {
-            $deliveryExecutionManagerService->setExtraTime(
-                $deliveryExecutionArray,
-                $timer->getExtraTime(),
-                $extendedTime
-            );
-        }
     }
 
     public function isSuitable(User $user, $deliveryId = null)
