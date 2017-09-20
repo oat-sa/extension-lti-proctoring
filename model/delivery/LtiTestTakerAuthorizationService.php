@@ -59,8 +59,8 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
                     );
                 }
                 $proctored = filter_var($var, FILTER_VALIDATE_BOOLEAN);
-                $this->checkExtendedTime();
             }
+            $this->checkExtendedTime();
         }
         return $proctored;
     }
