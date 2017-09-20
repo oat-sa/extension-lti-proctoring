@@ -19,12 +19,15 @@
  */
 namespace oat\ltiProctoring\model\delivery;
 
+use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationService;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
 use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
 use oat\oatbox\user\User;
 use oat\taoProctoring\model\DelegatedServiceHandler;
+use oat\taoProctoring\model\execution\DeliveryExecutionManagerService;
+use oat\taoQtiTest\models\runner\time\QtiTimer;
 
 /**
  * Manage the Delivery authorization.
@@ -34,6 +37,7 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
 {
 
     const CUSTOM_LTI_PROCTORED = 'custom_proctored';
+    const CUSTOM_LTI_EXTENDED_TIME = 'custom_extended_time';
 
     /**
      * (non-PHPdoc)
@@ -55,6 +59,7 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
                     );
                 }
                 $proctored = filter_var($var, FILTER_VALIDATE_BOOLEAN);
+                $this->checkExtendedTime();
             }
         }
         return $proctored;
@@ -75,8 +80,57 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
         throw new UnAuthorizedException($errorPage, 'Proctor authorization missing');
     }
 
+    /**
+     * @param User $user
+     * @param null $deliveryId
+     * @return bool
+     */
     public function isSuitable(User $user, $deliveryId = null)
     {
         return is_a($user, \taoLti_models_classes_LtiUser::class);
+    }
+
+    /**
+     * Check extended time from LTI session
+     */
+    protected function checkExtendedTime()
+    {
+        $request = \Context::getInstance()->getRequest();
+        $deliveryExecution = null;
+        if ($deliveryExecutionUri = $request->getParameter('deliveryExecution')) {
+            $deliveryExecution = ServiceProxy::singleton()->getDeliveryExecution($deliveryExecutionUri);
+        }
+
+        $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
+        $extendedTime = 0;
+        if ($launchData->hasVariable(self::CUSTOM_LTI_EXTENDED_TIME)) {
+            $extendedTime = floatval($launchData->getVariable(self::CUSTOM_LTI_EXTENDED_TIME));
+        }
+
+        $this->updateDeliveryExtendedTime($deliveryExecution, $extendedTime);
+    }
+
+    /**
+     * @param DeliveryExecution $deliveryExecution
+     * @param $extendedTime
+     */
+    protected function updateDeliveryExtendedTime(DeliveryExecution $deliveryExecution, $extendedTime)
+    {
+        /** @var DeliveryExecutionManagerService  $deliveryExecutionManagerService */
+        $deliveryExecutionManagerService = $this->getServiceLocator()->get(DeliveryExecutionManagerService::SERVICE_ID);
+        /** @var QtiTimer $timer */
+        $timer = $deliveryExecutionManagerService->getDeliveryTimer($deliveryExecution);
+        $deliveryExecutionArray = [
+            $deliveryExecution
+        ];
+
+        $extendedTime = (!$extendedTime) ? 1 : $extendedTime;
+        if ($extendedTime) {
+            $deliveryExecutionManagerService->setExtraTime(
+                $deliveryExecutionArray,
+                $timer->getExtraTime(),
+                $extendedTime
+            );
+        }
     }
 }
