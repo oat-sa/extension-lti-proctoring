@@ -23,11 +23,15 @@ namespace oat\ltiProctoring\model;
 use oat\ltiProctoring\model\delivery\ProctorService;
 use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\oatbox\service\ConfigurableService;
+use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
+use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionCreated;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionState;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use oat\taoProctoring\model\execution\DeliveryExecution;
+use oat\taoProctoring\model\execution\DeliveryExecutionManagerService;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
+use oat\taoQtiTest\models\runner\time\QtiTimer;
 use taoLti_models_classes_LtiLaunchData as LtiLaunchData;
 use oat\taoLti\models\classes\LtiVariableMissingException;
 
@@ -39,6 +43,8 @@ use oat\taoLti\models\classes\LtiVariableMissingException;
 class LtiListenerService extends ConfigurableService
 {
     const SERVICE_ID = 'ltiProctoring/LtiListener';
+
+    const CUSTOM_LTI_EXTENDED_TIME = 'custom_extended_time';
 
     public function executionCreated(DeliveryExecutionCreated $event)
     {
@@ -104,11 +110,11 @@ class LtiListenerService extends ConfigurableService
         $session = \common_session_SessionManager::getSession();
         if ($session instanceof \taoLti_models_classes_TaoLtiSession) {
             $launchData = $session->getLaunchData();
+            $deliveryExecution = $event->getDeliveryExecution();
             if ($event->getState() == DeliveryExecution::STATE_ACTIVE &&
                 $launchData->hasVariable(LtiDeliveryExecutionService::LTI_USER_NAME)
             ) {
                 $ltiUserName = $launchData->getVariable(LtiDeliveryExecutionService::LTI_USER_NAME);
-                $deliveryExecution = $event->getDeliveryExecution();
                 $executionId = $deliveryExecution->getIdentifier();
                 $serviceManager = $this->getServiceManager();
 
@@ -121,6 +127,49 @@ class LtiListenerService extends ConfigurableService
                     \common_Logger::w('monitor cache for delivery ' . $executionId . ' could not be updated');
                 }
             }
+
+            if ($event->getPreviousState() == DeliveryExecution::STATE_PAUSED) {
+                $this->checkExtendedTime($launchData, $deliveryExecution);
+            }
+        }
+    }
+
+    /**
+     * Check extended time from LTI session
+     * @param \taoLti_models_classes_LtiLaunchData $launchData
+     * @param DeliveryExecutionInterface $deliveryExecution
+     */
+    public function checkExtendedTime(\taoLti_models_classes_LtiLaunchData $launchData, DeliveryExecutionInterface $deliveryExecution)
+    {
+        $extendedTime = 0;
+        if ($launchData->hasVariable(self::CUSTOM_LTI_EXTENDED_TIME)) {
+            $extendedTime = floatval($launchData->getVariable(self::CUSTOM_LTI_EXTENDED_TIME));
+        }
+
+        $this->updateDeliveryExtendedTime($deliveryExecution, $extendedTime);
+    }
+
+    /**
+     * @param DeliveryExecutionInterface $deliveryExecution
+     * @param $extendedTime
+     */
+    public function updateDeliveryExtendedTime(DeliveryExecutionInterface $deliveryExecution, $extendedTime)
+    {
+        /** @var DeliveryExecutionManagerService  $deliveryExecutionManagerService */
+        $deliveryExecutionManagerService = $this->getServiceLocator()->get(DeliveryExecutionManagerService::SERVICE_ID);
+        /** @var QtiTimer $timer */
+        $timer = $deliveryExecutionManagerService->getDeliveryTimer($deliveryExecution);
+        $deliveryExecutionArray = [
+            $deliveryExecution
+        ];
+
+        $extendedTime = (!$extendedTime) ? 1 : $extendedTime;
+        if ($extendedTime) {
+            $deliveryExecutionManagerService->setExtraTime(
+                $deliveryExecutionArray,
+                $timer->getExtraTime(),
+                $extendedTime
+            );
         }
     }
 
