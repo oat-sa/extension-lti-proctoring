@@ -19,15 +19,12 @@
  */
 namespace oat\ltiProctoring\model\delivery;
 
-use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationService;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
 use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
 use oat\oatbox\user\User;
 use oat\taoProctoring\model\DelegatedServiceHandler;
-use oat\taoProctoring\model\execution\DeliveryExecutionManagerService;
-use oat\taoQtiTest\models\runner\time\QtiTimer;
 
 /**
  * Manage the Delivery authorization.
@@ -37,7 +34,6 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
 {
 
     const CUSTOM_LTI_PROCTORED = 'custom_proctored';
-    const CUSTOM_LTI_EXTENDED_TIME = 'custom_extended_time';
 
     /**
      * (non-PHPdoc)
