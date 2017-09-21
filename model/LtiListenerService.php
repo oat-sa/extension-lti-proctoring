@@ -127,7 +127,10 @@ class LtiListenerService extends ConfigurableService
                     \common_Logger::w('monitor cache for delivery ' . $executionId . ' could not be updated');
                 }
             }
-            $this->checkExtendedTime($launchData, $deliveryExecution);
+
+            if ($event->getPreviousState() == DeliveryExecution::STATE_PAUSED) {
+                $this->checkExtendedTime($launchData, $deliveryExecution);
+            }
         }
     }
 
