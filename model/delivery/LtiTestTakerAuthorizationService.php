@@ -60,7 +60,6 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
                 }
                 $proctored = filter_var($var, FILTER_VALIDATE_BOOLEAN);
             }
-            $this->checkExtendedTime();
         }
         return $proctored;
     }
@@ -88,49 +87,5 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
     public function isSuitable(User $user, $deliveryId = null)
     {
         return is_a($user, \taoLti_models_classes_LtiUser::class);
-    }
-
-    /**
-     * Check extended time from LTI session
-     */
-    protected function checkExtendedTime()
-    {
-        $request = \Context::getInstance()->getRequest();
-        $deliveryExecution = null;
-        if ($deliveryExecutionUri = $request->getParameter('deliveryExecution')) {
-            $deliveryExecution = ServiceProxy::singleton()->getDeliveryExecution($deliveryExecutionUri);
-        }
-
-        $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
-        $extendedTime = 0;
-        if ($launchData->hasVariable(self::CUSTOM_LTI_EXTENDED_TIME)) {
-            $extendedTime = floatval($launchData->getVariable(self::CUSTOM_LTI_EXTENDED_TIME));
-        }
-
-        $this->updateDeliveryExtendedTime($deliveryExecution, $extendedTime);
-    }
-
-    /**
-     * @param DeliveryExecution $deliveryExecution
-     * @param $extendedTime
-     */
-    protected function updateDeliveryExtendedTime(DeliveryExecution $deliveryExecution, $extendedTime)
-    {
-        /** @var DeliveryExecutionManagerService  $deliveryExecutionManagerService */
-        $deliveryExecutionManagerService = $this->getServiceLocator()->get(DeliveryExecutionManagerService::SERVICE_ID);
-        /** @var QtiTimer $timer */
-        $timer = $deliveryExecutionManagerService->getDeliveryTimer($deliveryExecution);
-        $deliveryExecutionArray = [
-            $deliveryExecution
-        ];
-
-        $extendedTime = (!$extendedTime) ? 1 : $extendedTime;
-        if ($extendedTime) {
-            $deliveryExecutionManagerService->setExtraTime(
-                $deliveryExecutionArray,
-                $timer->getExtraTime(),
-                $extendedTime
-            );
-        }
     }
 }
