@@ -29,6 +29,8 @@ use oat\oatbox\service\ServiceNotFoundException;
 use oat\taoProctoring\model\ProctorService;
 use oat\taoProctoring\model\ProctorServiceDelegator;
 use oat\taoProctoring\model\ProctorServiceInterface;
+use oat\tao\model\actionQueue\ActionQueue;
+use oat\ltiProctoring\model\actions\GetActiveDeliveryExecution;
 
 class Updater extends \common_ext_ExtensionUpdater
 {
@@ -147,5 +149,17 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('3.0.0', '3.2.0');
+
+        if ($this->isVersion('3.2.0')) {
+            $actionQueue = $this->getServiceManager()->get(ActionQueue::SERVICE_ID);
+            $actions = $actionQueue->getOption(ActionQueue::OPTION_ACTIONS);
+            $actions[GetActiveDeliveryExecution::class] = [
+                ActionQueue::ACTION_PARAM_LIMIT => 0,
+                ActionQueue::ACTION_PARAM_TTL => 3600, //one hour
+            ];
+            $actionQueue->setOption(ActionQueue::OPTION_ACTIONS, $actions);
+            $this->getServiceManager()->register(ActionQueue::SERVICE_ID, $actionQueue);
+            $this->setVersion('3.3.0');
+        }
     }
 }
