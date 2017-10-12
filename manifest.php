@@ -41,7 +41,7 @@ return array(
     'requires' => array(
         'taoLti' => '>=3.2.2',
         'taoProctoring' => '>=7.0.0',
-        'ltiDeliveryProvider' => '>=3.4.0',
+        'ltiDeliveryProvider' => '>=3.6.0',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#ltiProctoringManager',
     'acl' => array(
