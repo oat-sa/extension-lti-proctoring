@@ -23,6 +23,8 @@ namespace oat\ltiProctoring\model\execution;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
 use oat\ltiDeliveryProvider\model\execution\implementation\LtiDeliveryExecutionService as BaseImplementation;
+use oat\tao\model\actionQueue\ActionQueue;
+use oat\ltiProctoring\model\actions\GetActiveDeliveryExecution;
 
 /**
  * Class LtiDeliveryExecutionService
@@ -62,5 +64,21 @@ class LtiDeliveryExecutionService extends BaseImplementation
         return array_filter($result, function($execution) {
             return $execution->getState()->getUri() !== ProctoredDeliveryExecution::STATE_CANCELED;
         });
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getActiveDeliveryExecution(\core_kernel_classes_Resource $delivery)
+    {
+        /** @var ActionQueue $actionQueue */
+        $actionQueue = $this->getServiceManager()->get(ActionQueue::SERVICE_ID);
+        $action = new GetActiveDeliveryExecution($delivery);
+        if ($actionQueue->perform($action)) {
+            return $action->getResult();
+        } else {
+            throw new \oat\tao\model\actionQueue\ActionFullException($actionQueue->getPosition($action));
+        }
+
     }
 }
