@@ -42,7 +42,7 @@ class RegisterServices extends InstallAction
      */
     public function __invoke($params)
     {
-        $service = $this->getServiceManager(LtiDeliveryExecutionService::SERVICE_ID);
+        $service = $this->getServiceManager()->get(LtiDeliveryExecutionService::SERVICE_ID);
         $newService = new LtiDeliveryExecutionService($service->getOptions());
         $this->registerService(LtiDeliveryExecutionService::SERVICE_ID, $newService);
         
