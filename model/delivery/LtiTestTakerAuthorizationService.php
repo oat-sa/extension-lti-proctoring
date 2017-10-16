@@ -25,7 +25,7 @@ use oat\taoDelivery\model\authorization\UnAuthorizedException;
 use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
 use oat\oatbox\user\User;
 use oat\taoProctoring\model\DelegatedServiceHandler;
-
+use oat\taoLti\models\classes\LtiRoles;
 /**
  * Manage the Delivery authorization.
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
@@ -82,6 +82,11 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
      */
     public function isSuitable(User $user, $deliveryId = null)
     {
-        return is_a($user, \taoLti_models_classes_LtiUser::class);
+        $ltiRoles = array_intersect([
+            LtiRoles::CONTEXT_INSTRUCTOR,
+            LtiRoles::CONTEXT_LEARNER,
+            LtiRoles::CONTEXT_TEACHING_ASSISTANT,
+        ], $user->getRoles());
+        return !empty($ltiRoles);
     }
 }
