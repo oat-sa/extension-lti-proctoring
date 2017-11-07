@@ -8,4 +8,6 @@
   <!-- Context roles -->
   <rdf:Description rdf:about="http://www.imsglobal.org/imspurl/lis/v1/vocab/membership#TeachingAssistant">
   </rdf:Description>
+  <rdf:Description rdf:about="http://www.imsglobal.org/imspurl/lis/v1/vocab/membership#Administrator">
+    </rdf:Description>
 </rdf:RDF>

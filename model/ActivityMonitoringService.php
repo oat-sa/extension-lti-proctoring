@@ -41,7 +41,8 @@ class ActivityMonitoringService extends BaseActivityMonitoringService
     {
         $data = parent::getData();
         $proctors = $this->getNumberOfActiveUsers(ProctorService::ROLE_PROCTOR) +
-            $this->getNumberOfActiveUsers(LtiRoles::CONTEXT_TEACHING_ASSISTANT);
+            $this->getNumberOfActiveUsers(LtiRoles::CONTEXT_TEACHING_ASSISTANT) +
+            $this->getNumberOfActiveUsers(LtiRoles::CONTEXT_ADMINISTRATOR);
         $data['active_proctors'] = $proctors;
         return $data;
     }
