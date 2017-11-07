@@ -36,11 +36,11 @@ return array(
     'label' => 'LTI Proctoring',
     'description' => 'Grants access to the proctoring functionalities using LTI',
     'license' => 'GPL-2.0',
-    'version' => '3.3.3',
+    'version' => '3.4.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
-        'taoLti' => '>=3.2.2',
-        'taoProctoring' => '>=7.0.0',
+        'taoLti' => '>=3.4.4',
+        'taoProctoring' => '>=7.9.0',
         'ltiDeliveryProvider' => '>=3.4.0',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#ltiProctoringManager',
@@ -52,6 +52,10 @@ return array(
         array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Monitor::class),
         array('grant', LtiRoles::CONTEXT_TEACHING_ASSISTANT, Reporting::class),
         array('grant', LtiRoles::CONTEXT_LEARNER, DeliveryServer::class),
+        array('grant', LtiRoles::CONTEXT_ADMINISTRATOR, \oat\taoProctoring\controller\MonitorProctorAdministrator::class),
+        array('grant', LtiRoles::CONTEXT_ADMINISTRATOR, \oat\taoProctoring\controller\Reporting::class),
+        array('grant', LtiRoles::CONTEXT_ADMINISTRATOR, Monitor::class),
+        array('grant', LtiRoles::CONTEXT_ADMINISTRATOR, Reporting::class),
     ),
     'install' => array(
         'php' => [
