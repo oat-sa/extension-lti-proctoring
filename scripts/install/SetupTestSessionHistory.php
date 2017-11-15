@@ -45,6 +45,7 @@ class SetupTestSessionHistory extends InstallAction
             $roles = [];
         }
         $roles[] = LtiRoles::CONTEXT_TEACHING_ASSISTANT;
+        $roles[] = LtiRoles::CONTEXT_ADMINISTRATOR;
         $historyService->setOption(TestSessionHistoryService::PROCTOR_ROLES, $roles);
         $this->getServiceManager()->register(TestSessionHistoryService::SERVICE_ID, $historyService);
     }

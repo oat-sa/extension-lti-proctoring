@@ -86,6 +86,7 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
             LtiRoles::CONTEXT_INSTRUCTOR,
             LtiRoles::CONTEXT_LEARNER,
             LtiRoles::CONTEXT_TEACHING_ASSISTANT,
+            LtiRoles::CONTEXT_ADMINISTRATOR,
         ], $user->getRoles());
         return !empty($ltiRoles);
     }
