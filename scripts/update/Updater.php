@@ -16,7 +16,6 @@ use oat\taoDelivery\model\authorization\strategy\AuthorizationAggregator;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionState;
 use oat\taoLti\models\classes\LtiRoles;
 use oat\taoProctoring\controller\Monitor;
-use oat\taoProctoring\controller\MonitorProctorAdministrator;
 use oat\taoProctoring\model\authorization\ProctorAuthorizationProvider;
 use oat\tao\model\accessControl\func\AccessRule;
 use oat\tao\model\accessControl\func\AclProxy;
@@ -151,10 +150,11 @@ class Updater extends \common_ext_ExtensionUpdater
 
         if ($this->isVersion('3.3.3')) {
             OntologyUpdater::syncModels();
-            AclProxy::applyRule(new AccessRule('grant', LtiRoles::CONTEXT_ADMINISTRATOR, MonitorProctorAdministrator::class));
+            AclProxy::applyRule(new AccessRule('grant', LtiRoles::CONTEXT_ADMINISTRATOR, \oat\taoProctoring\controller\MonitorProctorAdministrator::class));
             AclProxy::applyRule(new AccessRule('grant', LtiRoles::CONTEXT_ADMINISTRATOR, \oat\taoProctoring\controller\Reporting::class));
+            AclProxy::applyRule(new AccessRule('grant', LtiRoles::CONTEXT_ADMINISTRATOR, \oat\taoProctoring\controller\Monitor::class));
             AclProxy::applyRule(new AccessRule('grant', LtiRoles::CONTEXT_ADMINISTRATOR, \oat\ltiProctoring\controller\Monitor::class));
-            AclProxy::applyRule(new AccessRule('grant', LtiRoles::CONTEXT_ADMINISTRATOR, Reporting::class));
+            AclProxy::applyRule(new AccessRule('grant', LtiRoles::CONTEXT_ADMINISTRATOR, \oat\ltiProctoring\controller\Reporting::class));
 
             $this->setVersion('3.4.0');
         }

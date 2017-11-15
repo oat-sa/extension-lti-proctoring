@@ -54,8 +54,9 @@ return array(
         array('grant', LtiRoles::CONTEXT_LEARNER, DeliveryServer::class),
         array('grant', LtiRoles::CONTEXT_ADMINISTRATOR, \oat\taoProctoring\controller\MonitorProctorAdministrator::class),
         array('grant', LtiRoles::CONTEXT_ADMINISTRATOR, \oat\taoProctoring\controller\Reporting::class),
-        array('grant', LtiRoles::CONTEXT_ADMINISTRATOR, Monitor::class),
-        array('grant', LtiRoles::CONTEXT_ADMINISTRATOR, Reporting::class),
+        array('grant', LtiRoles::CONTEXT_ADMINISTRATOR, \oat\taoProctoring\controller\Monitor::class),
+        array('grant', LtiRoles::CONTEXT_ADMINISTRATOR, \oat\ltiProctoring\controller\Monitor::class),
+        array('grant', LtiRoles::CONTEXT_ADMINISTRATOR, \oat\ltiProctoring\controller\Reporting::class),
     ),
     'install' => array(
         'php' => [
