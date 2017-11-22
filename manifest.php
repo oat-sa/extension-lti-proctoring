@@ -21,6 +21,7 @@
 use oat\ltiProctoring\controller\ProctoringTool;
 use oat\ltiProctoring\controller\Monitor;
 use oat\ltiProctoring\controller\Reporting;
+use oat\ltiProctoring\scripts\install\SetupTestRunnerMessageService;
 use oat\taoLti\models\classes\LtiRoles;
 use oat\tao\model\user\TaoRoles;
 use oat\ltiProctoring\scripts\install\SetupProctoringEventListeners;
@@ -36,11 +37,11 @@ return array(
     'label' => 'LTI Proctoring',
     'description' => 'Grants access to the proctoring functionalities using LTI',
     'license' => 'GPL-2.0',
-    'version' => '3.4.1',
+    'version' => '3.4.2',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'taoLti' => '>=3.4.4',
-        'taoProctoring' => '>=7.9.0',
+        'taoProctoring' => '>=7.11.1',
         'ltiDeliveryProvider' => '>=3.4.0',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#ltiProctoringManager',
@@ -63,6 +64,7 @@ return array(
             SetupProctoringEventListeners::class,
             RegisterServices::class,
             SetupTestSessionHistory::class,
+            SetupTestRunnerMessageService::class,
             \oat\ltiProctoring\scripts\install\OverrideProctorService::class,
         ],
         'rdf' => array(
