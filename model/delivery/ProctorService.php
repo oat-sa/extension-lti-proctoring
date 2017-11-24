@@ -20,6 +20,7 @@
 
 namespace oat\ltiProctoring\model\delivery;
 
+use oat\taoLti\models\classes\user\LtiUser;
 use oat\taoProctoring\model\ProctorService as DefaultProctorService;
 use oat\oatbox\user\User;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
@@ -123,6 +124,6 @@ class ProctorService extends DefaultProctorService
 
     public function isSuitable(User $user, $deliveryId = null)
     {
-        return is_a($user, \taoLti_models_classes_LtiUser::class);
+        return is_a($user, LtiUser::class);
     }
 }

@@ -26,6 +26,7 @@ use oat\ltiProctoring\model\delivery\LtiProctorAuthorizationProvider;
 use oat\ltiProctoring\model\delivery\LtiTestTakerAuthorizationService;
 use oat\ltiProctoring\model\ActivityMonitoringService;
 use oat\oatbox\service\ServiceNotFoundException;
+use oat\taoProctoring\model\implementation\TestRunnerMessageService;
 use oat\taoProctoring\model\ProctorService;
 use oat\taoProctoring\model\ProctorServiceDelegator;
 use oat\taoProctoring\model\ProctorServiceInterface;
@@ -157,6 +158,20 @@ class Updater extends \common_ext_ExtensionUpdater
             AclProxy::applyRule(new AccessRule('grant', LtiRoles::CONTEXT_ADMINISTRATOR, \oat\ltiProctoring\controller\Reporting::class));
 
             $this->setVersion('3.4.0');
+        }
+
+        $this->skip('3.4.0', '3.4.1');
+
+        if ($this->isVersion('3.4.1')) {
+            /** @var TestRunnerMessageService $testRunnerMessageService */
+            $testRunnerMessageService = $this->getServiceManager()->get(TestRunnerMessageService::SERVICE_ID);
+            $roles = $testRunnerMessageService->getOption(TestRunnerMessageService::PROCTOR_ROLES_OPTION);
+            $roles[] = LtiRoles::CONTEXT_TEACHING_ASSISTANT;
+            $roles[] = LtiRoles::CONTEXT_ADMINISTRATOR;
+            $testRunnerMessageService->setOption(TestRunnerMessageService::PROCTOR_ROLES_OPTION, $roles);
+            $this->getServiceManager()->register(TestRunnerMessageService::SERVICE_ID, $testRunnerMessageService);
+
+            $this->setVersion('3.4.2');
         }
     }
 }
