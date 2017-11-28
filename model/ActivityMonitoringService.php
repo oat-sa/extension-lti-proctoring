@@ -21,6 +21,9 @@
 
 namespace oat\ltiProctoring\model;
 
+use oat\ltiDeliveryProvider\model\actions\GetActiveDeliveryExecution;
+use oat\tao\model\actionQueue\ActionQueue;
+use oat\tao\model\actionQueue\implementation\InstantActionQueue;
 use oat\taoProctoring\model\ActivityMonitoringService as BaseActivityMonitoringService;
 use oat\taoLti\models\classes\LtiRoles;
 use oat\taoProctoring\model\ProctorService;
@@ -59,7 +62,18 @@ class ActivityMonitoringService extends BaseActivityMonitoringService
      */
     protected function getLoginQueueLength()
     {
-        return 111;
+        /** @var InstantActionQueue $actionQueue */
+        $actionQueue = $this->getServiceManager()->get(ActionQueue::SERVICE_ID);
+
+        $queue = __('Queue disabled');
+        $actions = $actionQueue->getOption(ActionQueue::OPTION_ACTIONS);
+        if (isset($actions[GetActiveDeliveryExecution::class])) {
+            if ($actions[GetActiveDeliveryExecution::class][ActionQueue::ACTION_PARAM_LIMIT] > 0) {
+                $queue = $actionQueue->getPosition(new GetActiveDeliveryExecution());
+            }
+        }
+
+        return $queue;
     }
 
 }
