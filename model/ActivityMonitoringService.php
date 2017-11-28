@@ -34,7 +34,7 @@ class ActivityMonitoringService extends BaseActivityMonitoringService
 {
 
     /** Total testtakers awaiting in the queue */
-    const FIELD_LOGIN_QUEUE = 'login_queue';
+    const FIELD_LOGIN_QUEUE = 'queue-test-takers';
 
     /**
      * Return comprehensive activity monitoring data.
@@ -46,8 +46,9 @@ class ActivityMonitoringService extends BaseActivityMonitoringService
         $proctors = $this->getNumberOfActiveUsers(ProctorService::ROLE_PROCTOR) +
             $this->getNumberOfActiveUsers(LtiRoles::CONTEXT_TEACHING_ASSISTANT) +
             $this->getNumberOfActiveUsers(LtiRoles::CONTEXT_ADMINISTRATOR);
-        $data[self::FIELD_ACTIVE_PROCTORS] = $proctors;
-        $data[self::FIELD_LOGIN_QUEUE] = $this->getLoginQueueLength();
+
+        $data[self::GROUPFIELD_USER_ACTIVITY][self::FIELD_ACTIVE_PROCTORS] = $proctors;
+        $data[self::GROUPFIELD_USER_ACTIVITY][self::FIELD_LOGIN_QUEUE] = $this->getLoginQueueLength();
 
         return $data;
     }
