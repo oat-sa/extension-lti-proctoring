@@ -173,5 +173,7 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $this->setVersion('3.4.2');
         }
+
+        $this->skip('3.4.2', '3.4.3');
     }
 }
