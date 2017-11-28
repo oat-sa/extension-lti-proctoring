@@ -33,6 +33,9 @@ use oat\taoProctoring\model\ProctorService;
 class ActivityMonitoringService extends BaseActivityMonitoringService
 {
 
+    /** Total testtakers awaiting in the queue */
+    const FIELD_LOGIN_QUEUE = 'login_queue';
+
     /**
      * Return comprehensive activity monitoring data.
      * @return array
@@ -43,8 +46,19 @@ class ActivityMonitoringService extends BaseActivityMonitoringService
         $proctors = $this->getNumberOfActiveUsers(ProctorService::ROLE_PROCTOR) +
             $this->getNumberOfActiveUsers(LtiRoles::CONTEXT_TEACHING_ASSISTANT) +
             $this->getNumberOfActiveUsers(LtiRoles::CONTEXT_ADMINISTRATOR);
-        $data['active_proctors'] = $proctors;
+        $data[self::FIELD_ACTIVE_PROCTORS] = $proctors;
+        $data[self::FIELD_LOGIN_QUEUE] = $this->getLoginQueueLength();
+
         return $data;
+    }
+
+    /**
+     * Retrieve amount of users awaiting for available login slot
+     * @return int
+     */
+    protected function getLoginQueueLength()
+    {
+        return 111;
     }
 
 }
