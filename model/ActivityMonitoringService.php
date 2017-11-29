@@ -65,7 +65,7 @@ class ActivityMonitoringService extends BaseActivityMonitoringService
         /** @var InstantActionQueue $actionQueue */
         $actionQueue = $this->getServiceManager()->get(ActionQueue::SERVICE_ID);
 
-        $queue = __('Queue disabled');
+        $queue = __('Turned off');
         $actions = $actionQueue->getOption(ActionQueue::OPTION_ACTIONS);
         if (isset($actions[GetActiveDeliveryExecution::class])) {
             if ($actions[GetActiveDeliveryExecution::class][ActionQueue::ACTION_PARAM_LIMIT] > 0) {
