@@ -192,5 +192,8 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->getServiceManager()->register(ActivityMonitoringService::SERVICE_ID, $service);
             $this->setVersion('3.5.0');
         }
+
+        $this->skip('3.5.0', '3.5.1');
+
     }
 }
