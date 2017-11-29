@@ -24,7 +24,6 @@ use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
 use oat\oatbox\extension\InstallAction;
 use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationInterface;
-use oat\taoProctoring\model\authorization\TestTakerAuthorizationService;
 use oat\ltiProctoring\model\delivery\LtiTestTakerAuthorizationService;
 use oat\oatbox\service\ServiceNotFoundException;
 use oat\ltiProctoring\model\ActivityMonitoringService;
@@ -39,6 +38,7 @@ class RegisterServices extends InstallAction
     /**
      * @param $params
      * @throws \common_exception_Error
+     * @throws \common_Exception
      */
     public function __invoke($params)
     {
@@ -61,6 +61,18 @@ class RegisterServices extends InstallAction
                 ActivityMonitoringService::OPTION_ACTIVE_USER_THRESHOLD => 300
             ];
         }
+
+        $options = array_merge($options,
+            [\oat\taoProctoring\model\ActivityMonitoringService::OPTION_USER_ACTIVITY_WIDGETS => [
+                'queueTestTakers' => [
+                    'container' => 'queue-test-takers',
+                    'label' => __('Queued test-takers'),
+                    'value' => 0,
+                    'icon' => 'takers',
+                    'size' => 4
+                ]],
+            ]);
+
         $newActivityMonitoringService = new ActivityMonitoringService($options);
         $this->getServiceManager()->register(ActivityMonitoringService::SERVICE_ID, $newActivityMonitoringService);
     }
