@@ -20,6 +20,7 @@
 namespace oat\ltiProctoring\controller;
 
 use oat\generis\model\OntologyAwareTrait;
+use oat\ltiDeliveryProvider\model\LtiLaunchDataService;
 use oat\ltiProctoring\model\delivery\ProctorService;
 use oat\tao\model\theme\ThemeService;
 use oat\taoLti\models\classes\theme\LtiHeadless;
@@ -56,8 +57,10 @@ abstract class SimplePageModule extends \tao_actions_SinglePageModule
     protected function getCurrentDelivery()
     {
         $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
-        $deliveryId = $launchData->getCustomParameter('delivery');
-        return is_null($deliveryId) ? null : $this->getResource($deliveryId);
+        /** @var LtiLaunchDataService $service */
+        $ltiLaunchDataService = $this->getServiceManager()->get(LtiLaunchDataService::SERVICE_ID);
+        $delivery = $ltiLaunchDataService->findDeliveryFromLaunchData($launchData);
+        return $delivery;
     }
 
     protected function getDefaultTag()
