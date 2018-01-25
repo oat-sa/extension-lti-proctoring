@@ -90,8 +90,15 @@ class LtiListenerService extends ConfigurableService
             }
             $deliveryLog->log($executionId, 'LTI_DELIVERY_EXECUTION_CREATED', $logData);
 
-            $ltiParameters = $this->getLtiCustomParams($session);
-            $deliveryLog->log($event->getDeliveryExecution()->getIdentifier(), 'LTI_PARAMETERS', $ltiParameters);
+            $ltiCustomParameters = $this->getLtiCustomParams($session);
+            //log custom lti parameters
+            $deliveryLog->log($event->getDeliveryExecution()->getIdentifier(), 'LTI_PARAMETERS', $ltiCustomParameters);
+            //log non-custom lti parameters
+            $deliveryLog->log(
+                $event->getDeliveryExecution()->getIdentifier(),
+                'LTI_LAUNCH_PARAMETERS',
+                array_diff_key($session->getLaunchData()->getVariables(), $ltiCustomParameters)
+            );
 
             if ($launchData->hasVariable(LtiDeliveryExecutionService::LTI_USER_NAME)) {
                 $ltiUserName = $launchData->getVariable(LtiDeliveryExecutionService::LTI_USER_NAME);
