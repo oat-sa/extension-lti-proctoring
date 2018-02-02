@@ -37,12 +37,12 @@ return array(
     'label' => 'LTI Proctoring',
     'description' => 'Grants access to the proctoring functionalities using LTI',
     'license' => 'GPL-2.0',
-    'version' => '3.7.0',
+    'version' => '3.8.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'taoLti' => '>=3.4.4',
         'taoProctoring' => '>=7.12.0',
-        'ltiDeliveryProvider' => '>=3.9.0',
+        'ltiDeliveryProvider' => '>=5.1.0',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#ltiProctoringManager',
     'acl' => array(
@@ -66,6 +66,7 @@ return array(
             SetupTestSessionHistory::class,
             SetupTestRunnerMessageService::class,
             \oat\ltiProctoring\scripts\install\OverrideProctorService::class,
+            \oat\ltiProctoring\scripts\install\OverrideResultCustomFieldsService::class,
         ],
         'rdf' => array(
             __DIR__.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'install'.DIRECTORY_SEPARATOR.'ltiroles.rdf'

@@ -5,6 +5,7 @@ namespace oat\ltiProctoring\scripts\update;
 use oat\ltiProctoring\controller\DeliveryServer;
 use oat\ltiProctoring\controller\Reporting;
 use oat\ltiProctoring\model\delivery\ProctorService as ltiProctorService;
+use oat\ltiProctoring\model\execution\LtiResultCustomFieldsService;
 use oat\ltiProctoring\model\LtiListenerService;
 use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
@@ -15,6 +16,7 @@ use oat\taoDelivery\model\authorization\AuthorizationService as DeliveryAuthoriz
 use oat\taoDelivery\model\authorization\strategy\AuthorizationAggregator;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionState;
 use oat\taoLti\models\classes\LtiRoles;
+use oat\taoOutcomeUi\model\search\ResultCustomFieldsService;
 use oat\taoProctoring\controller\Monitor;
 use oat\taoProctoring\model\authorization\ProctorAuthorizationProvider;
 use oat\tao\model\accessControl\func\AccessRule;
@@ -194,5 +196,13 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('3.5.0', '3.7.0');
+
+        if ($this->isVersion('3.7.0')) {
+            /** @var ResultCustomFieldsService $resultCustomFieldsService */
+            $resultCustomFieldsService = $this->getServiceManager()->get(ResultCustomFieldsService::SERVICE_ID);
+            $ltiResultCustomFieldsService = new LtiResultCustomFieldsService($resultCustomFieldsService->getOptions());
+            $this->getServiceManager()->register(LtiResultCustomFieldsService::SERVICE_ID, $ltiResultCustomFieldsService);
+            $this->setVersion('3.8.0');
+        }
     }
 }
