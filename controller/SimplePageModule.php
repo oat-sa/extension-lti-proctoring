@@ -23,6 +23,7 @@ use oat\generis\model\OntologyAwareTrait;
 use oat\ltiDeliveryProvider\model\LtiLaunchDataService;
 use oat\ltiProctoring\model\delivery\ProctorService;
 use oat\tao\model\theme\ThemeService;
+use oat\taoLti\models\classes\LtiService;
 use oat\taoLti\models\classes\theme\LtiHeadless;
 
 /**
@@ -41,31 +42,44 @@ abstract class SimplePageModule extends \tao_actions_SinglePageModule
      * Retrieve the data from the url and make the base initialization
      *
      * @return void
+     * @throws \common_exception_Error
+     * @throws \oat\taoLti\models\classes\LtiException
      */
     protected function defaultData()
     {
         parent::defaultData();
         $this->setData('showControls', $this->showControls());
         
-        $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
+        $launchData = LtiService::singleton()->getLtiSession()->getLaunchData();
         if($launchData->hasReturnUrl()){
             $this->setData('exit', $launchData->getReturnUrl());
         }
 
     }
 
+    /**
+     * @return mixed
+     * @throws \common_exception_Error
+     * @throws \oat\taoLti\models\classes\LtiException
+     */
     protected function getCurrentDelivery()
     {
-        $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
+        $launchData =LtiService::singleton()->getLtiSession()->getLaunchData();
         /** @var LtiLaunchDataService $service */
         $ltiLaunchDataService = $this->getServiceManager()->get(LtiLaunchDataService::SERVICE_ID);
         $delivery = $ltiLaunchDataService->findDeliveryFromLaunchData($launchData);
         return $delivery;
     }
 
+    /**
+     * @return mixed|string
+     * @throws \common_exception_Error
+     * @throws \oat\taoLti\models\classes\LtiException
+     * @throws \oat\taoLti\models\classes\LtiVariableMissingException
+     */
     protected function getDefaultTag()
     {
-        $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
+        $launchData = LtiService::singleton()->getLtiSession()->getLaunchData();
         return $launchData->hasVariable(ProctorService::CUSTOM_TAG) ? $launchData->getVariable(ProctorService::CUSTOM_TAG) : '';
     }
 
@@ -91,6 +105,14 @@ abstract class SimplePageModule extends \tao_actions_SinglePageModule
         return false;
     }
 
+    /**
+     * @param string $scope
+     * @param array $data
+     * @param string $template
+     * @param string $extension
+     * @throws \common_exception_Error
+     * @throws \oat\taoLti\models\classes\LtiException
+     */
     protected function composeView($scope = '', $data = array(), $template = '', $extension = '')
     {
         $this->setExitUrl();
@@ -98,9 +120,13 @@ abstract class SimplePageModule extends \tao_actions_SinglePageModule
         parent::composeView($scope, $data, $template, $extension);
     }
 
+    /**
+     * @throws \common_exception_Error
+     * @throws \oat\taoLti\models\classes\LtiException
+     */
     private function setExitUrl()
     {
-        $launchData = \taoLti_models_classes_LtiService::singleton()->getLtiSession()->getLaunchData();
+        $launchData = LtiService::singleton()->getLtiSession()->getLaunchData();
 
         if($launchData->hasReturnUrl()){
             $exitUrl = $launchData->getReturnUrl();

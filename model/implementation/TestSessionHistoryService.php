@@ -19,6 +19,7 @@
 
 namespace oat\ltiProctoring\model\implementation;
 
+use oat\taoLti\models\classes\TaoLtiSession;
 use oat\taoProctoring\model\implementation\TestSessionHistoryService as TestSessionHistoryServiceProctoring;
 
 /**
@@ -30,13 +31,15 @@ class TestSessionHistoryService extends TestSessionHistoryServiceProctoring
 {
     /**
      * Gets the url that leads to the page listing the history
+     *
      * @param $delivery
      * @return string
+     * @throws \common_exception_Error
      */
     public function getHistoryUrl($delivery = null)
     {
         $session = \common_session_SessionManager::getSession();
-        if ($session instanceof \taoLti_models_classes_TaoLtiSession) {
+        if ($session instanceof TaoLtiSession) {
             $params = [];
             if ($delivery) {
                 if ($delivery instanceof \core_kernel_classes_Resource) {
@@ -54,11 +57,12 @@ class TestSessionHistoryService extends TestSessionHistoryServiceProctoring
      * Gets the back url that returns to the page listing the sessions
      * @param $delivery
      * @return string
+     * @throws \common_exception_Error
      */
     public function getBackUrl($delivery = null)
     {
         $session = \common_session_SessionManager::getSession();
-        if ($session instanceof \taoLti_models_classes_TaoLtiSession) {
+        if ($session instanceof TaoLtiSession) {
             $params = [];
             if ($delivery) {
                 if ($delivery instanceof \core_kernel_classes_Resource) {
