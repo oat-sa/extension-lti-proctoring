@@ -37,10 +37,10 @@ return array(
     'label' => 'LTI Proctoring',
     'description' => 'Grants access to the proctoring functionalities using LTI',
     'license' => 'GPL-2.0',
-    'version' => '3.6.1',
+    'version' => '3.6.2',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
-        'taoLti' => '>=3.4.4',
+        'taoLti' => '>=4.2.0',
         'taoProctoring' => '>=7.12.0',
         'ltiDeliveryProvider' => '>=3.9.0',
     ),
