@@ -19,6 +19,9 @@
  */
 namespace oat\ltiProctoring\model\delivery;
 
+use oat\taoLti\models\classes\LtiException;
+use oat\taoLti\models\classes\LtiLaunchData;
+use oat\taoLti\models\classes\TaoLtiSession;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationService;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
@@ -38,18 +41,24 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
     /**
      * (non-PHPdoc)
      * @see \oat\taoProctoring\model\authorization\TestTakerAuthorizationService::isProctored()
+     * @param $deliveryId
+     * @param User $user
+     * @return bool|mixed
+     * @throws LtiException
+     * @throws \common_exception_Error
+     * @throws \oat\taoLti\models\classes\LtiVariableMissingException
      */
     public function isProctored($deliveryId, User $user)
     {
         $proctored = parent::isProctored($deliveryId, $user);
         $currentSession = \common_session_SessionManager::getSession();
-        if ($currentSession instanceof \taoLti_models_classes_TaoLtiSession) {
-            /** @var \taoLti_models_classes_LtiLaunchData $launchData */
+        if ($currentSession instanceof TaoLtiSession) {
+            /** @var LtiLaunchData $launchData */
             $launchData = \common_session_SessionManager::getSession()->getLaunchData();
             if ($launchData->hasVariable(self::CUSTOM_LTI_PROCTORED)) {
                 $var = mb_strtolower($launchData->getVariable(self::CUSTOM_LTI_PROCTORED));
                 if ($var !== 'true' && $var !== 'false') {
-                    throw new \taoLti_models_classes_LtiException(
+                    throw new LtiException(
                         'Wrong value of `'.self::CUSTOM_LTI_PROCTORED.'` variable.',
                         LtiErrorMessage::ERROR_INVALID_PARAMETER
                     );
@@ -63,11 +72,14 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
     /**
      * (non-PHPdoc)
      * @see \oat\taoProctoring\model\authorization\TestTakerAuthorizationService::throwUnAuthorizedException()
+     * @param DeliveryExecution $deliveryExecution
+     * @throws UnAuthorizedException
+     * @throws \common_exception_Error
      */
     protected function throwUnAuthorizedException(DeliveryExecution $deliveryExecution)
     {
         $currentSession = \common_session_SessionManager::getSession();
-        if ($currentSession instanceof \taoLti_models_classes_TaoLtiSession) {
+        if ($currentSession instanceof TaoLtiSession) {
             $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'ltiProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
         } else {
             $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'taoProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));

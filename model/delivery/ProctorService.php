@@ -20,11 +20,12 @@
 
 namespace oat\ltiProctoring\model\delivery;
 
+use oat\taoLti\models\classes\LtiLaunchData;
+use oat\taoLti\models\classes\TaoLtiSession;
 use oat\taoLti\models\classes\user\LtiUser;
 use oat\taoProctoring\model\ProctorService as DefaultProctorService;
 use oat\oatbox\user\User;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
-use \taoLti_models_classes_LtiLaunchData as LtiLaunchData;
 
 /**
  * Delivery Service for proctoring via LTI
@@ -42,6 +43,9 @@ class ProctorService extends DefaultProctorService
      * @param null $context
      * @param array $options
      * @return array
+     * @throws \common_exception_Error
+     * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
+     * @throws \oat\taoLti\models\classes\LtiVariableMissingException
      */
     public function getProctorableDeliveryExecutions(User $proctor, $delivery = null, $context = null, $options = [])
     {
@@ -62,8 +66,8 @@ class ProctorService extends DefaultProctorService
 
         $criteria = $this->getCriteria($delivery, $context, $options);
         $currentSession = \common_session_SessionManager::getSession();
-        if ($currentSession instanceof \taoLti_models_classes_TaoLtiSession) {
-            /** @var \taoLti_models_classes_LtiLaunchData $launchData */
+        if ($currentSession instanceof TaoLtiSession) {
+            /** @var LtiLaunchData $launchData */
             $launchData = $currentSession->getLaunchData();
             if ($launchData->hasVariable(LtiLaunchData::CONTEXT_ID)) {
                 $contextId = $launchData->getVariable(LtiLaunchData::CONTEXT_ID);
@@ -84,6 +88,16 @@ class ProctorService extends DefaultProctorService
         return $monitoringService->find($criteria, $options, true);
     }
 
+    /**
+     * @param User $proctor
+     * @param null $delivery
+     * @param null $context
+     * @param array $options
+     * @return int
+     * @throws \common_exception_Error
+     * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
+     * @throws \oat\taoLti\models\classes\LtiVariableMissingException
+     */
     public function countProctorableDeliveryExecutions(User $proctor, $delivery = null, $context = null, $options = [])
     {
         $monitoringService = $this->getServiceManager()->get(DeliveryMonitoringService::SERVICE_ID);
@@ -101,8 +115,8 @@ class ProctorService extends DefaultProctorService
 
         $criteria = $this->getCriteria($delivery, $context, $options);
         $currentSession = \common_session_SessionManager::getSession();
-        if ($currentSession instanceof \taoLti_models_classes_TaoLtiSession) {
-            /** @var \taoLti_models_classes_LtiLaunchData $launchData */
+        if ($currentSession instanceof TaoLtiSession) {
+            /** @var LtiLaunchData $launchData */
             $launchData = $currentSession->getLaunchData();
             if ($launchData->hasVariable(LtiLaunchData::CONTEXT_ID)) {
                 $contextId = $launchData->getVariable(LtiLaunchData::CONTEXT_ID);

@@ -24,15 +24,15 @@ use oat\ltiProctoring\model\delivery\ProctorService;
 use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
-use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionCreated;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionState;
+use oat\taoLti\models\classes\LtiLaunchData;
+use oat\taoLti\models\classes\TaoLtiSession;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use oat\taoProctoring\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\execution\DeliveryExecutionManagerService;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
 use oat\taoQtiTest\models\runner\time\QtiTimer;
-use taoLti_models_classes_LtiLaunchData as LtiLaunchData;
 use oat\taoLti\models\classes\LtiVariableMissingException;
 
 /**
@@ -46,10 +46,17 @@ class LtiListenerService extends ConfigurableService
 
     const CUSTOM_LTI_EXTENDED_TIME = 'custom_extended_time';
 
+    /**
+     * @param DeliveryExecutionCreated $event
+     * @throws LtiVariableMissingException
+     * @throws \common_exception_Error
+     * @throws \common_exception_NotFound
+     * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
+     */
     public function executionCreated(DeliveryExecutionCreated $event)
     {
         $session = \common_session_SessionManager::getSession();
-        if ($session instanceof \taoLti_models_classes_TaoLtiSession) {
+        if ($session instanceof TaoLtiSession) {
             $deliveryExecution = $event->getDeliveryExecution();
             $executionId = $deliveryExecution->getIdentifier();
             $serviceManager = $this->getServiceManager();
@@ -112,10 +119,17 @@ class LtiListenerService extends ConfigurableService
         }
     }
 
+    /**
+     * @param DeliveryExecutionState $event
+     * @throws LtiVariableMissingException
+     * @throws \common_exception_Error
+     * @throws \common_exception_NotFound
+     * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
+     */
     public function executionStateChanged(DeliveryExecutionState $event)
     {
         $session = \common_session_SessionManager::getSession();
-        if ($session instanceof \taoLti_models_classes_TaoLtiSession) {
+        if ($session instanceof TaoLtiSession) {
             $launchData = $session->getLaunchData();
             $deliveryExecution = $event->getDeliveryExecution();
             if ($event->getState() == DeliveryExecution::STATE_ACTIVE &&
@@ -143,10 +157,12 @@ class LtiListenerService extends ConfigurableService
 
     /**
      * Check extended time from LTI session
-     * @param \taoLti_models_classes_LtiLaunchData $launchData
+     *
+     * @param LtiLaunchData $launchData
      * @param DeliveryExecutionInterface $deliveryExecution
+     * @throws LtiVariableMissingException
      */
-    public function checkExtendedTime(\taoLti_models_classes_LtiLaunchData $launchData, DeliveryExecutionInterface $deliveryExecution)
+    public function checkExtendedTime(LtiLaunchData $launchData, DeliveryExecutionInterface $deliveryExecution)
     {
         $extendedTime = 0;
         if ($launchData->hasVariable(self::CUSTOM_LTI_EXTENDED_TIME)) {
@@ -159,6 +175,10 @@ class LtiListenerService extends ConfigurableService
     /**
      * @param DeliveryExecutionInterface $deliveryExecution
      * @param $extendedTime
+     * @throws \common_exception_Error
+     * @throws \common_exception_MissingParameter
+     * @throws \common_exception_NotFound
+     * @throws \oat\taoTests\models\runner\time\InvalidStorageException
      */
     public function updateDeliveryExtendedTime(DeliveryExecutionInterface $deliveryExecution, $extendedTime)
     {
@@ -182,10 +202,10 @@ class LtiListenerService extends ConfigurableService
 
     /**
      * Get LTI launch parameters which name starts from 'custom_'
-     * @param \taoLti_models_classes_TaoLtiSession $session
+     * @param TaoLtiSession $session
      * @return array
      */
-    protected function getLtiCustomParams(\taoLti_models_classes_TaoLtiSession $session)
+    protected function getLtiCustomParams(TaoLtiSession $session)
     {
         $ltiParameters = array_filter(
             $session->getLaunchData()->getVariables(),
