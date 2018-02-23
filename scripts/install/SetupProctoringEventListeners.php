@@ -33,11 +33,14 @@ class SetupProctoringEventListeners extends InstallAction
 {
     /**
      * @param $params
+     * @return \common_report_Report
      */
     public function __invoke($params)
     {
         // monitoring cache
         $this->registerEvent(DeliveryExecutionCreated::class, [LtiListenerService::SERVICE_ID, 'executionCreated']);
         $this->registerEvent(DeliveryExecutionState::class, [LtiListenerService::SERVICE_ID, 'executionStateChanged']);
+
+        return \common_report_Report::createSuccess("successfull ");
     }
 }
