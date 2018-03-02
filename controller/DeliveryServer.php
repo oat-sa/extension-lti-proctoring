@@ -31,6 +31,7 @@ use oat\taoLti\models\classes\LtiService;
 use oat\ltiDeliveryProvider\model\execution\LtiDeliveryExecutionService;
 use oat\taoLti\models\classes\LtiException;
 use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
+use oat\taoLti\models\classes\LtiVariableMissingException;
 
 /**
  * Override the default DeliveryServer Controller
@@ -125,7 +126,8 @@ class DeliveryServer extends ProctoringDeliveryServer
 
     /**
      * @return DeliveryExecution
-     * @throws
+     * @throws LtiException if given delivery exection does not correspond to current lti session
+     * @throws \Exception
      */
     protected function getCurrentDeliveryExecution()
     {
