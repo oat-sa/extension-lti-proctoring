@@ -21,13 +21,17 @@
 
 namespace oat\ltiProctoring\controller;
 
-use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoLti\models\classes\LtiMessages\LtiMessage;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
 use oat\ltiDeliveryProvider\model\LTIDeliveryTool;
+use oat\taoLti\models\classes\LtiService;
+use oat\ltiDeliveryProvider\model\execution\LtiDeliveryExecutionService;
+use oat\taoLti\models\classes\LtiException;
+use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
+use oat\taoLti\models\classes\LtiVariableMissingException;
 
 /**
  * Override the default DeliveryServer Controller
@@ -52,12 +56,7 @@ class DeliveryServer extends ProctoringDeliveryServer
      */
     public function finishDeliveryExecution()
     {
-        $deliveryExecution = null;
-        if ($this->hasRequestParameter('deliveryExecution')) {
-            $deliveryExecution = ServiceProxy::singleton()->getDeliveryExecution(
-                $this->getRequestParameter('deliveryExecution')
-            );
-        }
+        $deliveryExecution = $this->getCurrentDeliveryExecution();
         if ($deliveryExecution->getState()->getUri() == ProctoredDeliveryExecution::STATE_PAUSED) {
             $redirectUrl = _url('awaitingAuthorization', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getIdentifier()]);
         } else {
@@ -122,6 +121,32 @@ class DeliveryServer extends ProctoringDeliveryServer
         $deliveryExecution = $this->getCurrentDeliveryExecution();
         return _url('finishDeliveryExecution', 'DeliveryServer', 'ltiProctoring',
             ['deliveryExecution' => $deliveryExecution->getIdentifier()]
+        );
+    }
+
+    /**
+     * @return DeliveryExecution
+     * @throws LtiException if given delivery exection does not correspond to current lti session
+     * @throws \Exception
+     */
+    protected function getCurrentDeliveryExecution()
+    {
+        $deliveryExecution = parent::getCurrentDeliveryExecution();
+        $link = LtiService::singleton()->getLtiSession()->getLtiLinkResource();
+        $user = \common_session_SessionManager::getSession()->getUser();
+        /** @var LtiDeliveryExecutionService $deliveryExecutionService */
+        $deliveryExecutionService = $this->getServiceLocator()->get(LtiDeliveryExecutionService::SERVICE_ID);
+        $linkedDeliveryExecutions = $deliveryExecutionService->getLinkedDeliveryExecutions($deliveryExecution->getDelivery(), $link, $user->getIdentifier());
+
+        foreach ($linkedDeliveryExecutions as $linkedDeliveryExecution) {
+            if ($linkedDeliveryExecution->getIdentifier() === $deliveryExecution->getIdentifier()) {
+                return $deliveryExecution;
+            }
+        }
+
+        throw new LtiException(
+            'Delivery execution identifier is not linked with current resource_link_id',
+            LtiErrorMessage::ERROR_INVALID_PARAMETER
         );
     }
 }
