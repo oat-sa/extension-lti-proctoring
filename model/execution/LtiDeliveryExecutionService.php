@@ -35,21 +35,6 @@ class LtiDeliveryExecutionService extends BaseImplementation
     const LTI_USER_NAME = 'custom_username';
     
     /**
-     * @inheritdoc
-     */
-    public function isFinished(DeliveryExecution $deliveryExecution)
-    {
-        return in_array(
-            $deliveryExecution->getState()->getUri(),
-            [
-                ProctoredDeliveryExecution::STATE_FINISHIED,
-                ProctoredDeliveryExecution::STATE_TERMINATED,
-                ProctoredDeliveryExecution::STATE_CANCELED,
-            ]
-        );
-    }
-
-    /**
      * Returns an array of DeliveryExecution
      *
      * @param \core_kernel_classes_Resource $delivery
