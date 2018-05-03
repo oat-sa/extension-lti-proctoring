@@ -30,6 +30,8 @@ use oat\taoProctoring\model\implementation\TestRunnerMessageService;
 use oat\taoProctoring\model\ProctorService;
 use oat\taoProctoring\model\ProctorServiceDelegator;
 use oat\taoProctoring\model\ProctorServiceInterface;
+use oat\taoDelivery\model\AttemptServiceInterface;
+use oat\ltiProctoring\model\AttemptService;
 
 class Updater extends \common_ext_ExtensionUpdater
 {
@@ -194,5 +196,13 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('3.5.0', '3.9.0');
+
+        if ($this->isVersion('3.9.0')) {
+            $this->getServiceManager()->register(
+                AttemptServiceInterface::SERVICE_ID,
+                new AttemptService([])
+            );
+            $this->setVersion('3.10.0');
+        }
     }
 }
