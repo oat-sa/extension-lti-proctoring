@@ -22,7 +22,6 @@ namespace oat\ltiProctoring\scripts\install;
 
 use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
 use oat\oatbox\extension\InstallAction;
-use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationInterface;
 use oat\ltiProctoring\model\delivery\LtiTestTakerAuthorizationService;
 use oat\oatbox\service\ServiceNotFoundException;
@@ -42,10 +41,6 @@ class RegisterServices extends InstallAction
      */
     public function __invoke($params)
     {
-        $service = $this->getServiceManager()->get(LtiDeliveryExecutionService::SERVICE_ID);
-        $newService = new LtiDeliveryExecutionService($service->getOptions());
-        $this->registerService(LtiDeliveryExecutionService::SERVICE_ID, $newService);
-        
         $service = new TestSessionHistoryService();
         $this->registerService(TestSessionHistoryService::SERVICE_ID, $service);
 

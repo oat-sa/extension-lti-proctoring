@@ -6,7 +6,6 @@ use oat\ltiProctoring\controller\DeliveryServer;
 use oat\ltiProctoring\controller\Reporting;
 use oat\ltiProctoring\model\delivery\ProctorService as ltiProctorService;
 use oat\ltiProctoring\model\LtiListenerService;
-use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
 use oat\ltiProctoring\scripts\install\SetupTestSessionHistory;
 use oat\oatbox\event\EventManager;
@@ -54,8 +53,6 @@ class Updater extends \common_ext_ExtensionUpdater
         $this->skip('0.2.0', '0.2.1');
 
         if ($this->isVersion('0.2.1')) {
-            $service = new LtiDeliveryExecutionService([]);
-            $this->getServiceManager()->register(LtiDeliveryExecutionService::SERVICE_ID, $service);
             $this->setVersion('0.3.0');
         }
 
@@ -193,6 +190,6 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('3.5.0');
         }
 
-        $this->skip('3.5.0', '3.9.0');
+        $this->skip('3.5.0', '3.10.0');
     }
 }
