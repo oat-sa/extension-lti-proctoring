@@ -45,6 +45,7 @@ class LtiListenerService extends ConfigurableService
     const SERVICE_ID = 'ltiProctoring/LtiListener';
 
     const CUSTOM_LTI_EXTENDED_TIME = 'custom_extended_time';
+    const LTI_USER_NAME = 'custom_username';
 
     /**
      * @param DeliveryExecutionCreated $event
@@ -107,9 +108,9 @@ class LtiListenerService extends ConfigurableService
                 array_diff_key($session->getLaunchData()->getVariables(), $ltiCustomParameters)
             );
 
-            if ($launchData->hasVariable(LtiDeliveryExecutionService::LTI_USER_NAME)) {
-                $ltiUserName = $launchData->getVariable(LtiDeliveryExecutionService::LTI_USER_NAME);
-                $data->update(LtiDeliveryExecutionService::LTI_USER_NAME, $ltiUserName);
+            if ($launchData->hasVariable(self::LTI_USER_NAME)) {
+                $ltiUserName = $launchData->getVariable(self::LTI_USER_NAME);
+                $data->update(self::LTI_USER_NAME, $ltiUserName);
             }
 
             $success = $monitoringService->save($data);
@@ -133,15 +134,15 @@ class LtiListenerService extends ConfigurableService
             $launchData = $session->getLaunchData();
             $deliveryExecution = $event->getDeliveryExecution();
             if ($event->getState() == DeliveryExecution::STATE_ACTIVE &&
-                $launchData->hasVariable(LtiDeliveryExecutionService::LTI_USER_NAME)
+                $launchData->hasVariable(self::LTI_USER_NAME)
             ) {
-                $ltiUserName = $launchData->getVariable(LtiDeliveryExecutionService::LTI_USER_NAME);
+                $ltiUserName = $launchData->getVariable(self::LTI_USER_NAME);
                 $executionId = $deliveryExecution->getIdentifier();
                 $serviceManager = $this->getServiceManager();
 
                 $monitoringService = $serviceManager->get(DeliveryMonitoringService::SERVICE_ID);
                 $data = $monitoringService->getData($deliveryExecution);
-                $data->update(LtiDeliveryExecutionService::LTI_USER_NAME, $ltiUserName);
+                $data->update(self::LTI_USER_NAME, $ltiUserName);
 
                 $success = $monitoringService->save($data);
                 if (!$success) {

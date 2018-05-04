@@ -6,7 +6,6 @@ use oat\ltiProctoring\controller\DeliveryServer;
 use oat\ltiProctoring\controller\Reporting;
 use oat\ltiProctoring\model\delivery\ProctorService as ltiProctorService;
 use oat\ltiProctoring\model\LtiListenerService;
-use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
 use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
 use oat\ltiProctoring\scripts\install\SetupTestSessionHistory;
 use oat\oatbox\event\EventManager;
@@ -30,6 +29,8 @@ use oat\taoProctoring\model\implementation\TestRunnerMessageService;
 use oat\taoProctoring\model\ProctorService;
 use oat\taoProctoring\model\ProctorServiceDelegator;
 use oat\taoProctoring\model\ProctorServiceInterface;
+use oat\ltiDeliveryProvider\model\execution\LtiDeliveryExecutionService;
+use oat\ltiDeliveryProvider\model\execution\implementation\LtiDeliveryExecutionService as OntologyLtiDeliveryExecutionService;
 
 class Updater extends \common_ext_ExtensionUpdater
 {
@@ -54,8 +55,6 @@ class Updater extends \common_ext_ExtensionUpdater
         $this->skip('0.2.0', '0.2.1');
 
         if ($this->isVersion('0.2.1')) {
-            $service = new LtiDeliveryExecutionService([]);
-            $this->getServiceManager()->register(LtiDeliveryExecutionService::SERVICE_ID, $service);
             $this->setVersion('0.3.0');
         }
 
@@ -193,6 +192,17 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('3.5.0');
         }
 
-        $this->skip('3.5.0', '3.8.1');
+        $this->skip('3.5.0', '3.9.0');
+
+        if ($this->isVersion('3.9.0')) {
+            $lLtiDeliveryExecutionService = $this->safeLoadService(LtiDeliveryExecutionService::SERVICE_ID);
+            if (!$lLtiDeliveryExecutionService instanceof LtiDeliveryExecutionService) {
+                $this->getServiceManager()->register(
+                    LtiDeliveryExecutionService::SERVICE_ID,
+                    new OntologyLtiDeliveryExecutionService($lLtiDeliveryExecutionService->getOptions())
+                );
+            }
+            $this->setVersion('4.0.0');
+        }
     }
 }
