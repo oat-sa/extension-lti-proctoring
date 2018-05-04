@@ -29,6 +29,8 @@ use oat\taoProctoring\model\implementation\TestRunnerMessageService;
 use oat\taoProctoring\model\ProctorService;
 use oat\taoProctoring\model\ProctorServiceDelegator;
 use oat\taoProctoring\model\ProctorServiceInterface;
+use oat\ltiDeliveryProvider\model\execution\LtiDeliveryExecutionService;
+use oat\ltiDeliveryProvider\model\execution\implementation\LtiDeliveryExecutionService as OntologyLtiDeliveryExecutionService;
 
 class Updater extends \common_ext_ExtensionUpdater
 {
@@ -190,6 +192,15 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('3.5.0');
         }
 
-        $this->skip('3.5.0', '3.10.0');
+        $this->skip('3.5.0', '3.9.0');
+
+        if ($this->isVersion('3.9.0')) {
+            $lLtiDeliveryExecutionService = $this->getServiceManager()->get(LtiDeliveryExecutionService::SERVICE_ID);
+            $this->getServiceManager()->register(
+                LtiDeliveryExecutionService::SERVICE_ID,
+                new OntologyLtiDeliveryExecutionService($lLtiDeliveryExecutionService->getOptions())
+            );
+            $this->setVersion('3.10.0');
+        }
     }
 }
