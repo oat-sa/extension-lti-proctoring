@@ -196,10 +196,12 @@ class Updater extends \common_ext_ExtensionUpdater
 
         if ($this->isVersion('3.9.0')) {
             $lLtiDeliveryExecutionService = $this->safeLoadService(LtiDeliveryExecutionService::SERVICE_ID);
-            $this->getServiceManager()->register(
-                LtiDeliveryExecutionService::SERVICE_ID,
-                new OntologyLtiDeliveryExecutionService($lLtiDeliveryExecutionService->getOptions())
-            );
+            if (!$lLtiDeliveryExecutionService instanceof LtiDeliveryExecutionService) {
+                $this->getServiceManager()->register(
+                    LtiDeliveryExecutionService::SERVICE_ID,
+                    new OntologyLtiDeliveryExecutionService($lLtiDeliveryExecutionService->getOptions())
+                );
+            }
             $this->setVersion('4.0.0');
         }
     }
