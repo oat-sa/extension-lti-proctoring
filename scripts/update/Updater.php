@@ -195,12 +195,12 @@ class Updater extends \common_ext_ExtensionUpdater
         $this->skip('3.5.0', '3.9.0');
 
         if ($this->isVersion('3.9.0')) {
-            $lLtiDeliveryExecutionService = $this->getServiceManager()->get(LtiDeliveryExecutionService::SERVICE_ID);
+            $lLtiDeliveryExecutionService = $this->safeLoadService(LtiDeliveryExecutionService::SERVICE_ID);
             $this->getServiceManager()->register(
                 LtiDeliveryExecutionService::SERVICE_ID,
                 new OntologyLtiDeliveryExecutionService($lLtiDeliveryExecutionService->getOptions())
             );
-            $this->setVersion('3.10.0');
+            $this->setVersion('4.0.0');
         }
     }
 }
