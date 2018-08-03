@@ -22,7 +22,7 @@ namespace oat\ltiProctoring\controller;
 use oat\generis\model\OntologyAwareTrait;
 use oat\ltiDeliveryProvider\model\LtiLaunchDataService;
 use oat\ltiProctoring\model\delivery\ProctorService;
-use oat\tao\model\theme\ThemeService;
+use oat\tao\model\theme\ThemeServiceInterface;
 use oat\taoLti\models\classes\LtiService;
 use oat\taoLti\models\classes\theme\LtiHeadless;
 
@@ -98,8 +98,8 @@ abstract class SimplePageModule extends \tao_actions_SinglePageModule
      * @return boolean
      */
     protected function showControls() {
-        $themeService = $this->getServiceManager()->get(ThemeService::SERVICE_ID);
-        if ($themeService instanceof ThemeService || $themeService instanceof LtiHeadless) {
+        $themeService = $this->getServiceManager()->get(ThemeServiceInterface::SERVICE_ID);
+        if ($themeService instanceof ThemeServiceInterface || $themeService instanceof LtiHeadless) {
             return !$themeService->isHeadless();
         }
         return false;
