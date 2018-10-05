@@ -1,52 +1,43 @@
+/**
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; under version 2
+ * of the License (non-upgradable).
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ * Copyright (c) 2014-2018 (original work) Open Assessment Technologies SA;
+ */
+
+/**
+ * configure the extension bundles
+ * @author Bertrand Chevrier <bertrand@taotesting.com>
+ */
 module.exports = function(grunt) {
+    'use strict';
 
-    var requirejs   = grunt.config('requirejs') || {};
-    var clean       = grunt.config('clean') || {};
-    var copy        = grunt.config('copy') || {};
-
-    var root        = grunt.option('root');
-    var libs        = grunt.option('mainlibs');
-    var ext         = require(root + '/tao/views/build/tasks/helpers/extensions')(grunt, root);
-    var out         = 'output';
-
-    /**
-     * Remove bundled and bundling files
-     */
-    clean.ltiproctoringbundle = [out];
-
-    /**
-     * Compile tao files into a bundle
-     */
-    requirejs.ltiproctoringbundle = {
-        options: {
-            baseUrl : '../js',
-            dir : out,
-            mainConfigFile : './config/requirejs.build.js',
-            paths : {
-                'ltiProctoring' : root + '/ltiProctoring/views/js'
-            },
-            modules : [{
-                name: 'ltiProctoring/controller/routes',
-                include : ext.getExtensionsControllers(['ltiProctoring']),
-                exclude: ['mathJax'].concat(libs)
-            }]
+    grunt.config.merge({
+        bundle : {
+            ltiproctoring : {
+                options : {
+                    extension : 'ltiProctoring',
+                    outputDir : 'loader',
+                    bundles : [{
+                        name : 'ltiProctoring',
+                        default : true
+                    }]
+                }
+            }
         }
-    };
-
-    /**
-     * copy the bundles to the right place
-     */
-    copy.ltiproctoringbundle = {
-        files: [
-            { src: [out + '/ltiProctoring/controller/routes.js'],  dest: root + '/ltiProctoring/views/js/controllers.min.js' },
-            { src: [out + '/ltiProctoring/controller/routes.js.map'],  dest: root + '/ltiProctoring/views/js/controllers.min.js.map' }
-        ]
-    };
-
-    grunt.config('clean', clean);
-    grunt.config('requirejs', requirejs);
-    grunt.config('copy', copy);
+    });
 
     // bundle task
-    grunt.registerTask('ltiproctoringbundle', ['clean:ltiproctoringbundle', 'requirejs:ltiproctoringbundle', 'copy:ltiproctoringbundle']);
+    grunt.registerTask('ltiproctoringbundle', ['bundle:ltiproctoring']);
 };
