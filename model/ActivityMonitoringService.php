@@ -68,7 +68,8 @@ class ActivityMonitoringService extends BaseActivityMonitoringService
         $queue = __('Turned off');
         $actions = $actionQueue->getOption(ActionQueue::OPTION_ACTIONS);
         if (isset($actions[GetActiveDeliveryExecution::class])) {
-            if ($actions[GetActiveDeliveryExecution::class][ActionQueue::ACTION_PARAM_LIMIT] > 0) {
+            $limit = array_sum($actions[GetActiveDeliveryExecution::class]['restrictions']);
+            if ($limit > 0) {
                 $queue = $actionQueue->getPosition(new GetActiveDeliveryExecution());
             }
         }
