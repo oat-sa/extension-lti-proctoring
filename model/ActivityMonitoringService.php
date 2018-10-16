@@ -64,11 +64,12 @@ class ActivityMonitoringService extends BaseActivityMonitoringService
     {
         /** @var InstantActionQueue $actionQueue */
         $actionQueue = $this->getServiceLocator()->get(ActionQueue::SERVICE_ID);
+        $activeDeliveryExecution = new GetActiveDeliveryExecution();
 
         $queue = __('Turned off');
-        $limit = $actionQueue->getLimits(new GetActiveDeliveryExecution());
+        $limit = $actionQueue->getLimits($activeDeliveryExecution);
         if ($limit > 0) {
-            $queue = $actionQueue->getPosition(new GetActiveDeliveryExecution());
+            $queue = $actionQueue->getPosition($activeDeliveryExecution);
         }
 
         return $queue;
