@@ -63,14 +63,13 @@ class ActivityMonitoringService extends BaseActivityMonitoringService
     protected function getLoginQueueLength()
     {
         /** @var InstantActionQueue $actionQueue */
-        $actionQueue = $this->getServiceManager()->get(ActionQueue::SERVICE_ID);
+        $actionQueue = $this->getServiceLocator()->get(ActionQueue::SERVICE_ID);
+        $activeDeliveryExecution = new GetActiveDeliveryExecution();
 
         $queue = __('Turned off');
-        $actions = $actionQueue->getOption(ActionQueue::OPTION_ACTIONS);
-        if (isset($actions[GetActiveDeliveryExecution::class])) {
-            if ($actions[GetActiveDeliveryExecution::class][ActionQueue::ACTION_PARAM_LIMIT] > 0) {
-                $queue = $actionQueue->getPosition(new GetActiveDeliveryExecution());
-            }
+        $limit = $actionQueue->getLimits($activeDeliveryExecution);
+        if ($limit > 0) {
+            $queue = $actionQueue->getPosition($activeDeliveryExecution);
         }
 
         return $queue;
