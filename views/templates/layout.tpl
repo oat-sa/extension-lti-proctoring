@@ -25,7 +25,7 @@ $hasVersionWarning = empty($_COOKIE['versionWarning'])
     <link rel="stylesheet" href="<?= Template::css('proctoring.css', 'taoProctoring') ?>"/>
     <link rel="stylesheet" href="<?= Layout::getThemeStylesheet(Theme::CONTEXT_FRONTOFFICE) ?>"/>
     <link rel="shortcut icon" href="<?= Template::img('favicon.ico', 'tao') ?>"/>
-    <?= Layout::getAmdLoader(Template::js('loader/app.min.js', 'tao'), 'controller/app', get_data('client_params')) ?>
+    <?= Layout::getAmdLoader(Template::js('loader/tao.min.js', 'tao'), 'controller/app', get_data('client_params')) ?>
 </head>
 <body class="proctoring-scope">
 <?php Template::inc('blocks/requirement-check.tpl', 'tao'); ?>
