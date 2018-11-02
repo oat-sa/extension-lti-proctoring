@@ -20,6 +20,7 @@
 namespace oat\ltiProctoring\model\implementation;
 
 use oat\taoLti\models\classes\TaoLtiSession;
+use oat\taoLti\models\classes\user\LtiUserService;
 use oat\taoProctoring\model\implementation\TestSessionHistoryService as TestSessionHistoryServiceProctoring;
 
 /**
@@ -73,5 +74,18 @@ class TestSessionHistoryService extends TestSessionHistoryServiceProctoring
             return _url('index', 'Monitor', 'ltiProctoring', $params);    
         }
         return parent::getBackUrl($delivery);
+    }
+
+    /**
+     * @param $userId
+     * @return string
+     */
+    protected function getActorName($userId)
+    {
+        /** @var LtiUserService $ltiUserService */
+        $ltiUserService = $this->getServiceLocator()->get(LtiUserService::SERVICE_ID);
+        $userData = $ltiUserService->getUserDataFromId($userId);
+
+        return $ltiUserService->getUserName($userData);
     }
 }
