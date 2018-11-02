@@ -81,7 +81,7 @@ class TestSessionHistoryService extends TestSessionHistoryServiceProctoring
      * @param $userId
      * @return string
      */
-    protected function getActor($userId)
+    protected function getActorName($userId)
     {
         /** @var LtiUserService $ltiUserService */
         $ltiUserService = $this->getServiceLocator()->get(LtiUserService::SERVICE_ID);
