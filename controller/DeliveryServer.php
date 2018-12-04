@@ -31,7 +31,7 @@ use oat\taoLti\models\classes\LtiService;
 use oat\ltiDeliveryProvider\model\execution\LtiDeliveryExecutionService;
 use oat\taoLti\models\classes\LtiException;
 use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
-use oat\taoLti\models\classes\LtiVariableMissingException;
+use oat\taoQtiTest\models\QtiTestExtractionFailedException;
 
 /**
  * Override the default DeliveryServer Controller
@@ -46,7 +46,12 @@ class DeliveryServer extends ProctoringDeliveryServer
      */
     public function awaitingAuthorization()
     {
-        parent::awaitingAuthorization();
+        try {
+            parent::awaitingAuthorization();
+
+        }catch (QtiTestExtractionFailedException $e) {
+            throw new LtiException($e->getMessage());
+        }
         $deliveryExecution = $this->getCurrentDeliveryExecution();
         $this->setData('cancelUrl', _url('cancelExecution', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getIdentifier()]));
     }
