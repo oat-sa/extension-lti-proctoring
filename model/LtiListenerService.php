@@ -21,8 +21,10 @@
 namespace oat\ltiProctoring\model;
 
 use oat\ltiProctoring\model\delivery\ProctorService;
-use oat\ltiProctoring\model\execution\LtiDeliveryExecutionService;
+use oat\ltiProctoring\model\execution\LtiDeliveryExecutionContext;
 use oat\oatbox\service\ConfigurableService;
+use oat\taoDelivery\model\execution\DeliveryExecutionContext;
+use oat\taoDelivery\model\execution\DeliveryExecutionContextInterface;
 use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionCreated;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionState;
@@ -31,6 +33,7 @@ use oat\taoLti\models\classes\TaoLtiSession;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use oat\taoProctoring\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\execution\DeliveryExecutionManagerService;
+use oat\taoProctoring\model\monitorCache\DeliveryMonitoringData;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
 use oat\taoQtiTest\models\runner\time\QtiTimer;
 use oat\taoLti\models\classes\LtiVariableMissingException;
@@ -72,6 +75,7 @@ class LtiListenerService extends ConfigurableService
             }
 
             $monitoringService = $serviceManager->get(DeliveryMonitoringService::SERVICE_ID);
+            /** @var DeliveryMonitoringData $data */
             $data = $monitoringService->getData($deliveryExecution);
 
             // tag data
@@ -84,6 +88,12 @@ class LtiListenerService extends ConfigurableService
             try {
                 $contextId = $launchData->getVariable(LtiLaunchData::CONTEXT_ID);
                 $data->update(LtiLaunchData::CONTEXT_ID, $contextId);
+
+                $executionContext = $this->createExecutionContext($executionId, $launchData);
+                if ($executionContext instanceof DeliveryExecutionContextInterface) {
+                    $data->setDeliveryExecutionContext($executionContext);
+                }
+
                 $logData[LtiLaunchData::CONTEXT_ID] = $contextId;
                 $logData[LtiLaunchData::CONTEXT_LABEL] = $launchData->getVariable(LtiLaunchData::CONTEXT_LABEL);
             } catch (LtiVariableMissingException $e) {
@@ -216,5 +226,27 @@ class LtiListenerService extends ConfigurableService
             ARRAY_FILTER_USE_KEY
         );
         return $ltiParameters;
+    }
+
+    /**
+     * @param string $executionId
+     * @param LtiLaunchData $launchData
+     * @return DeliveryExecutionContext|null
+     */
+    private function createExecutionContext($executionId, LtiLaunchData $launchData)
+    {
+        $executionContext = null;
+        try {
+            $executionContext = new DeliveryExecutionContext(
+                $executionId,
+                $launchData->getVariable(LtiLaunchData::CONTEXT_ID),
+                LtiDeliveryExecutionContext::EXECUTION_CONTEXT_TYPE,
+                $launchData->getVariable(LtiLaunchData::CONTEXT_LABEL)
+            );
+        } catch (\InvalidArgumentException $e) {
+            $this->logInfo('Delivery execution context object can not be created. Reason: ' . $e->getMessage());
+        }
+
+        return $executionContext;
     }
 }
