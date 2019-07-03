@@ -85,6 +85,9 @@ class TestSessionHistoryService extends TestSessionHistoryServiceProctoring
         /** @var LtiUserService $ltiUserService */
         $ltiUserService = $this->getServiceLocator()->get(LtiUserService::SERVICE_ID);
         $userData = $ltiUserService->getUserDataFromId($userId);
+        if ($userData === null) {
+            $userData = [];
+        }
 
         return $ltiUserService->getUserName($userData);
     }
