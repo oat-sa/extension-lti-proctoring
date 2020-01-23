@@ -20,6 +20,7 @@
 namespace oat\ltiProctoring\model\delivery;
 
 use common_session_Session;
+use oat\ltiDeliveryProvider\model\delivery\DeliveryContainerService;
 use oat\oatbox\session\SessionService;
 use oat\taoLti\models\classes\LtiException;
 use oat\taoLti\models\classes\LtiLaunchData;
@@ -69,6 +70,26 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
         }
         return $proctored;
     }
+
+    /**
+     * @param string $deliveryId
+     * @return bool
+     * @throws \common_Exception
+     */
+    protected function isSecure($deliveryId)
+    {
+        $secureTest = parent::isSecure($deliveryId);
+        $currentSession = $this->getSession();
+        if ($currentSession instanceof TaoLtiSession) {
+            $launchData = $currentSession->getLaunchData();
+            if ($launchData->hasVariable(DeliveryContainerService::CUSTOM_LTI_SECURE)) {
+                $secureTest = $launchData->getVariable(DeliveryContainerService::CUSTOM_LTI_SECURE) === 'true';
+            }
+        }
+
+        return $secureTest;
+    }
+
 
     /**
      * @return common_session_Session

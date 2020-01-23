@@ -42,7 +42,7 @@ return array(
     'requires' => array(
         'tao' => '>=21.0.0',
         'taoLti' => '>=8.6.1',
-        'taoProctoring' => '>=12.7.0',
+        'taoProctoring' => '>=18.2.2',
         'taoDelivery' => '>=12.5.0',
         'ltiDeliveryProvider' => '>=7.0.0',
     ),
