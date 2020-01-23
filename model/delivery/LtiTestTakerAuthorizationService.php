@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,6 +18,7 @@
  * Copyright (c) 2017 (original work) Open Assessment Technologies SA;
  *
  */
+
 namespace oat\ltiProctoring\model\delivery;
 
 use common_session_Session;
@@ -32,6 +34,7 @@ use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
 use oat\oatbox\user\User;
 use oat\taoProctoring\model\DelegatedServiceHandler;
 use oat\taoLti\models\classes\LtiRoles;
+
 /**
  * Manage the Delivery authorization.
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
@@ -61,7 +64,7 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
                 $var = mb_strtolower($launchData->getVariable(self::CUSTOM_LTI_PROCTORED));
                 if ($var !== 'true' && $var !== 'false') {
                     throw new LtiException(
-                        'Wrong value of `'.self::CUSTOM_LTI_PROCTORED.'` variable.',
+                        'Wrong value of `' . self::CUSTOM_LTI_PROCTORED . '` variable.',
                         LtiErrorMessage::ERROR_INVALID_PARAMETER
                     );
                 }
