@@ -19,6 +19,8 @@
  */
 namespace oat\ltiProctoring\model\delivery;
 
+use common_session_Session;
+use oat\oatbox\session\SessionService;
 use oat\taoLti\models\classes\LtiException;
 use oat\taoLti\models\classes\LtiLaunchData;
 use oat\taoLti\models\classes\TaoLtiSession;
@@ -45,16 +47,15 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
      * @param User $user
      * @return bool|mixed
      * @throws LtiException
-     * @throws \common_exception_Error
      * @throws \oat\taoLti\models\classes\LtiVariableMissingException
      */
     public function isProctored($deliveryId, User $user)
     {
         $proctored = parent::isProctored($deliveryId, $user);
-        $currentSession = \common_session_SessionManager::getSession();
+        $currentSession = $this->getSession();
         if ($currentSession instanceof TaoLtiSession) {
             /** @var LtiLaunchData $launchData */
-            $launchData = \common_session_SessionManager::getSession()->getLaunchData();
+            $launchData = $currentSession->getLaunchData();
             if ($launchData->hasVariable(self::CUSTOM_LTI_PROCTORED)) {
                 $var = mb_strtolower($launchData->getVariable(self::CUSTOM_LTI_PROCTORED));
                 if ($var !== 'true' && $var !== 'false') {
@@ -70,6 +71,15 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
     }
 
     /**
+     * @return common_session_Session
+     */
+    private function getSession()
+    {
+        return $this->getServiceLocator()->get(SessionService::SERVICE_ID)->getCurrentSession();
+    }
+
+
+    /**
      * (non-PHPdoc)
      * @see \oat\taoProctoring\model\authorization\TestTakerAuthorizationService::throwUnAuthorizedException()
      * @param DeliveryExecution $deliveryExecution
@@ -78,8 +88,7 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
      */
     protected function throwUnAuthorizedException(DeliveryExecution $deliveryExecution)
     {
-        $currentSession = \common_session_SessionManager::getSession();
-        if ($currentSession instanceof TaoLtiSession) {
+        if ($this->getSession() instanceof TaoLtiSession) {
             $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'ltiProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
         } else {
             $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'taoProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
