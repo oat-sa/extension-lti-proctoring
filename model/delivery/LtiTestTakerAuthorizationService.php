@@ -25,6 +25,7 @@ use common_session_Session;
 use oat\ltiDeliveryProvider\model\delivery\DeliveryContainerService;
 use oat\oatbox\session\SessionService;
 use oat\taoLti\models\classes\LtiException;
+use oat\taoLti\models\classes\LtiInvalidVariableException;
 use oat\taoLti\models\classes\LtiLaunchData;
 use oat\taoLti\models\classes\TaoLtiSession;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationService;
@@ -55,42 +56,46 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
      */
     public function isProctored($deliveryId, User $user)
     {
-        $proctored = parent::isProctored($deliveryId, $user);
-        $currentSession = $this->getSession();
-        if ($currentSession instanceof TaoLtiSession) {
-            /** @var LtiLaunchData $launchData */
-            $launchData = $currentSession->getLaunchData();
-            if ($launchData->hasVariable(self::CUSTOM_LTI_PROCTORED)) {
-                $var = mb_strtolower($launchData->getVariable(self::CUSTOM_LTI_PROCTORED));
-                if ($var !== 'true' && $var !== 'false') {
-                    throw new LtiException(
-                        'Wrong value of `' . self::CUSTOM_LTI_PROCTORED . '` variable.',
-                        LtiErrorMessage::ERROR_INVALID_PARAMETER
-                    );
+        try {
+            $proctored = parent::isProctored($deliveryId, $user);
+            $currentSession = $this->getSession();
+            if ($currentSession instanceof TaoLtiSession) {
+                /** @var LtiLaunchData $launchData */
+                $launchData = $currentSession->getLaunchData();
+                if ($launchData->hasVariable(self::CUSTOM_LTI_PROCTORED)) {
+                    $proctored = $launchData->getBooleanVariable(self::CUSTOM_LTI_PROCTORED);
                 }
-                $proctored = filter_var($var, FILTER_VALIDATE_BOOLEAN);
             }
+
+            return $proctored;
+        } catch (LtiInvalidVariableException $e) {
+            throw new LtiException($e->getMessage(), $e->getCode());
         }
-        return $proctored;
     }
 
     /**
      * @param string $deliveryId
      * @return bool
+     *
+     * @throws LtiException
      * @throws \common_Exception
      */
-    protected function isSecure($deliveryId)
+    public function isSecure($deliveryId)
     {
-        $secureTest = parent::isSecure($deliveryId);
-        $currentSession = $this->getSession();
-        if ($currentSession instanceof TaoLtiSession) {
-            $launchData = $currentSession->getLaunchData();
-            if ($launchData->hasVariable(DeliveryContainerService::CUSTOM_LTI_SECURE)) {
-                $secureTest = $launchData->getVariable(DeliveryContainerService::CUSTOM_LTI_SECURE) === 'true';
+        try {
+            $secureTest = parent::isSecure($deliveryId);
+            $currentSession = $this->getSession();
+            if ($currentSession instanceof TaoLtiSession) {
+                $launchData = $currentSession->getLaunchData();
+                if ($launchData->hasVariable(DeliveryContainerService::CUSTOM_LTI_SECURE)) {
+                    $secureTest = $launchData->getBooleanVariable(DeliveryContainerService::CUSTOM_LTI_SECURE);
+                }
             }
-        }
 
-        return $secureTest;
+            return $secureTest;
+        } catch (LtiInvalidVariableException $e) {
+            throw new LtiException($e->getMessage(), $e->getCode());
+        }
     }
 
 
