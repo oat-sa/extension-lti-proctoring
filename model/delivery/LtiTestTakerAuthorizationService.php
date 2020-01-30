@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,9 +18,14 @@
  * Copyright (c) 2017 (original work) Open Assessment Technologies SA;
  *
  */
+
 namespace oat\ltiProctoring\model\delivery;
 
+use common_session_Session;
+use oat\ltiDeliveryProvider\model\delivery\DeliveryContainerService;
+use oat\oatbox\session\SessionService;
 use oat\taoLti\models\classes\LtiException;
+use oat\taoLti\models\classes\LtiInvalidVariableException;
 use oat\taoLti\models\classes\LtiLaunchData;
 use oat\taoLti\models\classes\TaoLtiSession;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationService;
@@ -29,6 +35,7 @@ use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
 use oat\oatbox\user\User;
 use oat\taoProctoring\model\DelegatedServiceHandler;
 use oat\taoLti\models\classes\LtiRoles;
+
 /**
  * Manage the Delivery authorization.
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
@@ -45,29 +52,61 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
      * @param User $user
      * @return bool|mixed
      * @throws LtiException
-     * @throws \common_exception_Error
      * @throws \oat\taoLti\models\classes\LtiVariableMissingException
      */
     public function isProctored($deliveryId, User $user)
     {
-        $proctored = parent::isProctored($deliveryId, $user);
-        $currentSession = \common_session_SessionManager::getSession();
-        if ($currentSession instanceof TaoLtiSession) {
-            /** @var LtiLaunchData $launchData */
-            $launchData = \common_session_SessionManager::getSession()->getLaunchData();
-            if ($launchData->hasVariable(self::CUSTOM_LTI_PROCTORED)) {
-                $var = mb_strtolower($launchData->getVariable(self::CUSTOM_LTI_PROCTORED));
-                if ($var !== 'true' && $var !== 'false') {
-                    throw new LtiException(
-                        'Wrong value of `'.self::CUSTOM_LTI_PROCTORED.'` variable.',
-                        LtiErrorMessage::ERROR_INVALID_PARAMETER
-                    );
+        try {
+            $proctored = parent::isProctored($deliveryId, $user);
+            $currentSession = $this->getSession();
+            if ($currentSession instanceof TaoLtiSession) {
+                /** @var LtiLaunchData $launchData */
+                $launchData = $currentSession->getLaunchData();
+                if ($launchData->hasVariable(self::CUSTOM_LTI_PROCTORED)) {
+                    $proctored = $launchData->getBooleanVariable(self::CUSTOM_LTI_PROCTORED);
                 }
-                $proctored = filter_var($var, FILTER_VALIDATE_BOOLEAN);
             }
+
+            return $proctored;
+        } catch (LtiInvalidVariableException $e) {
+            throw new LtiException($e->getMessage(), $e->getCode());
         }
-        return $proctored;
     }
+
+    /**
+     * @param string $deliveryId
+     * @return bool
+     *
+     * @throws LtiException
+     * @throws \common_Exception
+     */
+    public function isSecure($deliveryId)
+    {
+        try {
+            $secureTest = parent::isSecure($deliveryId);
+            $currentSession = $this->getSession();
+            if ($currentSession instanceof TaoLtiSession) {
+                $launchData = $currentSession->getLaunchData();
+                if ($launchData->hasVariable(DeliveryContainerService::CUSTOM_LTI_SECURE)) {
+                    $secureTest = $launchData->getBooleanVariable(DeliveryContainerService::CUSTOM_LTI_SECURE);
+                }
+            }
+
+            return $secureTest;
+        } catch (LtiInvalidVariableException $e) {
+            throw new LtiException($e->getMessage(), $e->getCode());
+        }
+    }
+
+
+    /**
+     * @return common_session_Session
+     */
+    private function getSession()
+    {
+        return $this->getServiceLocator()->get(SessionService::SERVICE_ID)->getCurrentSession();
+    }
+
 
     /**
      * (non-PHPdoc)
@@ -78,8 +117,7 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
      */
     protected function throwUnAuthorizedException(DeliveryExecution $deliveryExecution)
     {
-        $currentSession = \common_session_SessionManager::getSession();
-        if ($currentSession instanceof TaoLtiSession) {
+        if ($this->getSession() instanceof TaoLtiSession) {
             $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'ltiProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
         } else {
             $errorPage = _url('awaitingAuthorization', 'DeliveryServer', 'taoProctoring', array('deliveryExecution' => $deliveryExecution->getIdentifier()));
