@@ -45,8 +45,7 @@ class LtiMonitorParametersService extends ConfigurableService
      */
     public function getParameters()
     {
-        $params = [];
-        $params['defaultTag'] = $this->getDefaultTag();
+        $params = ['defaultTag' => $this->getDefaultTag()];
 
         $delivery = $this->getCurrentDelivery();
         if ($delivery !== null) {
