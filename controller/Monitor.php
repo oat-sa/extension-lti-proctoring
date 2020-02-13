@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,6 +19,7 @@
  *
  *
  */
+
 namespace oat\ltiProctoring\controller;
 
 use common_exception_Error;
@@ -27,7 +29,7 @@ use oat\taoLti\models\classes\LtiVariableMissingException;
 
 /**
  * LTI monitoring controller
- * 
+ *
  * @author joel bout
  */
 class Monitor extends SimplePageModule
