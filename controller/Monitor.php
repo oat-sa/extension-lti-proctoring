@@ -44,7 +44,7 @@ class Monitor extends SimplePageModule
     public function index()
     {
         /** @var LtiMonitorParametersService $monitoringParamsService */
-        $monitoringParamsService = $this->getServiceLocator()->get(LtiMonitorParametersService::class);
+        $monitoringParamsService = $this->getServiceLocator()->get(LtiMonitorParametersService::SERVICE_ID);
         $this->setClientRoute(_url('index', 'Monitor', 'taoProctoring', $monitoringParamsService->getParameters()));
         $this->composeView('delegated-view', null, 'pages/index.tpl', 'tao');
     }

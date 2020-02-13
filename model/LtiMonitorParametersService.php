@@ -88,9 +88,7 @@ class LtiMonitorParametersService extends ConfigurableService
      */
     private function getLtiLaunchDataService()
     {
-        /** @var LtiLaunchDataService $service */
-        $service = $this->getServiceLocator()->get(LtiLaunchDataService::SERVICE_ID);
-        return $service;
+        return $this->getServiceLocator()->get(LtiLaunchDataService::SERVICE_ID);
     }
 
     /**
