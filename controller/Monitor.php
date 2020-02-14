@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,30 +19,33 @@
  *
  *
  */
+
 namespace oat\ltiProctoring\controller;
+
+use common_exception_Error;
+use oat\ltiProctoring\model\LtiMonitorParametersService;
+use oat\taoLti\models\classes\LtiException;
+use oat\taoLti\models\classes\LtiVariableMissingException;
 
 /**
  * LTI monitoring controller
- * 
+ *
  * @author joel bout
  */
 class Monitor extends SimplePageModule
 {
     /**
      * Monitoring view of a selected delivery
+     *
+     * @throws common_exception_Error
+     * @throws LtiException
+     * @throws LtiVariableMissingException
      */
     public function index()
     {
-        $delivery = $this->getCurrentDelivery();
-
-        $params = [
-            'defaultTag' => (string)$this->getDefaultTag(),
-        ];
-
-        if (!is_null($delivery)) {
-            $params['delivery'] = $delivery->getUri();
-        }
-        $this->setClientRoute(_url('index', 'Monitor', 'taoProctoring', $params));
+        /** @var LtiMonitorParametersService $monitoringParamsService */
+        $monitoringParamsService = $this->getServiceLocator()->get(LtiMonitorParametersService::SERVICE_ID);
+        $this->setClientRoute(_url('index', 'Monitor', 'taoProctoring', $monitoringParamsService->getParameters()));
         $this->composeView('delegated-view', null, 'pages/index.tpl', 'tao');
     }
 }
