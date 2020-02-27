@@ -22,7 +22,6 @@
 namespace oat\ltiProctoring\model\delivery;
 
 use common_session_Session;
-use oat\ltiDeliveryProvider\model\delivery\DeliveryContainerService;
 use oat\oatbox\session\SessionService;
 use oat\taoLti\models\classes\LtiException;
 use oat\taoLti\models\classes\LtiInvalidVariableException;
@@ -31,7 +30,6 @@ use oat\taoLti\models\classes\TaoLtiSession;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationService;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
-use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
 use oat\oatbox\user\User;
 use oat\taoProctoring\model\DelegatedServiceHandler;
 use oat\taoLti\models\classes\LtiRoles;
@@ -72,32 +70,6 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
             throw new LtiException($e->getMessage(), $e->getCode());
         }
     }
-
-    /**
-     * @param string $deliveryId
-     * @return bool
-     *
-     * @throws LtiException
-     * @throws \common_Exception
-     */
-    public function isSecure($deliveryId)
-    {
-        try {
-            $secureTest = parent::isSecure($deliveryId);
-            $currentSession = $this->getSession();
-            if ($currentSession instanceof TaoLtiSession) {
-                $launchData = $currentSession->getLaunchData();
-                if ($launchData->hasVariable(DeliveryContainerService::CUSTOM_LTI_SECURE)) {
-                    $secureTest = $launchData->getBooleanVariable(DeliveryContainerService::CUSTOM_LTI_SECURE);
-                }
-            }
-
-            return $secureTest;
-        } catch (LtiInvalidVariableException $e) {
-            throw new LtiException($e->getMessage(), $e->getCode());
-        }
-    }
-
 
     /**
      * @return common_session_Session

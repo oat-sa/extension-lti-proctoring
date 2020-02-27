@@ -101,64 +101,6 @@ class LtiTestTakerAuthorizationServiceTest extends TestCase
         $this->object->isProctored($deliveryUri, $user);
     }
 
-    /**
-     * @param string $testRunnerFeatures
-     * @param string $sessionType
-     * @param bool $ltiVarExists
-     * @param bool $ltiVarValue
-     * @param bool $expectedResult
-     *
-     * @dataProvider dataProviderTestIsSecure
-     *
-     * @throws LtiException
-     * @throws \common_Exception
-     */
-    public function testIsSecure($testRunnerFeatures, $sessionType, $ltiVarExists, $ltiVarValue, $expectedResult)
-    {
-        $deliveryId = 'FAKE_DELIVERY_ID';
-
-        $this->mockParentIsSecureBehavior($testRunnerFeatures);
-
-        $ltiVarName = 'custom_secure';
-        $launchDataMock = $this->getLtiLaunchDataMock($ltiVarName, $ltiVarExists, $ltiVarValue);
-        $sessionServiceMock = $this->getSessionServiceMock($sessionType, $launchDataMock);
-
-        $serviceLocatorMock = $this->getServiceLocatorMock([
-            Ontology::SERVICE_ID => $this->ontologyMock,
-            SessionService::SERVICE_ID => $sessionServiceMock
-        ]);
-        $this->object->setServiceLocator($serviceLocatorMock);
-
-        $result = $this->object->isSecure($deliveryId);
-        $this->assertEquals($expectedResult, $result, 'Result of isSecure() check must be as expected.');
-    }
-
-    public function testIsSecureInvalidLtiVariableThrowsException()
-    {
-        $deliveryId = 'FAKE_DELIVERY_ID';
-
-        $this->mockParentIsSecureBehavior("FAKE_TEST_RUNNER_FEATURES");
-
-        $ltiVarName = 'custom_secure';
-        $launchDataMock = $this->createMock(LtiLaunchData::class);
-        $launchDataMock->method('hasVariable')
-            ->with($ltiVarName)
-            ->willReturn(true);
-        $launchDataMock->method('getBooleanVariable')
-            ->willThrowException(new LtiInvalidVariableException("Exception message"));
-
-        $sessionServiceMock = $this->getSessionServiceMock(TaoLtiSession::class, $launchDataMock);
-
-        $serviceLocatorMock = $this->getServiceLocatorMock([
-            Ontology::SERVICE_ID => $this->ontologyMock,
-            SessionService::SERVICE_ID => $sessionServiceMock
-        ]);
-        $this->object->setServiceLocator($serviceLocatorMock);
-
-        $this->expectException(LtiException::class);
-        $this->object->isSecure($deliveryId);
-    }
-
     public function dataProviderTestIsProctored()
     {
         return [
@@ -214,61 +156,6 @@ class LtiTestTakerAuthorizationServiceTest extends TestCase
         ];
     }
 
-    public function dataProviderTestIsSecure()
-    {
-        return [
-            'Not LTI session, parent - secure' => [
-                'testRunnerFeatures' => 'security',
-                'sessionType' => common_session_Session::class,
-                'ltiVarExists' => 'NOT_IMPORTANT',
-                'ltiVarValue' => 'NOT_IMPORTANT',
-                'expectedResult' => true,
-            ],
-            'Not LTI session, parent - not secure' => [
-                'testRunnerFeatures' => 'NO_SECURITY_VALUE',
-                'sessionType' => common_session_Session::class,
-                'ltiVarExists' => 'NOT_IMPORTANT',
-                'ltiVarValue' => 'NOT_IMPORTANT',
-                'expectedResult' => false,
-            ],
-            'LTI session, parent - secure, lti variable does not exists' => [
-                'testRunnerFeatures' => 'security',
-                'sessionType' => TaoLtiSession::class,
-                'ltiVarExists' => false,
-                'ltiVarValue' => 'NOT_IMPORTANT',
-                'expectedResult' => true,
-            ],
-            'LTI session, parent - not secure, lti variable does not exists' => [
-                'testRunnerFeatures' => 'NO_SECURITY_VALUE',
-                'sessionType' => TaoLtiSession::class,
-                'ltiVarExists' => false,
-                'ltiVarValue' => 'NOT_IMPORTANT',
-                'expectedResult' => false,
-            ],
-            'LTI session, parent - secure, lti variable exists, lti var value - true' => [
-                'testRunnerFeatures' => 'security',
-                'sessionType' => TaoLtiSession::class,
-                'ltiVarExists' => true,
-                'ltiVarValue' => true,
-                'expectedResult' => true,
-            ],
-            'LTI session, parent - not secure secure, lti variable exists, lti var value - true' => [
-                'testRunnerFeatures' => 'NO_SECURITY_VALUE',
-                'sessionType' => TaoLtiSession::class,
-                'ltiVarExists' => true,
-                'ltiVarValue' => true,
-                'expectedResult' => true,
-            ],
-            'LTI session, parent - secure, lti variable exists, lti var value - false' => [
-                'testRunnerFeatures' => 'security',
-                'sessionType' => TaoLtiSession::class,
-                'ltiVarExists' => true,
-                'ltiVarValue' => false,
-                'expectedResult' => false,
-            ],
-        ];
-    }
-
     /**
      * @param string $proctoredPropertyUriValue
      */
@@ -278,17 +165,6 @@ class LtiTestTakerAuthorizationServiceTest extends TestCase
         $proctoredPropertyMock->method('getUri')->willReturn($proctoredPropertyUriValue);
 
         $this->deliveryResourceMock->method('getOnePropertyValue')->willReturn($proctoredPropertyMock);
-
-        $this->ontologyMock->method('getResource')->willReturn($this->deliveryResourceMock);
-        $this->ontologyMock->method('getProperty')->willReturn(new core_kernel_classes_Property('FAKE_PROPERTY'));
-    }
-
-    /**
-     * @param string $testRunnerFeatures
-     */
-    private function mockParentIsSecureBehavior($testRunnerFeatures)
-    {
-        $this->deliveryResourceMock->method('getOnePropertyValue')->willReturn($testRunnerFeatures);
 
         $this->ontologyMock->method('getResource')->willReturn($this->deliveryResourceMock);
         $this->ontologyMock->method('getProperty')->willReturn(new core_kernel_classes_Property('FAKE_PROPERTY'));
