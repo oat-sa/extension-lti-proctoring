@@ -213,7 +213,7 @@ class Updater extends \common_ext_ExtensionUpdater
                 LtiMonitorParametersService::SERVICE_ID,
                 new LtiMonitorParametersService()
             );
-            $this->setVersion('6.1.0');
+            $this->setVersion('7.0.0');
         }
     }
 }
