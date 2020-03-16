@@ -15,6 +15,7 @@ use oat\taoLti\models\classes\LtiException;
 use oat\taoLti\models\classes\LtiInvalidVariableException;
 use oat\taoLti\models\classes\LtiLaunchData;
 use oat\taoLti\models\classes\TaoLtiSession;
+use oat\taoLti\models\classes\user\LtiUser;
 
 class LtiTestTakerAuthorizationServiceTest extends TestCase
 {
@@ -30,7 +31,7 @@ class LtiTestTakerAuthorizationServiceTest extends TestCase
      */
     private $deliveryResourceMock;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->deliveryResourceMock = $this->createMock(core_kernel_classes_Resource::class);
