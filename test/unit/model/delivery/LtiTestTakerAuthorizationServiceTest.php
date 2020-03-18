@@ -179,7 +179,9 @@ class LtiTestTakerAuthorizationServiceTest extends TestCase
     private function getSessionServiceMock($sessionType, LtiLaunchData $launchDataMock)
     {
         $currentSessionMock = $this->createMock($sessionType);
-        $currentSessionMock->method('getLaunchData')->willReturn($launchDataMock);
+        if ($currentSessionMock instanceof TaoLtiSession) {
+            $currentSessionMock->method('getLaunchData')->willReturn($launchDataMock);
+        }
 
         $sessionServiceMock = $this->createMock(SessionService::class);
         $sessionServiceMock->method('getCurrentSession')->willReturn($currentSessionMock);
