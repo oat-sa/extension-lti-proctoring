@@ -66,9 +66,10 @@ class ActivityMonitoringService extends BaseActivityMonitoringService
         $actionQueue = $this->getServiceLocator()->get(ActionQueue::SERVICE_ID);
         $activeDeliveryExecution = new GetActiveDeliveryExecution();
 
-        $queue = __('Turned off');
         if ($actionQueue->isActionEnabled($activeDeliveryExecution)) {
             $queue = $actionQueue->getPosition($activeDeliveryExecution);
+        } else {
+            $queue = __('Turned off');
         }
 
         return $queue;
