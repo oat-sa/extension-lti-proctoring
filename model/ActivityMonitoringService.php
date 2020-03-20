@@ -67,8 +67,7 @@ class ActivityMonitoringService extends BaseActivityMonitoringService
         $activeDeliveryExecution = new GetActiveDeliveryExecution();
 
         $queue = __('Turned off');
-        $limit = $actionQueue->getLimits($activeDeliveryExecution);
-        if ($limit > 0) {
+        if ($actionQueue->isActionEnabled($activeDeliveryExecution)) {
             $queue = $actionQueue->getPosition($activeDeliveryExecution);
         }
 
