@@ -242,7 +242,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $ltiResultCustomFieldsService = new LtiResultCustomFieldsService($resultCustomFieldsServiceOptions);
             $this->getServiceManager()->register(LtiResultCustomFieldsService::SERVICE_ID, $ltiResultCustomFieldsService);
 
-            $this->setVersion('8.0.0');
+            $this->setVersion('8.1.0');
         }
 
     }
