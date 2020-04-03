@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 /**
  * This program is free software; you can redistribute it and/or
@@ -15,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2017  (original work) Open Assessment Technologies SA;
+ * Copyright (c) 2020  (original work) Open Assessment Technologies SA;
  *
  */
 
@@ -26,17 +27,13 @@ use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use RuntimeException;
 use oat\ltiDeliveryProvider\model\LtiLaunchDataService as BaseLtiLaunchDataService;
 
-/**
- * Class LtiLaunchDataService
- * @package oat\ltiProctoring\model
- */
 class LtiLaunchDataService extends BaseLtiLaunchDataService
 {
     /**
      * @param string $deliveryExecutionId
      * @return LtiLaunchData
      */
-    public function findLaunchDataByDeliveryExecutionId(string $deliveryExecutionId)
+    public function findLaunchDataByDeliveryExecutionId(string $deliveryExecutionId): LtiLaunchData
     {
         $ltiVariablesList = $this->getServiceLocator()
             ->get(DeliveryLog::SERVICE_ID)
