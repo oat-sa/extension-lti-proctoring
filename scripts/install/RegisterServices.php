@@ -74,13 +74,24 @@ class RegisterServices extends InstallAction
         $newActivityMonitoringService = new ActivityMonitoringService($options);
         $this->getServiceManager()->register(ActivityMonitoringService::SERVICE_ID, $newActivityMonitoringService);
 
-        $ltiLaunchDataServiceOptions = $this->getServiceLocator()->get(LtiLaunchDataService::SERVICE_ID)->getOptions();
+        try {
+            $ltiLaunchDataServiceOptions = $this->getServiceLocator()
+                ->get(LtiLaunchDataService::SERVICE_ID)
+                ->getOptions();
+        } catch (\Throwable $ex) {
+            $ltiLaunchDataServiceOptions = [];
+        }
         $newLtiLaunchDataService = new LtiLaunchDataService($ltiLaunchDataServiceOptions);
         $this->getServiceManager()->register(LtiLaunchDataService::SERVICE_ID, $newLtiLaunchDataService);
 
-        /** @var ResultCustomFieldsService $resultCustomFieldsService */
-        $resultCustomFieldsService = $this->getServiceLocator()->get(ResultCustomFieldsService::SERVICE_ID);
-        $ltiResultCustomFieldsService = new LtiResultCustomFieldsService($resultCustomFieldsService->getOptions());
+        try {
+            $resultCustomFieldsServiceOptions = $this->getServiceLocator()
+                ->get(ResultCustomFieldsService::SERVICE_ID)
+                ->getOptions();
+        } catch (\Throwable $ex) {
+            $resultCustomFieldsServiceOptions = [];
+        }
+        $ltiResultCustomFieldsService = new LtiResultCustomFieldsService($resultCustomFieldsServiceOptions);
         $this->getServiceManager()->register(LtiResultCustomFieldsService::SERVICE_ID, $ltiResultCustomFieldsService);
 
     }

@@ -222,13 +222,24 @@ class Updater extends \common_ext_ExtensionUpdater
         $this->skip('6.1.0', '8.0.0');
 
         if ($this->isVersion('8.0.0')) {
-            $ltiLaunchDataServiceOptions = $this->getServiceManager()->get(LtiLaunchDataService::SERVICE_ID)->getOptions();
+            try {
+                $ltiLaunchDataServiceOptions = $this->getServiceManager()
+                    ->get(LtiLaunchDataService::SERVICE_ID)
+                    ->getOptions();
+            } catch (\Throwable $ex) {
+                $ltiLaunchDataServiceOptions = [];
+            }
             $newLtiLaunchDataService = new LtiLaunchDataService($ltiLaunchDataServiceOptions);
             $this->getServiceManager()->register(LtiLaunchDataService::SERVICE_ID, $newLtiLaunchDataService);
 
-            /** @var ResultCustomFieldsService $resultCustomFieldsService */
-            $resultCustomFieldsService = $this->getServiceManager()->get(ResultCustomFieldsService::SERVICE_ID);
-            $ltiResultCustomFieldsService = new LtiResultCustomFieldsService($resultCustomFieldsService->getOptions());
+            try {
+                $resultCustomFieldsServiceOptions = $this->getServiceManager()
+                    ->get(ResultCustomFieldsService::SERVICE_ID)
+                    ->getOptions();
+            } catch (\Throwable $ex) {
+                $resultCustomFieldsServiceOptions = [];
+            }
+            $ltiResultCustomFieldsService = new LtiResultCustomFieldsService($resultCustomFieldsServiceOptions);
             $this->getServiceManager()->register(LtiResultCustomFieldsService::SERVICE_ID, $ltiResultCustomFieldsService);
 
             $this->setVersion('8.0.0');
