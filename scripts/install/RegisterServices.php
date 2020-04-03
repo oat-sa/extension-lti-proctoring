@@ -22,10 +22,13 @@ namespace oat\ltiProctoring\scripts\install;
 
 use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
 use oat\oatbox\extension\InstallAction;
+use oat\taoOutcomeUi\model\search\ResultCustomFieldsService;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationInterface;
 use oat\ltiProctoring\model\delivery\LtiTestTakerAuthorizationService;
 use oat\oatbox\service\ServiceNotFoundException;
 use oat\ltiProctoring\model\ActivityMonitoringService;
+use oat\ltiProctoring\model\LtiLaunchDataService;
+use oat\ltiProctoring\model\LtiResultCustomFieldsService;
 
 /**
  * Action to register necessary extension services
@@ -70,5 +73,15 @@ class RegisterServices extends InstallAction
 
         $newActivityMonitoringService = new ActivityMonitoringService($options);
         $this->getServiceManager()->register(ActivityMonitoringService::SERVICE_ID, $newActivityMonitoringService);
+
+        $ltiLaunchDataServiceOptions = $this->getServiceLocator()->get(LtiLaunchDataService::SERVICE_ID)->getOptions();
+        $newLtiLaunchDataService = new LtiLaunchDataService($ltiLaunchDataServiceOptions);
+        $this->getServiceManager()->register(LtiLaunchDataService::SERVICE_ID, $newLtiLaunchDataService);
+
+        /** @var ResultCustomFieldsService $resultCustomFieldsService */
+        $resultCustomFieldsService = $this->getServiceLocator()->get(ResultCustomFieldsService::SERVICE_ID);
+        $ltiResultCustomFieldsService = new LtiResultCustomFieldsService($resultCustomFieldsService->getOptions());
+        $this->getServiceManager()->register(LtiResultCustomFieldsService::SERVICE_ID, $ltiResultCustomFieldsService);
+
     }
 }
