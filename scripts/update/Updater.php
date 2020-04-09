@@ -246,7 +246,7 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         if ($this->isVersion('8.1.0')) {
-            $script = 'sudo -u www-data php index.php \'oat\taoProctoring\scripts\tools\KvMonitoringMigration\' -f context_id -d 1 -s 0 -pc';
+            $script = 'sudo -u www-data php index.php \'oat\taoProctoring\scripts\tools\KvMonitoringMigration\' -f context_id -d 1 -s 0 -pc -l 255';
             $this->addReport(\common_report_Report::createInfo("Run script :'" . $script . "' to finish updating. It may take few hours depending of amount of data."));
 
             $this->setVersion('8.2.0');
