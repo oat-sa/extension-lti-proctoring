@@ -28,6 +28,8 @@ use oat\ltiProctoring\scripts\install\SetupProctoringEventListeners;
 use oat\ltiProctoring\scripts\install\RegisterServices;
 use oat\ltiProctoring\controller\DeliveryServer;
 use oat\ltiProctoring\scripts\install\SetupTestSessionHistory;
+use oat\ltiProctoring\scripts\install\AlterDeliveryMonitoringTable;
+use oat\ltiProctoring\scripts\install\OverrideProctorService;
 
 /**
  * Generated using taoDevTools 2.17.0
@@ -37,13 +39,13 @@ return array(
     'label' => 'LTI Proctoring',
     'description' => 'Grants access to the proctoring functionalities using LTI',
     'license' => 'GPL-2.0',
-    'version' => '8.1.0',
+    'version' => '8.2.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'generis' => '>=12.15.0',
         'tao' => '>=41.9.0',
         'taoLti' => '>=11.3.0',
-        'taoProctoring' => '>=18.2.2',
+        'taoProctoring' => '>=19.4.0',
         'taoDelivery' => '>=12.5.0',
         'ltiDeliveryProvider' => '>=7.0.0',
         'taoOutcomeUi' => '>=7.0.0',
@@ -69,7 +71,8 @@ return array(
             RegisterServices::class,
             SetupTestSessionHistory::class,
             SetupTestRunnerMessageService::class,
-            \oat\ltiProctoring\scripts\install\OverrideProctorService::class,
+            OverrideProctorService::class,
+            AlterDeliveryMonitoringTable::class
         ],
         'rdf' => array(
             __DIR__.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'install'.DIRECTORY_SEPARATOR.'ltiroles.rdf'
