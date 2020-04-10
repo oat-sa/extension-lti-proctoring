@@ -85,7 +85,7 @@ class ProctorService extends DefaultProctorService
             }
         }
         $options['asArray'] = true;
-        return $monitoringService->find($criteria, $options, true);
+        return $monitoringService->find($criteria, $options, false);
     }
 
     /**

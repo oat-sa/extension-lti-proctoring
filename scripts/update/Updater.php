@@ -5,9 +5,11 @@ namespace oat\ltiProctoring\scripts\update;
 use oat\ltiProctoring\controller\DeliveryServer;
 use oat\ltiProctoring\controller\Reporting;
 use oat\ltiProctoring\model\delivery\ProctorService as ltiProctorService;
+use oat\ltiProctoring\model\LtiLaunchDataService;
 use oat\ltiProctoring\model\LtiListenerService;
 use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
 use oat\ltiProctoring\model\LtiMonitorParametersService;
+use oat\ltiProctoring\model\LtiResultCustomFieldsService;
 use oat\ltiProctoring\scripts\install\SetupTestSessionHistory;
 use oat\oatbox\event\EventManager;
 use oat\tao\scripts\update\OntologyUpdater;
@@ -15,6 +17,7 @@ use oat\taoDelivery\model\authorization\AuthorizationService as DeliveryAuthoriz
 use oat\taoDelivery\model\authorization\strategy\AuthorizationAggregator;
 use oat\taoDelivery\models\classes\execution\event\DeliveryExecutionState;
 use oat\taoLti\models\classes\LtiRoles;
+use oat\taoOutcomeUi\model\search\ResultCustomFieldsService;
 use oat\taoProctoring\controller\Monitor;
 use oat\taoProctoring\model\authorization\ProctorAuthorizationProvider;
 use oat\tao\model\accessControl\func\AccessRule;
@@ -217,5 +220,36 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('6.1.0', '8.0.0');
+
+        if ($this->isVersion('8.0.0')) {
+            try {
+                $ltiLaunchDataServiceOptions = $this->getServiceManager()
+                    ->get(LtiLaunchDataService::SERVICE_ID)
+                    ->getOptions();
+            } catch (\Throwable $ex) {
+                $ltiLaunchDataServiceOptions = [];
+            }
+            $newLtiLaunchDataService = new LtiLaunchDataService($ltiLaunchDataServiceOptions);
+            $this->getServiceManager()->register(LtiLaunchDataService::SERVICE_ID, $newLtiLaunchDataService);
+
+            try {
+                $resultCustomFieldsServiceOptions = $this->getServiceManager()
+                    ->get(ResultCustomFieldsService::SERVICE_ID)
+                    ->getOptions();
+            } catch (\Throwable $ex) {
+                $resultCustomFieldsServiceOptions = [];
+            }
+            $ltiResultCustomFieldsService = new LtiResultCustomFieldsService($resultCustomFieldsServiceOptions);
+            $this->getServiceManager()->register(LtiResultCustomFieldsService::SERVICE_ID, $ltiResultCustomFieldsService);
+
+            $this->setVersion('8.1.0');
+        }
+
+        if ($this->isVersion('8.1.0')) {
+            $script = 'sudo -u www-data php index.php \'oat\taoProctoring\scripts\tools\KvMonitoringMigration\' -f context_id -d 1 -s 0 -pc -l 255';
+            $this->addReport(\common_report_Report::createInfo("Run script :'" . $script . "' to finish updating. It may take few hours depending of amount of data."));
+
+            $this->setVersion('8.2.0');
+        }
     }
 }
