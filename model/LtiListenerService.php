@@ -35,7 +35,6 @@ use oat\taoProctoring\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\execution\DeliveryExecutionManagerService;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringData;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
-use oat\taoQtiTest\models\runner\time\QtiTimer;
 use oat\taoLti\models\classes\LtiVariableMissingException;
 
 /**
@@ -175,41 +174,19 @@ class LtiListenerService extends ConfigurableService
      */
     public function checkExtendedTime(LtiLaunchData $launchData, DeliveryExecutionInterface $deliveryExecution)
     {
-        $extendedTime = 0;
+        $extendedTimeMultiplier = 1.0;
         if ($launchData->hasVariable(self::CUSTOM_LTI_EXTENDED_TIME)) {
-            $extendedTime = floatval($launchData->getVariable(self::CUSTOM_LTI_EXTENDED_TIME));
+            $extendedTimeVariable = (float) $launchData->getVariable(self::CUSTOM_LTI_EXTENDED_TIME);
+            if (!empty($extendedTimeVariable)) {
+                $extendedTimeMultiplier = $extendedTimeVariable;
+            }
         }
 
-        $this->updateDeliveryExtendedTime($deliveryExecution, $extendedTime);
-    }
-
-    /**
-     * @param DeliveryExecutionInterface $deliveryExecution
-     * @param $extendedTime
-     * @throws \common_exception_Error
-     * @throws \common_exception_MissingParameter
-     * @throws \common_exception_NotFound
-     * @throws \oat\taoTests\models\runner\time\InvalidStorageException
-     */
-    public function updateDeliveryExtendedTime(DeliveryExecutionInterface $deliveryExecution, $extendedTime)
-    {
-        /** @var DeliveryExecutionManagerService  $deliveryExecutionManagerService */
+        /** @var DeliveryExecutionManagerService $deliveryExecutionManagerService */
         $deliveryExecutionManagerService = $this->getServiceLocator()->get(DeliveryExecutionManagerService::SERVICE_ID);
-        /** @var QtiTimer $timer */
-        $timer = $deliveryExecutionManagerService->getDeliveryTimer($deliveryExecution);
-        $deliveryExecutionArray = [
-            $deliveryExecution
-        ];
-
-        $extendedTime = (!$extendedTime) ? 1 : $extendedTime;
-        if ($extendedTime) {
-            $deliveryExecutionManagerService->setExtraTime(
-                $deliveryExecutionArray,
-                $timer->getExtraTime(),
-                $extendedTime
-            );
-        }
+        $deliveryExecutionManagerService->updateDeliveryExtendedTime($deliveryExecution, $extendedTimeMultiplier);
     }
+
 
     /**
      * Get LTI launch parameters which name starts from 'custom_'
