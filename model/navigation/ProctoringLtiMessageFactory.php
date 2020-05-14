@@ -21,6 +21,7 @@ declare(strict_types=1);
 
 namespace oat\ltiProctoring\model\navigation;
 
+use InvalidArgumentException;
 use oat\ltiDeliveryProvider\model\navigation\LtiMessageFactoryInterface;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
@@ -30,46 +31,77 @@ use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExec
 
 class ProctoringLtiMessageFactory extends ConfigurableService implements LtiMessageFactoryInterface
 {
+    /**
+     * @param DeliveryExecutionInterface $deliveryExecution
+     * @return LtiMessage
+     * @throws \common_exception_NotFound
+     */
     public function getLtiMessage(DeliveryExecutionInterface $deliveryExecution): LtiMessage
     {
         $state = $deliveryExecution->getState()->getLabel();
-        /** @var DeliveryLog $deliveryLog */
-        $deliveryLog = $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID);
-        $reason = '';
-        $reasons = null;
-        switch ($deliveryExecution->getState()->getUri()) {
-            case ProctoredDeliveryExecution::STATE_FINISHED:
-                $log = $deliveryLog->get($deliveryExecution->getIdentifier(), 'TEST_EXIT_CODE');
-                if ($log) {
-                    $reason .= 'Exit code: ' . $log[count($log) - 1]['data']['exitCode'] . PHP_EOL;
-                }
+        $deliveryLog = $this->getLastDeliveryLogByEvent($deliveryExecution);
+        $ltiLogMessage = $this->prepareLtiLogMessage($deliveryExecution->getState()->getUri(), $deliveryLog);
+
+        return new LtiMessage($state, $ltiLogMessage);
+    }
+
+    private function getEventId(string $executionStateUri): string
+    {
+        switch ($executionStateUri) {
+            case DeliveryExecutionInterface::STATE_FINISHED:
+                $eventId = 'TEST_EXIT_CODE';
                 break;
-            case ProctoredDeliveryExecution::STATE_TERMINATED:
-                $log = $deliveryLog->get($deliveryExecution->getIdentifier(), 'TEST_TERMINATE');
-                if ($log) {
-                    $reasons = $log[count($log) - 1]['data'];
-                }
+            case DeliveryExecutionInterface::STATE_TERMINATED:
+                $eventId = 'TEST_TERMINATE';
                 break;
-            case ProctoredDeliveryExecution::STATE_PAUSED:
-                $log = $deliveryLog->get($deliveryExecution->getIdentifier(), 'TEST_PAUSE');
-                if ($log) {
-                    $reasons = $log[count($log) - 1]['data'];
-                }
+            case DeliveryExecutionInterface::STATE_PAUSED:
+                $eventId = 'TEST_PAUSE';
                 break;
             case ProctoredDeliveryExecution::STATE_CANCELED:
-                $log = $deliveryLog->get($deliveryExecution->getIdentifier(), 'TEST_CANCEL');
-                if ($log) {
-                    $reasons = $log[count($log) - 1]['data'];
-                }
+                $eventId = 'TEST_CANCEL';
                 break;
+            default:
+                throw new InvalidArgumentException("Not supported delivery execution state URI provided: {$executionStateUri}");
         }
 
-        if ($reasons !== null) {
-            $reason .= isset($reasons['reason']['reasons']['category']) ? $reasons['reason']['reasons']['category'] : '';
-            $reason .= isset($reasons['reason']['reasons']['subCategory']) ? '; ' . $reasons['reason']['reasons']['subCategory'] : '';
-            $reason .= isset($reasons['reason']['comment']) ? ' - ' . $reasons['reason']['comment'] : '';
+        return $eventId;
+    }
+
+    private function getLastDeliveryLogByEvent(DeliveryExecutionInterface $deliveryExecution): array
+    {
+        $logRecord = [];
+        try {
+            $eventId = $this->getEventId($deliveryExecution->getState()->getUri());
+            /** @var DeliveryLog $deliveryLog */
+            $deliveryLog = $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID);
+            $logs = $deliveryLog->get($deliveryExecution->getIdentifier(), $eventId);
+
+            if (count($logs) > 0) {
+                $logRecord = array_pop($logs);
+            }
+        } catch (InvalidArgumentException $e) {
+            $this->logWarning($e->getMessage());
         }
 
-        return new LtiMessage($state, $reason);
+        return $logRecord;
+    }
+
+    private function prepareLtiLogMessage(string $executionStateUri, array $deliveryLog): string
+    {
+        $ltiLogMessage = '';
+        if (!isset($deliveryLog['data']) || empty($deliveryLog['data'])) {
+            return $ltiLogMessage;
+        }
+
+        $logData = $deliveryLog['data'];
+        if ($executionStateUri === DeliveryExecutionInterface::STATE_FINISHED) {
+            $ltiLogMessage = 'Exit code: ' . $logData['exitCode'] . PHP_EOL;
+        } else {
+            $ltiLogMessage .= $logData['reason']['reasons']['category'] ?? '';
+            $ltiLogMessage .= isset($logData['reason']['reasons']['subCategory']) ? '; ' . $logData['reason']['reasons']['subCategory'] : '';
+            $ltiLogMessage .= isset($logData['reason']['comment']) ? ' - ' . $logData['reason']['comment'] : '';
+        }
+
+        return $ltiLogMessage;
     }
 }
