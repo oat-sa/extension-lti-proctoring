@@ -25,6 +25,7 @@ use core_kernel_classes_Resource;
 use oat\generis\test\MockObject;
 use oat\generis\test\TestCase;
 use oat\ltiProctoring\model\navigation\ProctoringLtiMessageFactory;
+use oat\oatbox\log\LoggerService;
 use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
 use oat\taoLti\models\classes\LtiMessages\LtiMessage;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
@@ -69,7 +70,7 @@ class ProctoringLtiMessageFactoryTest extends TestCase
      * @dataProvider dataProviderTestGetLtiMessageReturnsCorrectMessage
      */
     public function testGetLtiMessageReturnsCorrectMessage(
-        string $executionState,
+        string $expectedMessageString,
         string $executionStateUri,
         array $logRecords,
         string $expectedLtiLog
@@ -77,28 +78,52 @@ class ProctoringLtiMessageFactoryTest extends TestCase
         $this->deliveryExecutionStateMock->method('getUri')
             ->willReturn($executionStateUri);
         $this->deliveryExecutionStateMock->method('getLabel')
-            ->willReturn($executionState);
+            ->willReturn($expectedMessageString);
         $this->deliveryLogMock->method('get')
             ->willReturn($logRecords);
         
         $ltiMessage = $this->subject->getLtiMessage($this->deliveryExecutionMock);
 
         self::assertInstanceOf(LtiMessage::class, $ltiMessage);
-        self::assertSame($executionState, $ltiMessage->getMessage());
+        self::assertSame($expectedMessageString, $ltiMessage->getMessage());
+        self::assertSame($expectedLtiLog, $ltiMessage->getLog());
+    }
+
+    public function testGetLtiMessageEmptyLtiLogFoInvalidExecutionUri(): void
+    {
+        $expectedMessageString = 'Completed';
+        $expectedLtiLog = '';
+        $this->deliveryExecutionStateMock->method('getUri')
+            ->willReturn('UNSUPPORTED_EXECUTION_STATE_URI');
+        $this->deliveryExecutionStateMock->method('getLabel')
+            ->willReturn($expectedMessageString);
+
+        $ltiMessage = $this->subject->getLtiMessage($this->deliveryExecutionMock);
+
+        self::assertInstanceOf(LtiMessage::class, $ltiMessage);
+        self::assertSame($expectedMessageString, $ltiMessage->getMessage());
         self::assertSame($expectedLtiLog, $ltiMessage->getLog());
     }
 
     public function dataProviderTestGetLtiMessageReturnsCorrectMessage(): array
     {
         return [
-            'Delivery finished no logs' => [
-                'executionState' => 'Finished',
+            'Delivery without logs' => [
+                'expectedMessageString' => 'Finished',
                 'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusFinished',
                 'logRecords' => [],
                 'expectedLtiLog' => ''
             ],
+            'Delivery with logs data empty array' => [
+                'expectedMessageString' => 'Terminated',
+                'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusTerminated',
+                'logRecords' => [
+                    'data' => []
+                ],
+                'expectedLtiLog' => ''
+            ],
             'Delivery finished with logs' => [
-                'executionState' => 'Finished',
+                'expectedMessageString' => 'Finished',
                 'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusFinished',
                 'logRecords' => [
                     [
@@ -109,35 +134,25 @@ class ProctoringLtiMessageFactoryTest extends TestCase
                 ],
                 'expectedLtiLog' => 'Exit code: C' . PHP_EOL
             ],
-            'Delivery terminated no logs' => [
-                'executionState' => 'Terminated',
-                'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusTerminated',
-                'logRecords' => [],
-                'expectedLtiLog' => ''
-            ],
-            'Delivery terminated multiple logs' => [
-                'executionState' => 'Terminated',
-                'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusTerminated',
+            'Delivery finished with multiple logs uses last record' => [
+                'expectedMessageString' => 'Finished',
+                'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusFinished',
                 'logRecords' => [
                     [
                         'data' => [
-                            'reason' => [
-                                'reasons' => [
-                                    'category' => 'FAKE_CATEGORY',
-                                    'subCategory' => 'FAKE_SUB_CATEGORY',
-                                ],
-                                'comment' => 'FAKE_TERMINATED_COMMENT',
-                            ],
+                            'exitCode' => 'C',
                         ]
                     ],
                     [
-                        'data' => []
-                    ],
+                        'data' => [
+                            'exitCode' => 'IC',
+                        ]
+                    ]
                 ],
-                'expectedLtiLog' => ''
+                'expectedLtiLog' => 'Exit code: IC' . PHP_EOL
             ],
             'Delivery terminated log with full reason' => [
-                'executionState' => 'Terminated',
+                'expectedMessageString' => 'Terminated',
                 'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusTerminated',
                 'logRecords' => [
                     [
@@ -154,35 +169,8 @@ class ProctoringLtiMessageFactoryTest extends TestCase
                 ],
                 'expectedLtiLog' => 'FAKE_CATEGORY; FAKE_SUB_CATEGORY - FAKE_TERMINATED_COMMENT'
             ],
-            'Delivery paused no logs' => [
-                'executionState' => 'Paused',
-                'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusPaused',
-                'logRecords' => [],
-                'expectedLtiLog' => ''
-            ],
-            'Delivery paused multiple logs' => [
-                'executionState' => 'Paused',
-                'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusPaused',
-                'logRecords' => [
-                    [
-                        'data' => [
-                            'reason' => [
-                                'reasons' => [
-                                    'category' => 'FAKE_CATEGORY',
-                                    'subCategory' => 'FAKE_SUB_CATEGORY',
-                                ],
-                                'comment' => 'FAKE_PAUSED_COMMENT',
-                            ],
-                        ]
-                    ],
-                    [
-                        'data' => []
-                    ],
-                ],
-                'expectedLtiLog' => ''
-            ],
             'Delivery paused log with reason without category' => [
-                'executionState' => 'Paused',
+                'expectedMessageString' => 'Paused',
                 'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusPaused',
                 'logRecords' => [
                     [
@@ -198,35 +186,8 @@ class ProctoringLtiMessageFactoryTest extends TestCase
                 ],
                 'expectedLtiLog' => '; FAKE_SUB_CATEGORY - FAKE_PAUSED_COMMENT'
             ],
-            'Delivery canceled no logs' => [
-                'executionState' => 'FAKE_CANCELED',
-                'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusCanceled',
-                'logRecords' => [],
-                'expectedLtiLog' => ''
-            ],
-            'Delivery canceled multiple logs' => [
-                'executionState' => 'Canceled',
-                'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusCanceled',
-                'logRecords' => [
-                    [
-                        'data' => []
-                    ],
-                    [
-                        'data' => [
-                            'reason' => [
-                                'reasons' => [
-                                    'category' => 'FAKE_CATEGORY',
-                                    'subCategory' => 'FAKE_SUB_CATEGORY',
-                                ],
-                                'comment' => 'FAKE_CANCELED_COMMENT',
-                            ],
-                        ]
-                    ],
-                ],
-                'expectedLtiLog' => 'FAKE_CATEGORY; FAKE_SUB_CATEGORY - FAKE_CANCELED_COMMENT'
-            ],
             'Delivery canceled log with reason without sub category' => [
-                'executionState' => 'Canceled',
+                'expectedMessageString' => 'Canceled',
                 'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusCanceled',
                 'logRecords' => [
                     [
@@ -243,7 +204,7 @@ class ProctoringLtiMessageFactoryTest extends TestCase
                 'expectedLtiLog' => 'FAKE_CATEGORY - FAKE_CANCELED_COMMENT'
             ],
             'Delivery canceled log with reason without comment' => [
-                'executionState' => 'Canceled',
+                'expectedMessageString' => 'Canceled',
                 'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusCanceled',
                 'logRecords' => [
                     [
@@ -278,7 +239,8 @@ class ProctoringLtiMessageFactoryTest extends TestCase
         $this->deliveryLogMock = $this->createMock(DeliveryLog::class);
 
         return $this->getServiceLocatorMock([
-            DeliveryLog::SERVICE_ID => $this->deliveryLogMock
+            DeliveryLog::SERVICE_ID => $this->deliveryLogMock,
+            LoggerService::SERVICE_ID => $this->createMock(LoggerService::class),
         ]);
     }
 }
