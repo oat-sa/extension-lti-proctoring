@@ -34,7 +34,7 @@ class ProctoringLtiMessageFactory extends ConfigurableService implements LtiMess
     {
         $state = $deliveryExecution->getState()->getLabel();
         /** @var DeliveryLog $deliveryLog */
-        $deliveryLog = $this->getServiceManager()->get(DeliveryLog::SERVICE_ID);
+        $deliveryLog = $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID);
         $reason = '';
         $reasons = null;
         switch ($deliveryExecution->getState()->getUri()) {
