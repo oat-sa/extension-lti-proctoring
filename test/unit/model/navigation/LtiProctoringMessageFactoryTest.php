@@ -64,7 +64,7 @@ class LtiProctoringMessageFactoryTest extends TestCase
 
     /**
      * @param string $deliveryExecutionState
-     * @param array $logRecords
+     * @param array $logRecord
      * @param string $expectedLtiLog
      *
      * @dataProvider dataProviderTestGetLtiMessageReturnsCorrectMessage
@@ -72,15 +72,15 @@ class LtiProctoringMessageFactoryTest extends TestCase
     public function testGetLtiMessageReturnsCorrectMessage(
         string $expectedMessageString,
         string $executionStateUri,
-        array $logRecords,
+        array $logRecord,
         string $expectedLtiLog
     ): void {
         $this->deliveryExecutionStateMock->method('getUri')
             ->willReturn($executionStateUri);
         $this->deliveryExecutionStateMock->method('getLabel')
             ->willReturn($expectedMessageString);
-        $this->deliveryLogMock->method('get')
-            ->willReturn($logRecords);
+        $this->deliveryLogMock->method('search')
+            ->willReturn($logRecord);
         
         $ltiMessage = $this->subject->getLtiMessage($this->deliveryExecutionMock);
 
@@ -111,21 +111,23 @@ class LtiProctoringMessageFactoryTest extends TestCase
             'Delivery without logs' => [
                 'expectedMessageString' => 'Finished',
                 'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusFinished',
-                'logRecords' => [],
+                'logRecord' => [],
                 'expectedLtiLog' => ''
             ],
             'Delivery with logs data empty array' => [
                 'expectedMessageString' => 'Terminated',
                 'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusTerminated',
-                'logRecords' => [
-                    'data' => []
+                'logRecord' => [
+                    [
+                        'data' => []
+                    ]
                 ],
                 'expectedLtiLog' => ''
             ],
-            'Delivery finished with logs' => [
+            'Delivery finished with correct log' => [
                 'expectedMessageString' => 'Finished',
                 'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusFinished',
-                'logRecords' => [
+                'logRecord' => [
                     [
                         'data' => [
                             'exitCode' => 'C'
@@ -134,27 +136,10 @@ class LtiProctoringMessageFactoryTest extends TestCase
                 ],
                 'expectedLtiLog' => 'Exit code: C' . PHP_EOL
             ],
-            'Delivery finished with multiple logs uses last record' => [
-                'expectedMessageString' => 'Finished',
-                'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusFinished',
-                'logRecords' => [
-                    [
-                        'data' => [
-                            'exitCode' => 'C',
-                        ]
-                    ],
-                    [
-                        'data' => [
-                            'exitCode' => 'IC',
-                        ]
-                    ]
-                ],
-                'expectedLtiLog' => 'Exit code: IC' . PHP_EOL
-            ],
             'Delivery terminated log with full reason' => [
                 'expectedMessageString' => 'Terminated',
                 'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusTerminated',
-                'logRecords' => [
+                'logRecord' => [
                     [
                         'data' => [
                             'reason' => [
@@ -172,7 +157,7 @@ class LtiProctoringMessageFactoryTest extends TestCase
             'Delivery paused log with reason without category' => [
                 'expectedMessageString' => 'Paused',
                 'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusPaused',
-                'logRecords' => [
+                'logRecord' => [
                     [
                         'data' => [
                             'reason' => [
@@ -189,7 +174,7 @@ class LtiProctoringMessageFactoryTest extends TestCase
             'Delivery canceled log with reason without sub category' => [
                 'expectedMessageString' => 'Canceled',
                 'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusCanceled',
-                'logRecords' => [
+                'logRecord' => [
                     [
                         'data' => [
                             'reason' => [
@@ -206,7 +191,7 @@ class LtiProctoringMessageFactoryTest extends TestCase
             'Delivery canceled log with reason without comment' => [
                 'expectedMessageString' => 'Canceled',
                 'executionStateUri' => 'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryExecutionStatusCanceled',
-                'logRecords' => [
+                'logRecord' => [
                     [
                         'data' => [
                             'reason' => [
