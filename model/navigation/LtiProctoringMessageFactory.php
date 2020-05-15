@@ -27,6 +27,7 @@ use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
 use oat\taoLti\models\classes\LtiMessages\LtiMessage;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
+use oat\taoProctoring\model\deliveryLog\event\DeliveryLogEvent;
 use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
 
 class LtiProctoringMessageFactory extends ConfigurableService implements LtiMessageFactoryInterface
@@ -49,16 +50,16 @@ class LtiProctoringMessageFactory extends ConfigurableService implements LtiMess
     {
         switch ($executionStateUri) {
             case DeliveryExecutionInterface::STATE_FINISHED:
-                $eventId = 'TEST_EXIT_CODE';
+                $eventId = DeliveryLogEvent::EVENT_ID_TEST_FINISHED;
                 break;
             case DeliveryExecutionInterface::STATE_TERMINATED:
-                $eventId = 'TEST_TERMINATE';
+                $eventId = DeliveryLogEvent::EVENT_ID_TEST_TERMINATED;
                 break;
             case DeliveryExecutionInterface::STATE_PAUSED:
-                $eventId = 'TEST_PAUSE';
+                $eventId = DeliveryLogEvent::EVENT_ID_TEST_PAUSED;
                 break;
             case ProctoredDeliveryExecution::STATE_CANCELED:
-                $eventId = 'TEST_CANCEL';
+                $eventId = DeliveryLogEvent::EVENT_ID_TEST_CANCELED;
                 break;
             default:
                 throw new InvalidArgumentException("Not supported delivery execution state URI provided: {$executionStateUri}");
@@ -71,14 +72,19 @@ class LtiProctoringMessageFactory extends ConfigurableService implements LtiMess
     {
         $logRecord = [];
         try {
-            $eventId = $this->getEventId($deliveryExecution->getState()->getUri());
             /** @var DeliveryLog $deliveryLog */
             $deliveryLog = $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID);
-            $logs = $deliveryLog->get($deliveryExecution->getIdentifier(), $eventId);
-
-            if (count($logs) > 0) {
-                $logRecord = array_pop($logs);
-            }
+            $searchParams = [
+                DeliveryLog::DELIVERY_EXECUTION_ID  => $deliveryExecution->getIdentifier(),
+                DeliveryLog::EVENT_ID               => $this->getEventId($deliveryExecution->getState()->getUri()),
+            ];
+            $searchOptions = [
+                'order' => DeliveryLog::ID,
+                'dir' => 'desc',
+                'limit' => 1,
+            ];
+            $searchResult = $deliveryLog->search($searchParams, $searchOptions);
+            $logRecord = $searchResult[0] ?? [];
         } catch (InvalidArgumentException $e) {
             $this->logWarning($e->getMessage());
         }
