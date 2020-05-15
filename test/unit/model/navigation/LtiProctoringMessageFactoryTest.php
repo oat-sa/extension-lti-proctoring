@@ -24,14 +24,14 @@ namespace oat\ltiProctoring\tests\model\navigation;
 use core_kernel_classes_Resource;
 use oat\generis\test\MockObject;
 use oat\generis\test\TestCase;
-use oat\ltiProctoring\model\navigation\ProctoringLtiMessageFactory;
+use oat\ltiProctoring\model\navigation\LtiProctoringMessageFactory;
 use oat\oatbox\log\LoggerService;
 use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
 use oat\taoLti\models\classes\LtiMessages\LtiMessage;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
-class ProctoringLtiMessageFactoryTest extends TestCase
+class LtiProctoringMessageFactoryTest extends TestCase
 {
     /**
      * @var DeliveryExecutionInterface|MockObject
@@ -49,7 +49,7 @@ class ProctoringLtiMessageFactoryTest extends TestCase
     private $deliveryLogMock;
 
     /**
-     * @var ProctoringLtiMessageFactory
+     * @var LtiProctoringMessageFactory
      */
     private $subject;
 
@@ -58,7 +58,7 @@ class ProctoringLtiMessageFactoryTest extends TestCase
         parent::setUp();
         $this->mockDeliveryExecution();
 
-        $this->subject = new ProctoringLtiMessageFactory();
+        $this->subject = new LtiProctoringMessageFactory();
         $this->subject->setServiceLocator($this->mockServiceLocator());
     }
 

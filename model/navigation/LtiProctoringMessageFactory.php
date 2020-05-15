@@ -29,7 +29,7 @@ use oat\taoLti\models\classes\LtiMessages\LtiMessage;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
 
-class ProctoringLtiMessageFactory extends ConfigurableService implements LtiMessageFactoryInterface
+class LtiProctoringMessageFactory extends ConfigurableService implements LtiMessageFactoryInterface
 {
     /**
      * @param DeliveryExecutionInterface $deliveryExecution

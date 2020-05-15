@@ -21,7 +21,7 @@
 use oat\ltiProctoring\controller\ProctoringTool;
 use oat\ltiProctoring\controller\Monitor;
 use oat\ltiProctoring\controller\Reporting;
-use oat\ltiProctoring\scripts\install\RegisterProctoringLtiMessageFactory;
+use oat\ltiProctoring\scripts\install\RegisterLtiProctoringMessageFactory;
 use oat\ltiProctoring\scripts\install\SetupTestRunnerMessageService;
 use oat\taoLti\models\classes\LtiRoles;
 use oat\tao\model\user\TaoRoles;
@@ -74,7 +74,7 @@ return array(
             SetupTestRunnerMessageService::class,
             OverrideProctorService::class,
             AlterDeliveryMonitoringTable::class,
-            RegisterProctoringLtiMessageFactory::class,
+            RegisterLtiProctoringMessageFactory::class,
         ],
         'rdf' => array(
             __DIR__.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'install'.DIRECTORY_SEPARATOR.'ltiroles.rdf'

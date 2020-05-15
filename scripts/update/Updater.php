@@ -10,7 +10,7 @@ use oat\ltiProctoring\model\LtiListenerService;
 use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
 use oat\ltiProctoring\model\LtiMonitorParametersService;
 use oat\ltiProctoring\model\LtiResultCustomFieldsService;
-use oat\ltiProctoring\scripts\install\RegisterProctoringLtiMessageFactory;
+use oat\ltiProctoring\scripts\install\RegisterLtiProctoringMessageFactory;
 use oat\ltiProctoring\scripts\install\SetupTestSessionHistory;
 use oat\oatbox\event\EventManager;
 use oat\tao\scripts\update\OntologyUpdater;
@@ -255,7 +255,7 @@ class Updater extends \common_ext_ExtensionUpdater
 
         $this->skip('8.2.0', '8.3.0');
         if ($this->isVersion('8.3.0')) {
-            $this->runExtensionScript(RegisterProctoringLtiMessageFactory::class);
+            $this->runExtensionScript(RegisterLtiProctoringMessageFactory::class);
             $this->setVersion('9.0.0');
         }
     }

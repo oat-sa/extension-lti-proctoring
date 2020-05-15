@@ -23,15 +23,19 @@ namespace oat\ltiProctoring\scripts\install;
 
 
 use oat\ltiDeliveryProvider\model\navigation\LtiNavigationService;
-use oat\ltiProctoring\model\navigation\ProctoringLtiMessageFactory;
+use oat\ltiProctoring\model\navigation\LtiProctoringMessageFactory;
 use oat\oatbox\extension\InstallAction;
 
-class RegisterProctoringLtiMessageFactory extends InstallAction
+class RegisterLtiProctoringMessageFactory extends InstallAction
 {
     public function __invoke($params)
     {
+        if (!$this->getServiceLocator()->has(LtiNavigationService::SERVICE_ID)) {
+            return;
+        }
+
         $ltiNavigationService = $this->getServiceManager()->get(LtiNavigationService::SERVICE_ID);
-        $ltiNavigationService->setOption(LtiNavigationService::OPTION_MESSAGE_FACTORY, new ProctoringLtiMessageFactory());
+        $ltiNavigationService->setOption(LtiNavigationService::OPTION_MESSAGE_FACTORY, new LtiProctoringMessageFactory());
         $this->getServiceManager()->register(LtiNavigationService::SERVICE_ID, $ltiNavigationService);
     }
 }
