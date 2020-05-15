@@ -2,6 +2,7 @@
 
 namespace oat\ltiProctoring\scripts\update;
 
+use oat\ltiDeliveryProvider\model\navigation\LtiNavigationService;
 use oat\ltiProctoring\controller\DeliveryServer;
 use oat\ltiProctoring\controller\Reporting;
 use oat\ltiProctoring\model\delivery\ProctorService as ltiProctorService;
@@ -10,7 +11,7 @@ use oat\ltiProctoring\model\LtiListenerService;
 use oat\ltiProctoring\model\implementation\TestSessionHistoryService;
 use oat\ltiProctoring\model\LtiMonitorParametersService;
 use oat\ltiProctoring\model\LtiResultCustomFieldsService;
-use oat\ltiProctoring\scripts\install\RegisterLtiProctoringMessageFactory;
+use oat\ltiProctoring\model\navigation\LtiProctoringMessageFactory;
 use oat\ltiProctoring\scripts\install\SetupTestSessionHistory;
 use oat\oatbox\event\EventManager;
 use oat\tao\scripts\update\OntologyUpdater;
@@ -255,7 +256,10 @@ class Updater extends \common_ext_ExtensionUpdater
 
         $this->skip('8.2.0', '8.3.0');
         if ($this->isVersion('8.3.0')) {
-            $this->runExtensionScript(RegisterLtiProctoringMessageFactory::class);
+            $ltiNavigationService = $this->getServiceManager()->get(LtiNavigationService::SERVICE_ID);
+            $ltiNavigationService->setOption(LtiNavigationService::OPTION_MESSAGE_FACTORY, new LtiProctoringMessageFactory());
+            $this->getServiceManager()->register(LtiNavigationService::SERVICE_ID, $ltiNavigationService);
+
             $this->setVersion('9.0.0');
         }
     }
