@@ -21,6 +21,7 @@
 
 namespace oat\ltiProctoring\controller;
 
+use oat\tao\helpers\UrlHelper;
 use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
@@ -61,9 +62,16 @@ class DeliveryServer extends ProctoringDeliveryServer
     {
         $deliveryExecution = $this->getCurrentDeliveryExecution();
         if ($deliveryExecution->getState()->getUri() == ProctoredDeliveryExecution::STATE_PAUSED) {
-            $redirectUrl = _url('awaitingAuthorization', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getIdentifier()]);
+            $redirectUrl = $this->getServiceLocator()->get(UrlHelper::class)->buildUrl(
+                'awaitingAuthorization',
+                'DeliveryServer',
+                'ltiProctoring',
+                [
+                    'deliveryExecution' => $deliveryExecution->getIdentifier()
+                ]
+            );
         } else {
-            $redirectUrl = LTIDeliveryTool::singleton()->getFinishUrl($deliveryExecution);
+            $redirectUrl = $this->getServiceLocator()->get(LTIDeliveryTool::class)->getFinishUrl($deliveryExecution);
         }
 
         $this->redirect($redirectUrl);
