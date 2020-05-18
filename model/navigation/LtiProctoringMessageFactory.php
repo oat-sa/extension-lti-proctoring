@@ -50,16 +50,16 @@ class LtiProctoringMessageFactory extends ConfigurableService implements LtiMess
     {
         switch ($executionStateUri) {
             case DeliveryExecutionInterface::STATE_FINISHED:
-                $eventId = DeliveryLogEvent::EVENT_ID_TEST_FINISHED;
+                $eventId = DeliveryLogEvent::EVENT_ID_TEST_EXIT_CODE;
                 break;
             case DeliveryExecutionInterface::STATE_TERMINATED:
-                $eventId = DeliveryLogEvent::EVENT_ID_TEST_TERMINATED;
+                $eventId = DeliveryLogEvent::EVENT_ID_TEST_TERMINATE;
                 break;
             case DeliveryExecutionInterface::STATE_PAUSED:
-                $eventId = DeliveryLogEvent::EVENT_ID_TEST_PAUSED;
+                $eventId = DeliveryLogEvent::EVENT_ID_TEST_PAUSE;
                 break;
             case ProctoredDeliveryExecution::STATE_CANCELED:
-                $eventId = DeliveryLogEvent::EVENT_ID_TEST_CANCELED;
+                $eventId = DeliveryLogEvent::EVENT_ID_TEST_CANCEL;
                 break;
             default:
                 throw new InvalidArgumentException("Not supported delivery execution state URI provided: {$executionStateUri}");
