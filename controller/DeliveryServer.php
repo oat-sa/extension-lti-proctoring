@@ -25,6 +25,7 @@ use common_Exception;
 use common_exception_Error;
 use common_exception_NotFound;
 use common_exception_Unauthorized;
+use InterruptedActionException;
 use oat\tao\helpers\UrlHelper;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
 use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
@@ -64,14 +65,12 @@ class DeliveryServer extends ProctoringDeliveryServer
      * @throws LtiException
      * @throws common_Exception
      * @throws common_exception_Error
-     * @throws common_exception_NotFound
-     * @throws common_exception_Unauthorized
+     * @throws common_exception_NotFound|InterruptedActionException
      */
     public function runDeliveryExecution()
     {
         $deliveryExecution = $this->getCurrentDeliveryExecution();
 
-        // Sets the deliveryId to session.
         if (!$this->hasSessionAttribute(DeliveryExecution::getDeliveryIdSessionKey($deliveryExecution->getIdentifier()))) {
             $this->setSessionAttribute(
                 DeliveryExecution::getDeliveryIdSessionKey($deliveryExecution->getIdentifier()),
