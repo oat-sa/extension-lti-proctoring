@@ -21,7 +21,13 @@
 
 namespace oat\ltiProctoring\controller;
 
+use common_Exception;
+use common_exception_Error;
+use common_exception_NotFound;
+use common_exception_Unauthorized;
+use InterruptedActionException;
 use oat\tao\helpers\UrlHelper;
+use oat\taoDelivery\model\authorization\UnAuthorizedException;
 use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
@@ -53,6 +59,34 @@ class DeliveryServer extends ProctoringDeliveryServer
         }
         $deliveryExecution = $this->getCurrentDeliveryExecution();
         $this->setData('cancelUrl', _url('cancelExecution', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getIdentifier()]));
+    }
+
+    /**
+     * @throws LtiException
+     * @throws common_Exception
+     * @throws common_exception_Error
+     * @throws common_exception_NotFound|InterruptedActionException
+     */
+    public function runDeliveryExecution()
+    {
+        $deliveryExecution = $this->getCurrentDeliveryExecution();
+
+        if (!$this->hasSessionAttribute(DeliveryExecution::getDeliveryIdSessionKey($deliveryExecution->getIdentifier()))) {
+            $this->setSessionAttribute(
+                DeliveryExecution::getDeliveryIdSessionKey($deliveryExecution->getIdentifier()),
+                $deliveryExecution->getDelivery()->getUri()
+            );
+        }
+
+        try {
+            $this->verifyDeliveryExecutionAuthorized($deliveryExecution);
+
+            parent::runDeliveryExecution();
+        } catch (UnAuthorizedException $e) {
+            // for the lti - correct lti error (link with error message)
+            $redirectUrl = $this->getServiceLocator()->get(LTIDeliveryTool::class)->getFinishUrl($deliveryExecution);
+            $this->redirect($redirectUrl);
+        }
     }
 
     /**
