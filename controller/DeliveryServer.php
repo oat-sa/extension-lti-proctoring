@@ -28,6 +28,7 @@ use common_exception_Unauthorized;
 use InterruptedActionException;
 use oat\tao\helpers\UrlHelper;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
+use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
 use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
@@ -37,6 +38,7 @@ use oat\ltiDeliveryProvider\model\execution\LtiDeliveryExecutionService;
 use oat\taoLti\models\classes\LtiException;
 use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
 use oat\taoQtiTest\models\QtiTestExtractionFailedException;
+use oat\taoQtiTest\models\TestSessionService;
 
 /**
  * Override the default DeliveryServer Controller
@@ -58,7 +60,24 @@ class DeliveryServer extends ProctoringDeliveryServer
             throw new LtiException($e->getMessage());
         }
         $deliveryExecution = $this->getCurrentDeliveryExecution();
+
+        if ($this->isAuthorizedInitLaunch($deliveryExecution)) {
+            \oat\taoProctoring\helpers\DeliveryHelper::authoriseExecutions([$deliveryExecution]);
+            $url = _url('runDeliveryExecution', null, null, [
+                'deliveryExecution' => $deliveryExecution->getIdentifier()
+            ]);
+            $this->redirect($url);
+        }
+
         $this->setData('cancelUrl', _url('cancelExecution', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getIdentifier()]));
+    }
+
+    private function isAuthorizedInitLaunch(DeliveryExecutionInterface $deliveryExecution): bool
+    {
+        $ts = $this->getServiceLocator()->get(TestSessionService::SERVICE_ID)->getTestSession($deliveryExecution);
+        $autoAuthorize = true;
+
+        return $ts === null && $autoAuthorize === true;
     }
 
     /**
