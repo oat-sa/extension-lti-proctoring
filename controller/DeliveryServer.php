@@ -26,8 +26,12 @@ use common_exception_Error;
 use common_exception_NotFound;
 use common_exception_Unauthorized;
 use InterruptedActionException;
+use oat\oatbox\session\SessionService;
+use oat\oatbox\user\User;
 use oat\tao\helpers\UrlHelper;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
+use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
+use oat\taoLti\models\classes\user\LtiUser;
 use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
@@ -36,7 +40,9 @@ use oat\taoLti\models\classes\LtiService;
 use oat\ltiDeliveryProvider\model\execution\LtiDeliveryExecutionService;
 use oat\taoLti\models\classes\LtiException;
 use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
+use oat\taoProctoring\model\implementation\DeliveryExecutionStateService;
 use oat\taoQtiTest\models\QtiTestExtractionFailedException;
+use oat\taoQtiTest\models\TestSessionService;
 
 /**
  * Override the default DeliveryServer Controller
@@ -58,7 +64,58 @@ class DeliveryServer extends ProctoringDeliveryServer
             throw new LtiException($e->getMessage());
         }
         $deliveryExecution = $this->getCurrentDeliveryExecution();
+        $user = $this->getServiceLocator()->get(SessionService::SERVICE_ID)->getCurrentUser();
+
+        if ($this->isAutoAuthorizationEnabled($deliveryExecution, $user)) {
+            \oat\taoProctoring\helpers\DeliveryHelper::authoriseExecutions([$deliveryExecution]);
+            $url = _url('runDeliveryExecution', null, null, [
+                'deliveryExecution' => $deliveryExecution->getIdentifier()
+            ]);
+            $this->redirect($url);
+        }
+
         $this->setData('cancelUrl', _url('cancelExecution', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getIdentifier()]));
+    }
+
+    private function isAutoAuthorizationEnabled(DeliveryExecutionInterface $deliveryExecution, User $user): bool
+    {
+        if (!$this->isInitialLaunch($deliveryExecution)) {
+            return false;
+        }
+
+        return $this->isAutoStartEnabled($user);
+    }
+
+    private function isInitialLaunch(DeliveryExecutionInterface $deliveryExecution): bool
+    {
+        return null === $this->getServiceLocator()->get(TestSessionService::SERVICE_ID)->getTestSession($deliveryExecution);
+    }
+
+    private function isAutoStartEnabled(User $user): bool
+    {
+        $autostartEnabled = false;
+        if (!$user instanceof LtiUser) {
+            return $autostartEnabled;
+        }
+
+        try {
+            $autostartParamName = "custom_autostart";
+            $ltiLaunchData = $user->getLaunchData();
+            if ($ltiLaunchData->hasVariable($autostartParamName)) {
+                $autostartEnabled = $ltiLaunchData->getBooleanVariable($autostartParamName);
+            }
+            return $autostartEnabled;
+        } catch (LtiException $e) {
+            $this->logWarning(
+                "Invalid custom LTI parameter",
+                [
+                    "error" => $e->getMessage(),
+                    "trace" => $e->getTraceAsString()
+                ]
+            );
+
+            return $autostartEnabled;
+        }
     }
 
     /**
@@ -67,7 +124,7 @@ class DeliveryServer extends ProctoringDeliveryServer
      * @throws common_exception_Error
      * @throws common_exception_NotFound|InterruptedActionException
      */
-    public function runDeliveryExecution()
+    public function runDeliveryExecution(): void
     {
         $deliveryExecution = $this->getCurrentDeliveryExecution();
 
