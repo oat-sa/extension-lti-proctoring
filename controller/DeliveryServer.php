@@ -15,8 +15,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  * Copyright (c) 2017 (original work) Open Assessment Technologies SA (under the project TAO-PRODUCT);
- *
- *
  */
 
 namespace oat\ltiProctoring\controller;
@@ -24,37 +22,33 @@ namespace oat\ltiProctoring\controller;
 use common_Exception;
 use common_exception_Error;
 use common_exception_NotFound;
-use common_exception_Unauthorized;
 use InterruptedActionException;
+use oat\ltiDeliveryProvider\model\execution\LtiDeliveryExecutionService;
+use oat\ltiDeliveryProvider\model\LTIDeliveryTool;
 use oat\tao\helpers\UrlHelper;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
-use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
 use oat\taoDelivery\model\execution\DeliveryExecution;
-use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
-use oat\ltiDeliveryProvider\model\LTIDeliveryTool;
-use oat\taoLti\models\classes\LtiService;
-use oat\ltiDeliveryProvider\model\execution\LtiDeliveryExecutionService;
 use oat\taoLti\models\classes\LtiException;
 use oat\taoLti\models\classes\LtiMessages\LtiErrorMessage;
+use oat\taoLti\models\classes\LtiService;
+use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
+use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
 use oat\taoQtiTest\models\QtiTestExtractionFailedException;
 
 /**
- * Override the default DeliveryServer Controller
- *
- * @package ltiProctoring
+ * Override the default DeliveryServer Controller.
  */
 class DeliveryServer extends ProctoringDeliveryServer
 {
     /**
      * Delivery execution authorization awaiting screen
-     * Overrides cancel URL
+     * Overrides cancel URL.
      */
     public function awaitingAuthorization()
     {
         try {
             parent::awaitingAuthorization();
-
-        }catch (QtiTestExtractionFailedException $e) {
+        } catch (QtiTestExtractionFailedException $e) {
             throw new LtiException($e->getMessage());
         }
         $deliveryExecution = $this->getCurrentDeliveryExecution();
@@ -67,7 +61,7 @@ class DeliveryServer extends ProctoringDeliveryServer
      * @throws common_exception_Error
      * @throws common_exception_NotFound|InterruptedActionException
      */
-    public function runDeliveryExecution()
+    public function runDeliveryExecution(): void
     {
         $deliveryExecution = $this->getCurrentDeliveryExecution();
 
@@ -90,18 +84,18 @@ class DeliveryServer extends ProctoringDeliveryServer
     }
 
     /**
-     * Redirect user to return URL
+     * Redirect user to return URL.
      */
     public function finishDeliveryExecution()
     {
         $deliveryExecution = $this->getCurrentDeliveryExecution();
-        if ($deliveryExecution->getState()->getUri() == ProctoredDeliveryExecution::STATE_PAUSED) {
+        if (ProctoredDeliveryExecution::STATE_PAUSED == $deliveryExecution->getState()->getUri()) {
             $redirectUrl = $this->getServiceLocator()->get(UrlHelper::class)->buildUrl(
                 'awaitingAuthorization',
                 'DeliveryServer',
                 'ltiProctoring',
                 [
-                    'deliveryExecution' => $deliveryExecution->getIdentifier()
+                    'deliveryExecution' => $deliveryExecution->getIdentifier(),
                 ]
             );
         } else {
@@ -112,21 +106,27 @@ class DeliveryServer extends ProctoringDeliveryServer
     }
 
     /**
-     * Overrides the return URL
+     * Overrides the return URL.
+     *
      * @return string the URL
      */
     protected function getReturnUrl()
     {
         $deliveryExecution = $this->getCurrentDeliveryExecution();
-        return _url('finishDeliveryExecution', 'DeliveryServer', 'ltiProctoring',
+
+        return _url(
+            'finishDeliveryExecution',
+            'DeliveryServer',
+            'ltiProctoring',
             ['deliveryExecution' => $deliveryExecution->getIdentifier()]
         );
     }
 
     /**
-     * @return DeliveryExecution
      * @throws LtiException if given delivery exection does not correspond to current lti session
      * @throws \Exception
+     *
+     * @return DeliveryExecution
      */
     protected function getCurrentDeliveryExecution()
     {
