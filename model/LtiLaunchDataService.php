@@ -27,6 +27,9 @@ use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use RuntimeException;
 use oat\ltiDeliveryProvider\model\LtiLaunchDataService as BaseLtiLaunchDataService;
 
+/**
+ * @deprecated
+ */
 class LtiLaunchDataService extends BaseLtiLaunchDataService
 {
     /**
