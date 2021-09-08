@@ -67,7 +67,7 @@ class DeliveryServer extends ProctoringDeliveryServer
      * @throws common_exception_Error
      * @throws common_exception_NotFound|InterruptedActionException
      */
-    public function runDeliveryExecution()
+    public function runDeliveryExecution(): void
     {
         $deliveryExecution = $this->getCurrentDeliveryExecution();
 

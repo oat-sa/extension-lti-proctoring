@@ -20,6 +20,7 @@
  */
 namespace oat\ltiProctoring\model;
 
+use InvalidArgumentException;
 use oat\ltiProctoring\model\delivery\ProctorService;
 use oat\ltiProctoring\model\execution\LtiDeliveryExecutionContext;
 use oat\oatbox\service\ConfigurableService;
@@ -88,7 +89,9 @@ class LtiListenerService extends ConfigurableService
                 $contextId = $launchData->getVariable(LtiLaunchData::CONTEXT_ID);
                 $data->update(LtiLaunchData::CONTEXT_ID, $contextId);
 
-                $executionContext = $this->createExecutionContext($executionId, $launchData);
+                if ($executionContext = $data->getDeliveryExecutionContext() === null) {
+                    $executionContext = $this->createExecutionContext($executionId, $launchData);
+                }
                 if ($executionContext instanceof DeliveryExecutionContextInterface) {
                     $data->setDeliveryExecutionContext($executionContext);
                 }
@@ -210,8 +213,10 @@ class LtiListenerService extends ConfigurableService
      * @param LtiLaunchData $launchData
      * @return DeliveryExecutionContext|null
      */
-    private function createExecutionContext($executionId, LtiLaunchData $launchData)
-    {
+    private function createExecutionContext(
+        string $executionId,
+        LtiLaunchData $launchData
+    ): DeliveryExecutionContextInterface {
         $executionContext = null;
         try {
             $executionContext = new DeliveryExecutionContext(
@@ -220,7 +225,7 @@ class LtiListenerService extends ConfigurableService
                 LtiDeliveryExecutionContext::EXECUTION_CONTEXT_TYPE,
                 $launchData->getVariable(LtiLaunchData::CONTEXT_LABEL)
             );
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException|LtiVariableMissingException $e) {
             $this->logInfo('Delivery execution context object can not be created. Reason: ' . $e->getMessage());
         }
 
