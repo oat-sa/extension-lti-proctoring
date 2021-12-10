@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2017 (original work) Open Assessment Technologies SA;
+ * Copyright (c) 2021 (original work) Open Assessment Technologies SA;
  *
  */
 
@@ -23,16 +23,19 @@ namespace oat\ltiProctoring\model\delivery;
 
 use common_session_Session;
 use oat\oatbox\session\SessionService;
+use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
 use oat\taoLti\models\classes\LtiException;
 use oat\taoLti\models\classes\LtiInvalidVariableException;
 use oat\taoLti\models\classes\LtiLaunchData;
 use oat\taoLti\models\classes\TaoLtiSession;
+use oat\taoLti\models\classes\user\LtiUser;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationService;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
 use oat\oatbox\user\User;
 use oat\taoProctoring\model\DelegatedServiceHandler;
 use oat\taoLti\models\classes\LtiRoles;
+use oat\taoQtiTest\models\TestSessionService;
 
 /**
  * Manage the Delivery authorization.
@@ -40,8 +43,8 @@ use oat\taoLti\models\classes\LtiRoles;
  */
 class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService implements DelegatedServiceHandler
 {
-
-    const CUSTOM_LTI_PROCTORED = 'custom_proctored';
+    public const CUSTOM_LTI_PROCTORED = 'custom_proctored';
+    public const CUSTOM_LTI_AUTOSTART = 'custom_autostart';
 
     /**
      * (non-PHPdoc)
@@ -111,5 +114,48 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
             LtiRoles::CONTEXT_ADMINISTRATOR,
         ], $user->getRoles());
         return !empty($ltiRoles);
+    }
+
+    protected function isMissingProctorAuthorization(DeliveryExecutionInterface $deliveryExecution, User $user)
+    {
+        if ($this->isInitialStart($deliveryExecution) && $this->isAutostartEnabled($user)) {
+            return false;
+        }
+
+        return parent::isMissingProctorAuthorization($deliveryExecution, $user);
+    }
+
+    private function isInitialStart(DeliveryExecutionInterface $deliveryExecution)
+    {
+        $testSession = $this->getServiceLocator()->get(TestSessionService::SERVICE_ID)
+            ->getTestSession($deliveryExecution);
+
+        return null === $testSession;
+    }
+
+    private function isAutostartEnabled(User $user)
+    {
+        $autostartEnabled = false;
+        if (!$user instanceof LtiUser) {
+            return $autostartEnabled;
+        }
+
+        try {
+            $ltiLaunchData = $user->getLaunchData();
+            if ($ltiLaunchData->hasVariable(self::CUSTOM_LTI_AUTOSTART)) {
+                $autostartEnabled = $ltiLaunchData->getBooleanVariable(self::CUSTOM_LTI_AUTOSTART);
+            }
+            return $autostartEnabled;
+        } catch (LtiException $e) {
+            $this->logWarning(
+                "Invalid custom LTI parameter",
+                [
+                    "error" => $e->getMessage(),
+                    "trace" => $e->getTraceAsString()
+                ]
+            );
+
+            return $autostartEnabled;
+        }
     }
 }
