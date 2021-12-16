@@ -27,12 +27,12 @@
         "oat-sa/extension-tao-ltideliveryprovider" : ">=12.0.0",
         "oat-sa/extension-tao-lti" : ">=12.0.0",
         "oat-sa/extension-tao-outcomeui" : ">=10.0.0",
-        "oat-sa/extension-tao-proctoring" : ">=20.0.0",
+        "oat-sa/extension-tao-proctoring" : ">=20.2.2",
         "oat-sa/extension-tao-testqti" : ">=41.0.0"
     },
     "autoload" : {
         "psr-4" : {
             "oat\\ltiProctoring\\" : ""
         }
-    } 
+    }
 }
