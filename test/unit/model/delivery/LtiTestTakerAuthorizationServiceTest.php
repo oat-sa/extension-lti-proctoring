@@ -11,11 +11,13 @@ use oat\generis\model\data\Ontology;
 use oat\ltiProctoring\model\delivery\LtiTestTakerAuthorizationService;
 use oat\oatbox\session\SessionService;
 use oat\oatbox\user\User;
+use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoLti\models\classes\LtiException;
 use oat\taoLti\models\classes\LtiInvalidVariableException;
 use oat\taoLti\models\classes\LtiLaunchData;
 use oat\taoLti\models\classes\TaoLtiSession;
 use oat\taoLti\models\classes\user\LtiUser;
+use oat\taoQtiTest\models\TestSessionService;
 
 class LtiTestTakerAuthorizationServiceTest extends TestCase
 {
@@ -100,6 +102,26 @@ class LtiTestTakerAuthorizationServiceTest extends TestCase
         $this->expectException(LtiException::class);
 
         $this->object->isProctored($deliveryUri, $user);
+    }
+
+    public function testVerifyResumeAuthorizationWithAutostartParameterProctorAuthorizationSkippedForLaunch()
+    {
+        $delivery = $this->getDeliveryMock();
+        $deliveryExecution = $this->getDeliveryExecutionMock('state', $delivery);
+        $user = $this->createMock(LtiUser::class);
+
+        $this->mockParentIsProctoredBehavior('http://www.tao.lu/Ontologies/TAODelivery.rdf#ComplyEnabled');
+
+        $ltiVarName = 'custom_autostart';
+        $launchDataMock = $this->getLtiLaunchDataMock($ltiVarName, true, 'true');
+        $user->method('getLaunchData')->willReturn($launchDataMock);
+
+        $slMock = $this->getServiceLocatorMock([
+            Ontology::SERVICE_ID => $this->ontologyMock,
+            TestSessionService::SERVICE_ID => $this->createMock(TestSessionService::class)
+        ]);
+        $this->object->setServiceLocator($slMock);
+        $this->assertNull($this->object->verifyResumeAuthorization($deliveryExecution, $user));
     }
 
     public function dataProviderTestIsProctored()
@@ -204,5 +226,41 @@ class LtiTestTakerAuthorizationServiceTest extends TestCase
         $launchDataMock->method('getBooleanVariable')->willReturn($ltiVarValue);
 
         return $launchDataMock;
+    }
+
+    /**
+     * @return core_kernel_classes_Resource|MockObject
+     */
+    private function getDeliveryMock()
+    {
+        $delivery = $this
+            ->getMockBuilder(core_kernel_classes_Resource::class)
+            ->setConstructorArgs(['deliveryUri'])
+            ->getMock();
+        $delivery->method('getUri')->willReturn('deliveryUri');
+
+        $this->ontologyMock->method('getResource')->willReturn($delivery);
+
+        return $delivery;
+    }
+
+    /**
+     * @param string $state
+     * @param $delivery
+     * @return DeliveryExecution|MockObject
+     * @throws \common_exception_Error
+     */
+    private function getDeliveryExecutionMock($state, $delivery)
+    {
+        $deliveryExecutionMock = $this
+            ->getMockBuilder(DeliveryExecution::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $deliveryExecutionMock->method('getState')->willReturn(new core_kernel_classes_Resource($state));
+        $deliveryExecutionMock->method('getDelivery')->willReturn($delivery);
+
+
+        return $deliveryExecutionMock;
     }
 }
