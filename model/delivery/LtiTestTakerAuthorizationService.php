@@ -135,27 +135,24 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
 
     private function isAutostartEnabled(User $user)
     {
-        $autostartEnabled = false;
         if (!$user instanceof LtiUser) {
-            return $autostartEnabled;
+            return false;
         }
 
         try {
             $ltiLaunchData = $user->getLaunchData();
-            if ($ltiLaunchData->hasVariable(self::CUSTOM_LTI_AUTOSTART)) {
-                $autostartEnabled = $ltiLaunchData->getBooleanVariable(self::CUSTOM_LTI_AUTOSTART);
+            if (!$ltiLaunchData->hasVariable(self::CUSTOM_LTI_AUTOSTART)) {
+                return false;
             }
-            return $autostartEnabled;
+
+            return $ltiLaunchData->getBooleanVariable(self::CUSTOM_LTI_AUTOSTART);
         } catch (LtiException $e) {
             $this->logWarning(
                 "Invalid custom LTI parameter",
-                [
-                    "error" => $e->getMessage(),
-                    "trace" => $e->getTraceAsString()
-                ]
+                ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]
             );
 
-            return $autostartEnabled;
+            return false;
         }
     }
 }
