@@ -34,7 +34,7 @@ use oat\taoLti\models\classes\user\LtiUser;
 use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
 use oat\taoQtiTest\models\TestSessionService;
 
-final class AutoStartProctorService
+class AutoStartProctorService
 {
     private const CUSTOM_LTI_AUTOSTART = 'custom_autostart';
 
