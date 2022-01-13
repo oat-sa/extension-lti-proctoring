@@ -76,7 +76,7 @@ class DeliveryServer extends ProctoringDeliveryServer
 
     private function getAutoStartProctorService(): AutoStartProctorService
     {
-        return $this->getPsrContainer()→get(AutoStartProctorService::class);
+        return $this->getPsrContainer()->get(AutoStartProctorService::class);
     }
 
     /**
