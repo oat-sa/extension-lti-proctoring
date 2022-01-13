@@ -24,8 +24,9 @@ namespace oat\ltiProctoring\controller;
 use common_Exception;
 use common_exception_Error;
 use common_exception_NotFound;
-use common_exception_Unauthorized;
+use common_session_SessionManager;
 use InterruptedActionException;
+use oat\ltiProctoring\model\delivery\AutoStartProctorService;
 use oat\tao\helpers\UrlHelper;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
 use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
@@ -51,14 +52,31 @@ class DeliveryServer extends ProctoringDeliveryServer
      */
     public function awaitingAuthorization()
     {
+        $deliveryExecution = $this->getCurrentDeliveryExecution();
+        $this->validateAutoStart($deliveryExecution);
+
         try {
             parent::awaitingAuthorization();
 
         }catch (QtiTestExtractionFailedException $e) {
             throw new LtiException($e->getMessage());
         }
-        $deliveryExecution = $this->getCurrentDeliveryExecution();
+
         $this->setData('cancelUrl', _url('cancelExecution', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getIdentifier()]));
+    }
+
+    private function validateAutoStart(DeliveryExecution $deliveryExecution): void
+    {
+        $user = common_session_SessionManager::getSession()->getUser();
+        $redirectUrl = $this->getAutoStartProctorService()->execute($deliveryExecution, $user, $this->getSession());
+        if ($redirectUrl) {
+            $this->redirect($redirectUrl);
+        }
+    }
+
+    private function getAutoStartProctorService(): AutoStartProctorService
+    {
+        return $this->getServiceManager()->getContainer()->get(AutoStartProctorService::class);
     }
 
     /**
