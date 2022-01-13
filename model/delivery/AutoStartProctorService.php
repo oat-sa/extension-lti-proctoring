@@ -95,7 +95,7 @@ final class AutoStartProctorService
         return false;
     }
 
-    public function getUrlRunDeliveryExecution(DeliveryExecutionInterface $deliveryExecution, Session $session): string
+    private function getUrlRunDeliveryExecution(DeliveryExecutionInterface $deliveryExecution, Session $session): string
     {
         return _url(
             'runDeliveryExecution',
