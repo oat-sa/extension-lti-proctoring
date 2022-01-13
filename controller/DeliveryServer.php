@@ -26,7 +26,7 @@ use common_exception_Error;
 use common_exception_NotFound;
 use common_session_SessionManager;
 use InterruptedActionException;
-use oat\ltiProctoring\model\delivery\AutoStartProctorService;
+use oat\ltiProctoring\model\delivery\AutoStartProctoredDeliveryService;
 use oat\tao\helpers\UrlHelper;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
 use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
@@ -67,16 +67,19 @@ class DeliveryServer extends ProctoringDeliveryServer
 
     private function validateAutoStart(DeliveryExecution $deliveryExecution): void
     {
-        $user = common_session_SessionManager::getSession()->getUser();
-        $redirectUrl = $this->getAutoStartProctorService()->execute($deliveryExecution, $user, $this->getSession());
+        $redirectUrl = $this->getAutoStartProctoredDeliveryService()->execute(
+            $deliveryExecution,
+            common_session_SessionManager::getSession()->getUser()
+        );
+
         if ($redirectUrl) {
             $this->redirect($redirectUrl);
         }
     }
 
-    private function getAutoStartProctorService(): AutoStartProctorService
+    private function getAutoStartProctoredDeliveryService(): AutoStartProctoredDeliveryService
     {
-        return $this->getPsrContainer()->get(AutoStartProctorService::class);
+        return $this->getPsrContainer()->get(AutoStartProctoredDeliveryService::class);
     }
 
     /**

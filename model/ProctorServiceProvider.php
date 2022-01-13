@@ -24,8 +24,9 @@ declare(strict_types=1);
 namespace oat\ltiProctoring\model;
 
 use oat\generis\model\DependencyInjection\ContainerServiceProviderInterface;
-use oat\ltiProctoring\model\delivery\AutoStartProctorService;
+use oat\ltiProctoring\model\delivery\AutoStartProctoredDeliveryService;
 use oat\oatbox\log\LoggerService;
+use oat\taoProctoring\model\authorization\TestTakerAuthorizationDelegator;
 use oat\taoQtiTest\models\TestSessionService;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
@@ -42,11 +43,12 @@ final class ProctorServiceProvider implements ContainerServiceProviderInterface
     private function configAutoStartProctorService(ServicesConfigurator $services): void
     {
         $services
-            ->set(AutoStartProctorService::class, AutoStartProctorService::class)
+            ->set(AutoStartProctoredDeliveryService::class, AutoStartProctoredDeliveryService::class)
             ->public()
             ->args(
                 [
                     service(TestSessionService::SERVICE_ID),
+                    service(TestTakerAuthorizationDelegator::SERVICE_ID),
                     service(LoggerService::SERVICE_ID)
                 ]
             );

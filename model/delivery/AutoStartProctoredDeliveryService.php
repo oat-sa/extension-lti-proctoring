@@ -23,18 +23,17 @@ declare(strict_types=1);
 
 namespace oat\ltiProctoring\model\delivery;
 
-use common_session_Session as Session;
 use oat\oatbox\log\LoggerService;
 use oat\oatbox\user\User;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
 use oat\taoLti\models\classes\LtiException;
-use oat\taoLti\models\classes\TaoLtiSession;
 use oat\taoLti\models\classes\user\LtiUser;
+use oat\taoProctoring\model\authorization\TestTakerAuthorizationDelegator;
 use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
 use oat\taoQtiTest\models\TestSessionService;
 
-class AutoStartProctorService
+class AutoStartProctoredDeliveryService
 {
     private const CUSTOM_LTI_AUTOSTART = 'custom_autostart';
 
@@ -44,34 +43,53 @@ class AutoStartProctorService
     private $testSessionService;
 
     /**
+     * @var TestTakerAuthorizationDelegator
+     */
+    private $testTakerAuthorizationDelegator;
+
+    /**
      * @var LoggerService
      */
     private $logger;
 
-    public function __construct(TestSessionService $testSessionService, LoggerService $logger)
-    {
+    public function __construct(
+        TestSessionService $testSessionService,
+        TestTakerAuthorizationDelegator $testTakerAuthorizationDelegator,
+        LoggerService $logger
+    ) {
         $this->testSessionService = $testSessionService;
+        $this->testTakerAuthorizationDelegator = $testTakerAuthorizationDelegator;
         $this->logger = $logger;
     }
 
-    public function execute(DeliveryExecution $deliveryExecution, User $user, Session $session): ?string
+    public function execute(DeliveryExecution $deliveryExecution, User $user): ?string
     {
-        if (false === $this->validateAutoStart($deliveryExecution, $user)) {
+        $deliveryExecutionIdentifier = $deliveryExecution->getIdentifier();
+        if (false === $this->testTakerAuthorizationDelegator->isProctored($deliveryExecutionIdentifier, $user)) {
+            return null;
+        }
+
+        if (false === $this->shouldSkipManualAuthorization($deliveryExecution, $user)) {
             return null;
         }
 
         $deliveryExecution->getImplementation()->setState(ProctoredDeliveryExecution::STATE_AUTHORIZED);
 
-        return $this->getUrlRunDeliveryExecution($deliveryExecution, $session);
+        return $this->getUrlRunDeliveryExecution($deliveryExecution);
     }
 
-    private function validateAutoStart(DeliveryExecution $deliveryExecution, User $user): bool
+    private function shouldSkipManualAuthorization(DeliveryExecution $deliveryExecution, User $user): bool
     {
-        if (null === $this->testSessionService->getTestSession($deliveryExecution)) {
+        if ($this->isInitialStart($deliveryExecution)) {
             return $this->isAutostartEnabled($user);
         }
 
         return false;
+    }
+
+    private function isInitialStart(DeliveryExecution $deliveryExecution): bool
+    {
+        return null === $this->testSessionService->getTestSession($deliveryExecution);
     }
 
     private function isAutostartEnabled(User $user): bool
@@ -95,12 +113,12 @@ class AutoStartProctorService
         return false;
     }
 
-    private function getUrlRunDeliveryExecution(DeliveryExecutionInterface $deliveryExecution, Session $session): string
+    private function getUrlRunDeliveryExecution(DeliveryExecutionInterface $deliveryExecution): string
     {
         return _url(
             'runDeliveryExecution',
             'DeliveryServer',
-            $session instanceof TaoLtiSession ? 'ltiProctoring' : 'taoProctoring',
+            'ltiProctoring',
             ['deliveryExecution' => $deliveryExecution->getIdentifier()]
         );
     }
