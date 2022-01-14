@@ -21,6 +21,7 @@
 use oat\ltiProctoring\controller\ProctoringTool;
 use oat\ltiProctoring\controller\Monitor;
 use oat\ltiProctoring\controller\Reporting;
+use oat\ltiProctoring\model\ProctorServiceProvider;
 use oat\ltiProctoring\scripts\install\RegisterLtiProctoringMessageFactory;
 use oat\ltiProctoring\scripts\install\SetupTestRunnerMessageService;
 use oat\taoLti\models\classes\LtiRoles;
@@ -82,5 +83,8 @@ return array(
 
         #BASE URL (usually the domain root)
         'BASE_URL' => ROOT_URL.'ltiProctoring/',
-    )
+    ),
+    'containerServiceProviders' => [
+        ProctorServiceProvider::class
+    ]
 );
