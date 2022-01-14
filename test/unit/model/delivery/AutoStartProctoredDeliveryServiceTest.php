@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace oat\ltiProctoring\test\unit\model\delivery;
 
+use core_kernel_classes_Resource;
 use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
 use oat\taoLti\models\classes\LtiException;
 use oat\taoLti\models\classes\LtiLaunchData;
@@ -54,29 +55,38 @@ final class AutoStartProctoredDeliveryServiceTest extends TestCase
     {
         $this->testTakerAuthorizationDelegator->method('isProctored')->willReturn(false);
 
-        $deliveryExecution = $this->createMock(DeliveryExecution::class);
-        $user = $this->createMock(User::class);
-        $url = $this->autoStartProctoredDeliveryService->execute($deliveryExecution, $user);
+        $deliveryResource = $this->createMock(core_kernel_classes_Resource::class);
 
-        self::assertNull($url);
+        $deliveryExecution = $this->createMock(DeliveryExecution::class);
+        $deliveryExecution->method('getDelivery')->willReturn($deliveryResource);
+
+        $user = $this->createMock(User::class);
+
+        self::assertFalse($this->autoStartProctoredDeliveryService->execute($deliveryExecution, $user));
     }
 
     public function testExecuteWithoutSessionReturnNull(): void
     {
         $this->testTakerAuthorizationDelegator->method('isProctored')->willReturn(true);
 
-        $deliveryExecution = $this->createMock(DeliveryExecution::class);
-        $user = $this->createMock(User::class);
-        $url = $this->autoStartProctoredDeliveryService->execute($deliveryExecution, $user);
+        $deliveryResource = $this->createMock(core_kernel_classes_Resource::class);
 
-        self::assertNull($url);
+        $deliveryExecution = $this->createMock(DeliveryExecution::class);
+        $deliveryExecution->method('getDelivery')->willReturn($deliveryResource);
+
+        $user = $this->createMock(User::class);
+
+        self::assertFalse($this->autoStartProctoredDeliveryService->execute($deliveryExecution, $user));
     }
 
     public function testExecuteWithoutCustomAutoStartReturnNull(): void
     {
         $this->testTakerAuthorizationDelegator->method('isProctored')->willReturn(true);
 
+        $deliveryResource = $this->createMock(core_kernel_classes_Resource::class);
+
         $deliveryExecution = $this->createMock(DeliveryExecution::class);
+        $deliveryExecution->method('getDelivery')->willReturn($deliveryResource);
 
         $ltiLaunchData = $this->createMock(LtiLaunchData::class);
         $ltiLaunchData->method('hasVariable')->willReturn(false);
@@ -84,16 +94,17 @@ final class AutoStartProctoredDeliveryServiceTest extends TestCase
         $user = $this->createMock(LtiUser::class);
         $user->method('getLaunchData')->willReturn($ltiLaunchData);
 
-        $url = $this->autoStartProctoredDeliveryService->execute($deliveryExecution, $user);
-
-        self::assertNull($url);
+        self::assertFalse($this->autoStartProctoredDeliveryService->execute($deliveryExecution, $user));
     }
 
     public function testExecuteLogWarningReturnNull(): void
     {
         $this->testTakerAuthorizationDelegator->method('isProctored')->willReturn(true);
 
+        $deliveryResource = $this->createMock(core_kernel_classes_Resource::class);
+
         $deliveryExecution = $this->createMock(DeliveryExecution::class);
+        $deliveryExecution->method('getDelivery')->willReturn($deliveryResource);
 
         $ltiLaunchData = $this->createMock(LtiLaunchData::class);
         $ltiLaunchData->method('hasVariable')->willReturn(true);
@@ -104,9 +115,7 @@ final class AutoStartProctoredDeliveryServiceTest extends TestCase
 
         $this->loggerService->expects($this->once())->method('warning');
 
-        $url = $this->autoStartProctoredDeliveryService->execute($deliveryExecution, $user);
-
-        self::assertNull($url);
+        self::assertFalse($this->autoStartProctoredDeliveryService->execute($deliveryExecution, $user));
     }
 
     public function testExecuteUpdateStateReturnUrl(): void
@@ -116,8 +125,11 @@ final class AutoStartProctoredDeliveryServiceTest extends TestCase
         $deliveryExecutionImplementation = $this->createMock(DeliveryExecutionInterface::class);
         $deliveryExecutionImplementation->expects($this->once())->method('setState');
 
+        $deliveryResource = $this->createMock(core_kernel_classes_Resource::class);
+
         $deliveryExecution = $this->createMock(DeliveryExecution::class);
         $deliveryExecution->method('getIdentifier')->willReturn('id');
+        $deliveryExecution->method('getDelivery')->willReturn($deliveryResource);
         $deliveryExecution->method('getImplementation')->willReturn($deliveryExecutionImplementation);
 
         $ltiLaunchData = $this->createMock(LtiLaunchData::class);
@@ -127,8 +139,6 @@ final class AutoStartProctoredDeliveryServiceTest extends TestCase
         $user = $this->createMock(LtiUser::class);
         $user->method('getLaunchData')->willReturn($ltiLaunchData);
 
-        $url = $this->autoStartProctoredDeliveryService->execute($deliveryExecution, $user);
-
-        self::assertSame('ltiProctoring/DeliveryServer/runDeliveryExecution?deliveryExecution=id', $url);
+        self::assertTrue($this->autoStartProctoredDeliveryService->execute($deliveryExecution, $user));
     }
 }

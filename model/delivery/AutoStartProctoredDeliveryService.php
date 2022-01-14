@@ -26,7 +26,6 @@ namespace oat\ltiProctoring\model\delivery;
 use oat\oatbox\log\LoggerService;
 use oat\oatbox\user\User;
 use oat\taoDelivery\model\execution\DeliveryExecution;
-use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
 use oat\taoLti\models\classes\LtiException;
 use oat\taoLti\models\classes\user\LtiUser;
 use oat\taoProctoring\model\authorization\TestTakerAuthorizationDelegator;
@@ -62,20 +61,20 @@ class AutoStartProctoredDeliveryService
         $this->logger = $logger;
     }
 
-    public function execute(DeliveryExecution $deliveryExecution, User $user): ?string
+    public function execute(DeliveryExecution $deliveryExecution, User $user): bool
     {
-        $deliveryExecutionIdentifier = $deliveryExecution->getIdentifier();
-        if (false === $this->testTakerAuthorizationDelegator->isProctored($deliveryExecutionIdentifier, $user)) {
-            return null;
+        $deliveryUri = $deliveryExecution->getDelivery()->getUri();
+        if (false === $this->testTakerAuthorizationDelegator->isProctored($deliveryUri, $user)) {
+            return false;
         }
 
         if (false === $this->shouldSkipManualAuthorization($deliveryExecution, $user)) {
-            return null;
+            return false;
         }
 
-        $deliveryExecution->getImplementation()->setState(ProctoredDeliveryExecution::STATE_AUTHORIZED);
+        $this->changeStateToAuthorized($deliveryExecution);
 
-        return $this->getUrlRunDeliveryExecution($deliveryExecution);
+        return true;
     }
 
     private function shouldSkipManualAuthorization(DeliveryExecution $deliveryExecution, User $user): bool
@@ -85,6 +84,20 @@ class AutoStartProctoredDeliveryService
         }
 
         return false;
+    }
+
+    private function changeStateToAuthorized(DeliveryExecution $deliveryExecution): void
+    {
+        $deliveryExecution->getImplementation()->setState(ProctoredDeliveryExecution::STATE_AUTHORIZED);
+
+        $this->logger->info(
+            get_called_class() . ' changes the status of delivery execution to authorized',
+            [
+                'identifier' =>  $deliveryExecution->getIdentifier(),
+                'uri' => $deliveryExecution->getDelivery()->getUri(),
+                'state' => ProctoredDeliveryExecution::STATE_AUTHORIZED
+            ]
+        );
     }
 
     private function isInitialStart(DeliveryExecution $deliveryExecution): bool
@@ -105,21 +118,11 @@ class AutoStartProctoredDeliveryService
             }
         } catch (LtiException $exception) {
             $this->logger->warning(
-                "Invalid custom LTI parameter",
+                'Invalid custom LTI parameter',
                 ['message' => $exception->getMessage(), 'file' => $exception->getFile(), 'line' => $exception->getLine()]
             );
         }
 
         return false;
-    }
-
-    private function getUrlRunDeliveryExecution(DeliveryExecutionInterface $deliveryExecution): string
-    {
-        return _url(
-            'runDeliveryExecution',
-            'DeliveryServer',
-            'ltiProctoring',
-            ['deliveryExecution' => $deliveryExecution->getIdentifier()]
-        );
     }
 }

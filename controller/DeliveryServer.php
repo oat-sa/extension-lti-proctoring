@@ -67,19 +67,29 @@ class DeliveryServer extends ProctoringDeliveryServer
 
     private function validateAutoStart(DeliveryExecution $deliveryExecution): void
     {
-        $redirectUrl = $this->getAutoStartProctoredDeliveryService()->execute(
+        $isAutoStartProctored = $this->getAutoStartProctoredDeliveryService()->execute(
             $deliveryExecution,
             common_session_SessionManager::getSession()->getUser()
         );
 
-        if ($redirectUrl) {
-            $this->redirect($redirectUrl);
+        if ($isAutoStartProctored) {
+            $this->redirect($this->getUrlRunDeliveryExecution($deliveryExecution));
         }
     }
 
     private function getAutoStartProctoredDeliveryService(): AutoStartProctoredDeliveryService
     {
         return $this->getPsrContainer()->get(AutoStartProctoredDeliveryService::class);
+    }
+
+    private function getUrlRunDeliveryExecution(DeliveryExecution $deliveryExecution): string
+    {
+        return _url(
+            'runDeliveryExecution',
+            'DeliveryServer',
+            'ltiProctoring',
+            ['deliveryExecution' => $deliveryExecution->getIdentifier()]
+        );
     }
 
     /**
