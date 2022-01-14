@@ -91,9 +91,12 @@ class AutoStartProctoredDeliveryService
         $deliveryExecution->getImplementation()->setState(ProctoredDeliveryExecution::STATE_AUTHORIZED);
 
         $this->logger->info(
-            get_called_class() . ' changes the status of delivery execution to authorized',
+            sprintf(
+                'Changes in the status of delivery execution to authorized. Delivery Execution Identifier: %s',
+                $deliveryExecution->getIdentifier()
+            ),
             [
-                'identifier' =>  $deliveryExecution->getIdentifier(),
+                'identifier' => $deliveryExecution->getIdentifier(),
                 'uri' => $deliveryExecution->getDelivery()->getUri(),
                 'state' => ProctoredDeliveryExecution::STATE_AUTHORIZED
             ]
