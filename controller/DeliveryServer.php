@@ -24,8 +24,9 @@ namespace oat\ltiProctoring\controller;
 use common_Exception;
 use common_exception_Error;
 use common_exception_NotFound;
-use common_exception_Unauthorized;
+use common_session_SessionManager;
 use InterruptedActionException;
+use oat\ltiProctoring\model\delivery\AutoStartProctoredDeliveryService;
 use oat\tao\helpers\UrlHelper;
 use oat\taoDelivery\model\authorization\UnAuthorizedException;
 use oat\taoProctoring\controller\DeliveryServer as ProctoringDeliveryServer;
@@ -51,14 +52,44 @@ class DeliveryServer extends ProctoringDeliveryServer
      */
     public function awaitingAuthorization()
     {
+        $deliveryExecution = $this->getCurrentDeliveryExecution();
+        $this->validateAutoStart($deliveryExecution);
+
         try {
             parent::awaitingAuthorization();
 
         }catch (QtiTestExtractionFailedException $e) {
             throw new LtiException($e->getMessage());
         }
-        $deliveryExecution = $this->getCurrentDeliveryExecution();
+
         $this->setData('cancelUrl', _url('cancelExecution', 'DeliveryServer', 'ltiProctoring', ['deliveryExecution' => $deliveryExecution->getIdentifier()]));
+    }
+
+    private function validateAutoStart(DeliveryExecution $deliveryExecution): void
+    {
+        $isAutoStartProctored = $this->getAutoStartProctoredDeliveryService()->execute(
+            $deliveryExecution,
+            common_session_SessionManager::getSession()->getUser()
+        );
+
+        if ($isAutoStartProctored) {
+            $this->redirect($this->getUrlRunDeliveryExecution($deliveryExecution));
+        }
+    }
+
+    private function getAutoStartProctoredDeliveryService(): AutoStartProctoredDeliveryService
+    {
+        return $this->getPsrContainer()->get(AutoStartProctoredDeliveryService::class);
+    }
+
+    private function getUrlRunDeliveryExecution(DeliveryExecution $deliveryExecution): string
+    {
+        return _url(
+            'runDeliveryExecution',
+            'DeliveryServer',
+            'ltiProctoring',
+            ['deliveryExecution' => $deliveryExecution->getIdentifier()]
+        );
     }
 
     /**
