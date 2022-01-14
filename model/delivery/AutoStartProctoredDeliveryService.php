@@ -92,7 +92,7 @@ class AutoStartProctoredDeliveryService
 
         $this->logger->info(
             sprintf(
-                '"%s" Delivery Execution's status changed to authorized',
+                '"%s" Delivery Execution\'s status changed to authorized',
                 $deliveryExecution->getIdentifier()
             ),
             [
