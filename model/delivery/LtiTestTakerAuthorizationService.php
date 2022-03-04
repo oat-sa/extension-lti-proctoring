@@ -15,14 +15,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2021 (original work) Open Assessment Technologies SA;
- *
+ * Copyright (c) 2021-2022 (original work) Open Assessment Technologies SA;
  */
 
 namespace oat\ltiProctoring\model\delivery;
 
 use common_session_Session;
 use oat\oatbox\session\SessionService;
+use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
 use oat\taoLti\models\classes\LtiException;
 use oat\taoLti\models\classes\LtiInvalidVariableException;
 use oat\taoLti\models\classes\LtiLaunchData;
@@ -33,6 +33,8 @@ use oat\taoDelivery\model\authorization\UnAuthorizedException;
 use oat\oatbox\user\User;
 use oat\taoProctoring\model\DelegatedServiceHandler;
 use oat\taoLti\models\classes\LtiRoles;
+use oat\taoProctoring\model\execution\DeliveryExecution as ProctoredDeliveryExecution;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Manage the Delivery authorization.
@@ -67,6 +69,28 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
             return $proctored;
         } catch (LtiInvalidVariableException $e) {
             throw new LtiException($e->getMessage(), $e->getCode());
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function verifyResumeAuthorization(DeliveryExecutionInterface $deliveryExecution, User $user)
+    {
+        parent::verifyResumeAuthorization($deliveryExecution, $user);
+
+        if ($this->isAuthorizedLtiExecutionWithWrongUrl($deliveryExecution)) {
+            throw new UnAuthorizedException(
+                _url(
+                    'runDeliveryExecution',
+                    'DeliveryServer',
+                    'ltiProctoring',
+                    [
+                        'deliveryExecution' => $deliveryExecution->getIdentifier()
+                    ]
+                ),
+                'Force redirected to follow ltiProctoring URL'
+            );
         }
     }
 
@@ -109,5 +133,16 @@ class LtiTestTakerAuthorizationService extends TestTakerAuthorizationService imp
             LtiRoles::CONTEXT_ADMINISTRATOR,
         ], $user->getRoles());
         return !empty($ltiRoles);
+    }
+
+    private function isAuthorizedLtiExecutionWithWrongUrl(DeliveryExecutionInterface $deliveryExecution): bool
+    {
+        return $this->getRequest()->getUri()->getPath() === '/ltiDeliveryProvider/DeliveryRunner/runDeliveryExecution'
+            && $deliveryExecution->getState()->getUri() === ProctoredDeliveryExecution::STATE_AUTHORIZED;
+    }
+
+    private function getRequest(): ServerRequestInterface
+    {
+        return $this->getServiceManager()->getContainer()->get(ServerRequestInterface::class);
     }
 }
