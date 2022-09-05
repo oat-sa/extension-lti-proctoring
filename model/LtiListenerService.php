@@ -89,6 +89,9 @@ class LtiListenerService extends ConfigurableService
                 $data->update(LtiLaunchData::CONTEXT_ID, $contextId);
 
                 $executionContext = $this->createExecutionContext($executionId, $launchData);
+
+                $this->logDebug('Context data: `' . json_encode($executionContext->jsonSerialize()) . '`');
+
                 if ($executionContext instanceof DeliveryExecutionContextInterface) {
                     $data->setDeliveryExecutionContext($executionContext);
                 }
@@ -96,6 +99,7 @@ class LtiListenerService extends ConfigurableService
                 $logData[LtiLaunchData::CONTEXT_ID] = $contextId;
                 $logData[LtiLaunchData::CONTEXT_LABEL] = $launchData->getVariable(LtiLaunchData::CONTEXT_LABEL);
             } catch (LtiVariableMissingException $e) {
+                $this->logWarning('Lti variable is missing, message: `' . $e->getMessage() . '`');
             }
 
             // resource
@@ -104,6 +108,7 @@ class LtiListenerService extends ConfigurableService
                 $logData[LtiLaunchData::RESOURCE_LINK_ID] = $resourceLink;
                 $data->update(LtiLaunchData::RESOURCE_LINK_ID, $resourceLink);
             } catch (LtiVariableMissingException $e) {
+                $this->logWarning('Lti variable is missing, message: `' . $e->getMessage() . '`');
             }
             $deliveryLog->log($executionId, 'LTI_DELIVERY_EXECUTION_CREATED', $logData);
 
@@ -210,15 +215,41 @@ class LtiListenerService extends ConfigurableService
      * @param LtiLaunchData $launchData
      * @return DeliveryExecutionContext|null
      */
-    private function createExecutionContext($executionId, LtiLaunchData $launchData)
+    private function createExecutionContext(string $executionId, LtiLaunchData $launchData): ?DeliveryExecutionContextInterface
     {
         $executionContext = null;
+
+        $contextId =
+            $launchData->hasVariable(LtiLaunchData::CONTEXT_ID)
+                ? $launchData->getVariable(LtiLaunchData::CONTEXT_ID)
+                : ''
+        ;
+        $contextLabel =
+            $launchData->hasVariable(LtiLaunchData::CONTEXT_LABEL)
+                ? $launchData->getVariable(LtiLaunchData::CONTEXT_LABEL)
+                : ''
+        ;
+        $consumerKey =
+            $launchData->hasVariable(LtiLaunchData::OAUTH_CONSUMER_KEY)
+                ? $launchData->getVariable(LtiLaunchData::OAUTH_CONSUMER_KEY)
+                : ''
+        ;
+        $returnUrl =
+            $launchData->hasVariable(LtiLaunchData::LIS_OUTCOME_SERVICE_URL)
+                ? $launchData->getVariable(LtiLaunchData::LIS_OUTCOME_SERVICE_URL)
+                : ''
+        ;
+
         try {
             $executionContext = new DeliveryExecutionContext(
                 $executionId,
-                $launchData->getVariable(LtiLaunchData::CONTEXT_ID),
+                $contextId,
                 LtiDeliveryExecutionContext::EXECUTION_CONTEXT_TYPE,
-                $launchData->getVariable(LtiLaunchData::CONTEXT_LABEL)
+                $contextLabel,
+                [
+                    LtiLaunchData::OAUTH_CONSUMER_KEY => $consumerKey,
+                    LtiLaunchData::LIS_OUTCOME_SERVICE_URL => $returnUrl
+                ]
             );
         } catch (\InvalidArgumentException $e) {
             $this->logInfo('Delivery execution context object can not be created. Reason: ' . $e->getMessage());
