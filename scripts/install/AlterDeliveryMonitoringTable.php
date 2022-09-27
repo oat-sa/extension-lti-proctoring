@@ -45,7 +45,7 @@ class AlterDeliveryMonitoringTable extends InstallAction
             $dbMigration = new DeliveryMonitoringDbMigration();
             $dbMigration->alterTable($persistence);
 
-            $newPrimaryColumns = array_unique(array_merge(DbSetup::getPrimaryColumns(),$dbMigration->getExtraColumns()));
+            $newPrimaryColumns = array_unique(array_merge((new DbSetup())->getPrimaryColumns(),$dbMigration->getExtraColumns()));
             $monitoringCacheService->setOption(MonitorCacheService::OPTION_PRIMARY_COLUMNS, $newPrimaryColumns);
 
             $this->registerService(MonitorCacheService::SERVICE_ID, $monitoringCacheService);
