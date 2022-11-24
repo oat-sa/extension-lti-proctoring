@@ -60,6 +60,7 @@ class LtiListenerService extends ConfigurableService
     public function executionCreated(DeliveryExecutionCreated $event)
     {
         $session = \common_session_SessionManager::getSession();
+
         if ($session instanceof TaoLtiSession) {
             $deliveryExecution = $event->getDeliveryExecution();
             $executionId = $deliveryExecution->getIdentifier();
@@ -111,14 +112,15 @@ class LtiListenerService extends ConfigurableService
             $deliveryLog->log($executionId, 'LTI_DELIVERY_EXECUTION_CREATED', $logData);
 
             $ltiCustomParameters = $this->getLtiCustomParams($session);
-            //log custom lti parameters
+
+            // Log custom LTI parameters
             $deliveryLog->log($event->getDeliveryExecution()->getIdentifier(), 'LTI_PARAMETERS', $ltiCustomParameters);
-            //log non-custom lti parameters
-            $deliveryLog->log(
-                $event->getDeliveryExecution()->getIdentifier(),
-                'LTI_LAUNCH_PARAMETERS',
-                array_diff_key($session->getLaunchData()->getVariables(), $ltiCustomParameters)
-            );
+
+            // Log non-custom LTI parameters
+            $ltiParameters = array_diff_key($session->getLaunchData()->getVariables(), $ltiCustomParameters);
+            $ltiParameters[LtiLaunchData::AGS_CLAIMS] = $ltiParameters[LtiLaunchData::AGS_CLAIMS]->normalize();
+
+            $deliveryLog->log($event->getDeliveryExecution()->getIdentifier(), 'LTI_LAUNCH_PARAMETERS', $ltiParameters);
 
             if ($launchData->hasVariable(self::LTI_USER_NAME)) {
                 $ltiUserName = $launchData->getVariable(self::LTI_USER_NAME);
