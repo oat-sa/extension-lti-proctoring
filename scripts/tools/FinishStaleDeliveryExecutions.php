@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace oat\taoProctoring\scripts\tools;
+namespace oat\ltiProctoring\scripts\tools;
 
 use common_Exception;
 use common_exception_Error;
@@ -42,6 +42,18 @@ use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use oat\taoProctoring\model\implementation\DeliveryExecutionStateService;
 use oat\taoProctoring\scripts\TerminatePausedAssessment;
 
+/**
+ * Script for gracefully finishing stale delivery executions.
+ *
+ * During invoking it emulates Lti 1.3 session which is based on entries in delivery_log.
+ * It is needed for proper catching up finished state and sending AGS back.
+ *
+ * # Wet run is the default behaviour and parameter can be omitted
+ * sudo php index.php 'oat\ltiProctoring\scripts\tools\FinishStaleDeliveryExecutions'
+ *
+ * # Dry run shows touched executions but does nothing
+ * sudo php index.php 'oat\ltiProctoring\scripts\tools\FinishStaleDeliveryExecutions' 0
+ */
 final class FinishStaleDeliveryExecutions extends TerminatePausedAssessment
 {
     use ServiceLocatorAwareTrait;
@@ -66,20 +78,7 @@ final class FinishStaleDeliveryExecutions extends TerminatePausedAssessment
             return;
         }
 
-        /** @var DeliveryLog $deliveryLog */
-        $deliveryLog = $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID);
-
-        $launchParameters = current($deliveryLog->get($deliveryExecution->getIdentifier(), 'LTI_LAUNCH_PARAMETERS'));
-
-        // Patch AGS
-        $launchParameters['data'][LtiLaunchData::AGS_CLAIMS] = AgsClaim::denormalize($launchParameters['data'][LtiLaunchData::AGS_CLAIMS]);
-
-        $ltiLaunchData = new LtiLaunchData($launchParameters['data'], []);
-
-        $user = new Lti1p3User($ltiLaunchData);
-        $user->setRegistrationId($ltiLaunchData->getVariable(LtiLaunchData::TOOL_CONSUMER_INSTANCE_ID));
-
-        common_session_SessionManager::startSession(TaoLtiSession::fromVersion1p3($user));
+        $this->initiateLtiSession($deliveryExecution);
 
         /** @var DeliveryExecutionStateService $deliveryExecutionStateService */
         $deliveryExecutionStateService = $this->getServiceLocator()->get(StateServiceInterface::SERVICE_ID);
@@ -88,10 +87,33 @@ final class FinishStaleDeliveryExecutions extends TerminatePausedAssessment
             $deliveryExecution,
             [
                 'reasons' => $this->getTerminationReasons(),
-                'comment' => __('The assessment was automatically finished (terminated) by the system due to inactivity.'),
+                'comment' => __('The assessment was automatically finished by the system due to inactivity.'),
             ]
         );
 
         $this->addReport(ReportInterface::TYPE_WARNING, "Delivery execution {$deliveryExecution->getIdentifier()} has been finished (terminated).");
+    }
+
+    /**
+     * @throws LtiVariableMissingException
+     * @throws common_exception_Error
+     * @throws common_Exception
+     */
+    private function initiateLtiSession(DeliveryExecution $execution): bool
+    {
+        /** @var DeliveryLog $deliveryLog */
+        $deliveryLog = $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID);
+
+        $launchParameters = current($deliveryLog->get($execution->getIdentifier(), 'LTI_LAUNCH_PARAMETERS'));
+
+        // Patch AGS Claim
+        $launchParameters['data'][LtiLaunchData::AGS_CLAIMS] = AgsClaim::denormalize($launchParameters['data'][LtiLaunchData::AGS_CLAIMS]);
+
+        $ltiLaunchData = new LtiLaunchData($launchParameters['data'], []);
+
+        $user = new Lti1p3User($ltiLaunchData);
+        $user->setRegistrationId($ltiLaunchData->getVariable(LtiLaunchData::TOOL_CONSUMER_INSTANCE_ID));
+
+        return common_session_SessionManager::startSession(TaoLtiSession::fromVersion1p3($user));
     }
 }
