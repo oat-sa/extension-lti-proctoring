@@ -74,7 +74,10 @@ final class FinishStaleDeliveryExecutions extends TerminatePausedAssessment
     protected function terminateExecution(DeliveryExecution $deliveryExecution): void
     {
         if ($this->wetRun !== true) {
-            $this->addReport(ReportInterface::TYPE_INFO, "Delivery execution {$deliveryExecution->getIdentifier()} should be finished (terminated).");
+            $this->addReport(
+                ReportInterface::TYPE_INFO,
+                "Delivery execution {$deliveryExecution->getIdentifier()} should be finished (terminated)."
+            );
             return;
         }
 
@@ -91,7 +94,10 @@ final class FinishStaleDeliveryExecutions extends TerminatePausedAssessment
             ]
         );
 
-        $this->addReport(ReportInterface::TYPE_WARNING, "Delivery execution {$deliveryExecution->getIdentifier()} has been finished (terminated).");
+        $this->addReport(
+            ReportInterface::TYPE_WARNING,
+            "Delivery execution {$deliveryExecution->getIdentifier()} has been finished (terminated)."
+        );
     }
 
     /**

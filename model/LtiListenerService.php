@@ -161,8 +161,9 @@ class LtiListenerService extends ConfigurableService
         if ($session instanceof TaoLtiSession) {
             $launchData = $session->getLaunchData();
             $deliveryExecution = $event->getDeliveryExecution();
-            if ($event->getState() == DeliveryExecutionInterface::STATE_ACTIVE &&
-                $launchData->hasVariable(self::LTI_USER_NAME)
+            if (
+                $event->getState() == DeliveryExecutionInterface::STATE_ACTIVE
+                && $launchData->hasVariable(self::LTI_USER_NAME)
             ) {
                 $ltiUserName = $launchData->getVariable(self::LTI_USER_NAME);
                 $executionId = $deliveryExecution->getIdentifier();
@@ -227,10 +228,9 @@ class LtiListenerService extends ConfigurableService
      * @return DeliveryExecutionContext|null
      */
     private function createExecutionContext(
-        string        $executionId,
+        string $executionId,
         LtiLaunchData $launchData
-    ): DeliveryExecutionContextInterface
-    {
+    ): DeliveryExecutionContextInterface {
         $executionContext = null;
         try {
             $executionContext = new DeliveryExecutionContext(
@@ -239,7 +239,7 @@ class LtiListenerService extends ConfigurableService
                 LtiDeliveryExecutionContext::EXECUTION_CONTEXT_TYPE,
                 $launchData->getVariable(LtiLaunchData::CONTEXT_LABEL)
             );
-        } catch (InvalidArgumentException|LtiVariableMissingException $e) {
+        } catch (InvalidArgumentException | LtiVariableMissingException $e) {
             $this->logInfo('Delivery execution context object can not be created. Reason: ' . $e->getMessage());
         }
 
