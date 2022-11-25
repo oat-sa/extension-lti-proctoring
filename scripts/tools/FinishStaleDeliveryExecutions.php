@@ -26,14 +26,20 @@ namespace oat\ltiProctoring\scripts\tools;
 
 use common_Exception;
 use common_exception_Error;
+use common_exception_MissingParameter;
 use common_exception_NotFound;
 use common_session_SessionManager;
 use OAT\Library\Lti1p3Core\Message\Payload\Claim\AgsClaim;
+use oat\oatbox\log\LoggerAwareTrait;
+use oat\oatbox\reporting\Report;
 use oat\oatbox\reporting\ReportInterface;
 use oat\oatbox\service\exception\InvalidServiceManagerException;
 use Laminas\ServiceManager\ServiceLocatorAwareTrait;
+use oat\oatbox\service\ServiceManager;
 use oat\taoDelivery\model\execution\DeliveryExecution;
+use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
 use oat\taoDelivery\model\execution\StateServiceInterface;
+use oat\taoDelivery\scripts\tools\ScoreEmptyResponseVariables;
 use oat\taoLti\models\classes\LtiLaunchData;
 use oat\taoLti\models\classes\LtiVariableMissingException;
 use oat\taoLti\models\classes\TaoLtiSession;
@@ -41,6 +47,7 @@ use oat\taoLti\models\classes\user\Lti1p3User;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use oat\taoProctoring\model\implementation\DeliveryExecutionStateService;
 use oat\taoProctoring\scripts\TerminatePausedAssessment;
+use qtism\runtime\storage\common\StorageException;
 
 /**
  * Script for gracefully finishing stale delivery executions.
@@ -57,16 +64,35 @@ use oat\taoProctoring\scripts\TerminatePausedAssessment;
 final class FinishStaleDeliveryExecutions extends TerminatePausedAssessment
 {
     use ServiceLocatorAwareTrait;
+    use LoggerAwareTrait;
 
     protected function getTerminationReasons(): array
     {
         return ['category' => 'Technical', 'subCategory' => 'Cleanup'];
     }
 
+    public function __invoke($params)
+    {
+        $report = parent::__invoke($params);
+
+        if ($this->wetRun === true) {
+            $subReports = $report->getChildren();
+
+            /** @var Report $lastMessage */
+            $lastMessage = end($subReports);
+
+            $this->logInfo(sprintf('%s Logged at %s', $lastMessage->getMessage(), date(DATE_RFC3339)));
+        }
+
+        return $report;
+    }
+
     /**
      * @param DeliveryExecution $deliveryExecution
      * @throws InvalidServiceManagerException
      * @throws LtiVariableMissingException
+     * @throws common_exception_MissingParameter
+     * @throws StorageException
      * @throws common_Exception
      * @throws common_exception_Error
      * @throws common_exception_NotFound
@@ -76,15 +102,24 @@ final class FinishStaleDeliveryExecutions extends TerminatePausedAssessment
         if ($this->wetRun !== true) {
             $this->addReport(
                 ReportInterface::TYPE_INFO,
-                "Delivery execution {$deliveryExecution->getIdentifier()} should be finished (terminated)."
+                "Delivery execution {$deliveryExecution->getIdentifier()} should be finished."
             );
             return;
         }
 
-        $this->initiateLtiSession($deliveryExecution);
-
         /** @var DeliveryExecutionStateService $deliveryExecutionStateService */
         $deliveryExecutionStateService = $this->getServiceLocator()->get(StateServiceInterface::SERVICE_ID);
+
+        // Pause execution before scoring
+        if ($deliveryExecution->getState()->getUri() === DeliveryExecutionInterface::STATE_ACTIVE) {
+            $deliveryExecutionStateService->pause($deliveryExecution);
+        }
+
+        // Score missed items
+        $this->report->add($this->scoreMissedItems($deliveryExecution));
+
+        // Create fake LTI session
+        $this->initiateLtiSession($deliveryExecution);
 
         $deliveryExecutionStateService->finish(
             $deliveryExecution,
@@ -96,7 +131,7 @@ final class FinishStaleDeliveryExecutions extends TerminatePausedAssessment
 
         $this->addReport(
             ReportInterface::TYPE_WARNING,
-            "Delivery execution {$deliveryExecution->getIdentifier()} has been finished (terminated)."
+            "Delivery execution {$deliveryExecution->getIdentifier()} has been gracefully finished."
         );
     }
 
@@ -121,5 +156,20 @@ final class FinishStaleDeliveryExecutions extends TerminatePausedAssessment
         $user->setRegistrationId($ltiLaunchData->getVariable(LtiLaunchData::TOOL_CONSUMER_INSTANCE_ID));
 
         return common_session_SessionManager::startSession(TaoLtiSession::fromVersion1p3($user));
+    }
+
+    private function scoreMissedItems(DeliveryExecution $execution): Report
+    {
+        return ServiceManager::getServiceManager()->propagate(new ScoreEmptyResponseVariables())(
+            $this->mapActionOptions([
+                ScoreEmptyResponseVariables::OPTION_DELIVERY_EXECUTION_IDS => $execution->getIdentifier(),
+                ScoreEmptyResponseVariables::OPTION_WET_RUN => 1
+            ])
+        );
+    }
+
+    private function mapActionOptions(array $options): array
+    {
+        return array_merge(...array_map(fn ($k, $v) => ['--' . $k, $v], array_keys($options), $options));
     }
 }
