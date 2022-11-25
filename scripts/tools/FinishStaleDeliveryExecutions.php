@@ -26,7 +26,6 @@ namespace oat\ltiProctoring\scripts\tools;
 
 use common_Exception;
 use common_exception_Error;
-use common_exception_MissingParameter;
 use common_exception_NotFound;
 use common_session_SessionManager;
 use OAT\Library\Lti1p3Core\Message\Payload\Claim\AgsClaim;
@@ -47,7 +46,6 @@ use oat\taoLti\models\classes\user\Lti1p3User;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use oat\taoProctoring\model\implementation\DeliveryExecutionStateService;
 use oat\taoProctoring\scripts\TerminatePausedAssessment;
-use qtism\runtime\storage\common\StorageException;
 
 /**
  * Script for gracefully finishing stale delivery executions.
@@ -91,8 +89,6 @@ final class FinishStaleDeliveryExecutions extends TerminatePausedAssessment
      * @param DeliveryExecution $deliveryExecution
      * @throws InvalidServiceManagerException
      * @throws LtiVariableMissingException
-     * @throws common_exception_MissingParameter
-     * @throws StorageException
      * @throws common_Exception
      * @throws common_exception_Error
      * @throws common_exception_NotFound
@@ -110,9 +106,9 @@ final class FinishStaleDeliveryExecutions extends TerminatePausedAssessment
         /** @var DeliveryExecutionStateService $deliveryExecutionStateService */
         $deliveryExecutionStateService = $this->getServiceLocator()->get(StateServiceInterface::SERVICE_ID);
 
-        // Pause execution before scoring
-        if ($deliveryExecution->getState()->getUri() === DeliveryExecutionInterface::STATE_ACTIVE) {
-            $deliveryExecutionStateService->pause($deliveryExecution);
+        // Resume it was paused to properly fire event for AGS catch
+        if ($deliveryExecution->getState()->getUri() === DeliveryExecutionInterface::STATE_PAUSED) {
+            $deliveryExecution = $deliveryExecutionStateService->run($deliveryExecution);
         }
 
         // Score missed items
@@ -165,6 +161,9 @@ final class FinishStaleDeliveryExecutions extends TerminatePausedAssessment
         return ServiceManager::getServiceManager()->propagate(new ScoreEmptyResponseVariables())(
             $this->mapActionOptions([
                 ScoreEmptyResponseVariables::OPTION_DELIVERY_EXECUTION_IDS => $execution->getIdentifier(),
+                ScoreEmptyResponseVariables::OPTION_ALLOWED_STATUSES => implode(',', [
+                    DeliveryExecutionInterface::STATE_ACTIVE
+                ]),
                 ScoreEmptyResponseVariables::OPTION_WET_RUN => 1
             ])
         );
