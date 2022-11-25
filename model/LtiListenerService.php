@@ -54,10 +54,10 @@ use oat\taoTests\models\runner\time\InvalidStorageException;
  */
 class LtiListenerService extends ConfigurableService
 {
-    const SERVICE_ID = 'ltiProctoring/LtiListener';
+    public const SERVICE_ID = 'ltiProctoring/LtiListener';
 
-    const CUSTOM_LTI_EXTENDED_TIME = 'custom_extended_time';
-    const LTI_USER_NAME = 'custom_username';
+    public const CUSTOM_LTI_EXTENDED_TIME = 'custom_extended_time';
+    public const LTI_USER_NAME = 'custom_username';
 
     /**
      * @param DeliveryExecutionCreated $event

@@ -148,7 +148,9 @@ final class FinishStaleDeliveryExecutions extends TerminatePausedAssessment
         $launchParameters = current($deliveryLog->get($execution->getIdentifier(), 'LTI_LAUNCH_PARAMETERS'));
 
         // Patch AGS Claim
-        $launchParameters['data'][LtiLaunchData::AGS_CLAIMS] = AgsClaim::denormalize($launchParameters['data'][LtiLaunchData::AGS_CLAIMS]);
+        $launchParameters['data'][LtiLaunchData::AGS_CLAIMS] = AgsClaim::denormalize(
+            $launchParameters['data'][LtiLaunchData::AGS_CLAIMS]
+        );
 
         $ltiLaunchData = new LtiLaunchData($launchParameters['data'], []);
 
