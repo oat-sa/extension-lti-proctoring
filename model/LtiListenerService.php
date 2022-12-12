@@ -28,6 +28,7 @@ use common_exception_NotFound;
 use common_Logger;
 use common_session_SessionManager;
 use InvalidArgumentException;
+use OAT\Library\Lti1p3Core\Message\Payload\Claim\AgsClaim;
 use oat\ltiProctoring\model\delivery\ProctorService;
 use oat\ltiProctoring\model\execution\LtiDeliveryExecutionContext;
 use oat\oatbox\service\ConfigurableService;
@@ -128,7 +129,12 @@ class LtiListenerService extends ConfigurableService
 
             // Log non-custom LTI parameters
             $ltiParameters = array_diff_key($session->getLaunchData()->getVariables(), $ltiCustomParameters);
-            $ltiParameters[LtiLaunchData::AGS_CLAIMS] = $ltiParameters[LtiLaunchData::AGS_CLAIMS]->normalize();
+
+            if (isset($ltiParameters[LtiLaunchData::AGS_CLAIMS])
+                && $ltiParameters[LtiLaunchData::AGS_CLAIMS] instanceof AgsClaim
+            ) {
+                $ltiParameters[LtiLaunchData::AGS_CLAIMS] = $ltiParameters[LtiLaunchData::AGS_CLAIMS]->normalize();
+            }
 
             $deliveryLog->log($event->getDeliveryExecution()->getIdentifier(), 'LTI_LAUNCH_PARAMETERS', $ltiParameters);
 
