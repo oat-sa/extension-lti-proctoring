@@ -24,7 +24,7 @@
         "oat-sa/generis": ">=15.22",
         "oat-sa/tao-core": ">=50.24.6",
         "oat-sa/extension-tao-ltideliveryprovider": "dev-feature/AUT-2995",
-        "oat-sa/extension-tao-lti": "dev-feature/AUT-2995",
+        "oat-sa/extension-tao-lti": ">=12.0.0",
         "oat-sa/extension-tao-outcomeui": ">=10.0.0",
         "oat-sa/extension-tao-proctoring": "dev-feature/AUT-2995",
         "oat-sa/extension-tao-testqti": ">=41.0.0"
