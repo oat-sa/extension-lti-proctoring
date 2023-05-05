@@ -1,0 +1,37 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: tao-3x\n"
+"PO-Revision-Date: 2023-04-21 15:46\n"
+"Last-Translator: TAO Translation Team <translation@tao.lu>\n"
+"MIME-Version: 1.0\n"
+"Language: pt\n"
+"sourceLanguage: en-US\n"
+"targetLanguage: pt-BR\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Basepath: ../../\n"
+"X-Poedit-KeywordsList: __\n"
+"X-Poedit-SearchPath-0: .\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Crowdin-Project: tao-3x\n"
+"X-Crowdin-Project-ID: 582145\n"
+"X-Crowdin-Language: pt-BR\n"
+"X-Crowdin-File: /ltiProctoring/locales/pt-BR/messages.po\n"
+"X-Crowdin-File-ID: 1933\n"
+"Language-Team: Portuguese, Brazilian\n"
+
+msgid "Exit"
+msgstr "Sair"
+
+msgid "Queued test-takers"
+msgstr "Candidatos em fila"
+
+msgid "The assessment was automatically finished by the system due to inactivity."
+msgstr "A avaliação foi automaticamente concluída pelo sistema devido a inatividade."
+
+msgid "Turned off"
+msgstr "Desligado"
+
+msgid "You are about to leave this page. Continue?"
+msgstr "Está prestes a sair desta página. Continuar?"
+
